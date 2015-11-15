@@ -65,7 +65,9 @@ io.on('connection', function(socket) {
 		if (socket.username != null){
 			socket.broadcast.emit('serverOthersMsg', '[SERVER] ' + socket.username + ' has left');
 			// logStream.end();
+			
 			userNumber = userNumber - 1;
+			console.log('usernumber = ' + userNumber);
 		}
 	});
 
@@ -74,7 +76,6 @@ io.on('connection', function(socket) {
 		var sysTime = getDateTime();
 		var content = {uid: socket.username, msg: msg, sysTime: sysTime};
 		io.sockets.emit('chat', content);
-		// console.log('[MSG][' + socket.username + ']' + msg + sysTime);
 
 		// var logMsg = socket.username + ',' + msg + '\n';
 		// logStream.write(logMsg);

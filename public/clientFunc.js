@@ -30,18 +30,18 @@ socket.on('partnerMsgDislike', function(timeStamp) { /* Disliked */
 /* Manipulate chat message, distribute user's and partner's messages
  * msgPack : uid: USERNAME, msg: MESSAGE, sysTime: SYSTEM TIME */
 socket.on('chat', function(packet) {
-	var content = packet.msg.replace('\n', '<br>');
 	var uid = packet.uid;
 	var postTime = packet.sysTime;
 
 	var msgContainer;
 
+	var content = $('<span>').addClass('msgText').html(packet.msg.replace('\n', '<br>') + '<br>');
 	var shareBt = $('<input>').addClass('shareBt').prop({type: 'button', value:''});
 	var likeBt = $('<input>').addClass('likeBt').prop({type: 'button', value:''});
 	var translateBtn = $('<input>').addClass('translateBt').prop({type: 'button', value: 'Translate'});
 	var timeStamp = $('<span>').addClass('timeStamp').hide().html(postTime);
 
-	content = $('<span>').addClass('msgContent').html(content + '<br>').append(timeStamp);
+	content = $('<span>').addClass('msgContent').append(content).append(timeStamp);
 
 	if (uid == username) {
 		msgContainer = $('#userMsgContainer');
@@ -82,11 +82,11 @@ socket.on('partnerMsgShare', function(timeStamp) {
 
 socket.on('is BINDED', function(input) { /* Get translated data and add to message */
 	var replaceWord = input.fromWord + ' (' + input.toWord + ')';
-	var transMsg = $(".msgContent:contains('" + input.timeStamp + "')").closest('div');
+	var transMsg = $(".msgContent:contains('" + input.timeStamp + "')").find('.msgText');
 	var msgContainer = transMsg.parent();
 	var scroll = msgContainer.scrollTop()
 
-	transMsg.html(transMsg.html().replace(input.fromWord, '<span class = "highlight" >' + replaceWord + '</span>'));
+	transMsg.html(transMsg.html().replace(input.fromWord, '<span class="highlight">' + replaceWord + '</span>'));
 
 	msgContainer.scrollTop(scroll);
 });
@@ -142,16 +142,19 @@ $('#container').on('mouseup', '.partnerMessage', function() {
 /* Send translate request */
 $('#container').on('click', 'input.translateBt', function() {
 	var partnerMsg = $(this).closest('.partnerMessage');
+	var transWord;
+
+	if (highlightWord == '') transWord = partnerMsg.find('.msgText').text();
+	else transWord = highlightWord;
+
 	var transElement = {
-		word: highlightWord, 
+		word: transWord, 
 		timeStamp: partnerMsg.find('.timeStamp').text(),
 		fromLanguage: $('#oriLang').val(), 
 		toLanguage: $('#transLang').val() 
 	}
 
-	if (partnerMsg.hasClass('selected')){
-		socket.emit('translate', transElement);
-	}
+	socket.emit('translate', transElement);
 });
 
 /* Specify highlighted words */ 
