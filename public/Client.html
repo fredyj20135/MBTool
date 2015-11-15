@@ -1,0 +1,44 @@
+<!doctype html>
+<html>
+	<head>
+		<meta http-equiv = "Content-Type" content = "text/html; charset=utf-8">
+		<title>Brainstorming Tool</title>
+		<link href="https://fonts.googleapis.com/css?family=Open+Sans:400,300,600,700|Archivo+Narrow:400,700" rel="stylesheet" type="text/css">
+		<link href="css/MyStyle.css" rel="stylesheet" type="text/css" media="screen">
+	</head>
+	<body>
+		<div id = "container">
+			<div id = "partnerMsgContainer"></div>
+			<div id = "userMsgContainer"></div>
+		</div>
+		<div id  = "inputArea">
+			<form>
+				<div class = "toolBar">
+					<button id = "sendButton" type = "button">Send</button>
+					<input  id = "blockAll" class = "clicked" type = "button" value = "Block all unshared messages">
+                    <select id = "oriLang" class = "langSelector">
+                        <option value = "en" selected = "selected">English</option>
+                        <option value = "zh-CHT" >中文</option>
+                        <option value = "ja" >日本語</option>
+                        <option value = "ko" >한국의</option>
+                        <option value = "fr" >Franch</option>
+                        <option value = "de" >Deutsch</option>
+                    </select>
+                    <div id  = "arrow" ></div>
+                    <select id = "transLang" class = "langSelector">
+                        <option value = "en" >English</option>
+                        <option value = "zh-CHT" selected = "selected">中文</option>
+                        <option value = "ja" >日本語</option>
+                        <option value = "ko" >한국의</option>
+                        <option value = "fr" >Franch</option>
+                        <option value = "de" >Deutsch</option>
+                    </select>
+				</div>
+				<textarea id  = "textInput" rows = "4" cols = "30" placeholder = "Your message here"></textarea>
+			</form>
+		</div>
+		<script src = "https://cdn.socket.io/socket.io-1.2.0.js"></script>
+		<script src = "http://code.jquery.com/jquery-1.11.1.js"></script>
+		<script src = "http://localhost:5092/Client.js"></script>
+	</body>
+</html>
