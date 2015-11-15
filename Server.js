@@ -62,9 +62,11 @@ io.on('connection', function(socket) {
 
 	// when someone is disconnect, print server information
 	socket.on('disconnect', function() {
-		socket.broadcast.emit('serverOthersMsg', '[SERVER] ' + socket.username + ' has left');
-		// logStream.end();
-		userNumber = userNumber - 1;
+		if (socket.username != null){
+			socket.broadcast.emit('serverOthersMsg', '[SERVER] ' + socket.username + ' has left');
+			// logStream.end();
+			userNumber = userNumber - 1;
+		}
 	});
 
 	// when the socket with tag 'chat message' is received, send socket with tag 'chat' to all the user
