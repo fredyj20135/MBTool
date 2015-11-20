@@ -9,7 +9,7 @@ var fs = require('fs');
 var mstranslator = require('mstranslator');
 var traanslateWizard = new mstranslator({
 	client_id: 'Super_ChatRoomWar_The1st',
-	client_secret: 'pcXvlEef4+Xjb9ryikhhvxgjeX3XosHtud1rmnOm8jQ='
+	client_secret: ''
 }, true);
 
 /* system log initialization */ 
