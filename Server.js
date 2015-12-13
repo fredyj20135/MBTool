@@ -90,7 +90,7 @@ io.on('connection', function(socket) {
 			to: input.toLanguage
 		};
 
-		traanslateWizard.translate(params, function(err, data) {
+		translateWizard.translate(params, function(err, data) {
 			// for now, just return to one user!
 			// io.sockets.emit('is BINDED', {fromWord: input.word, toWord: data, timeStamp: input.timeStamp});
 			io.sockets.emit('is BINDED', {fromWord: input.word, toWord: data, timeStamp: input.timeStamp});
