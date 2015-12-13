@@ -7,9 +7,10 @@ var fs = require('fs');
 
 /* Bing translator initialization */
 var mstranslator = require('mstranslator');
-var traanslateWizard = new mstranslator({
-	client_id: 'Super_ChatRoomWar_The1st',
-	client_secret: 'pcXvlEef4+Xjb9ryikhhvxgjeX3XosHtud1rmnOm8jQ='
+var config = JSON.parse(fs.readFileSync('./translatorConfig', 'utf8'));
+var translateWizard = new mstranslator({
+	client_id: config.cID,
+	client_secret: config.secret
 }, true);
 
 /* system log initialization */ 
