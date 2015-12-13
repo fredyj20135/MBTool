@@ -2,9 +2,10 @@ Multilingual Brainstorming Tool
 
 Testing prototype v1.0
 
-limited functions
+Using Microtranslator 'Bing' as part of the function. Please check your own id and secret key to access.
 
-some to do list:
+The module:
 
-4 users interface
-login streaming
+node.js
+express
+mstranslator
