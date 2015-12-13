@@ -15,9 +15,19 @@ var translateWizard = new mstranslator({
 
 /* system log initialization */ 
 var userNumber = 0;
+var postID = 0;
 var logStream;
 var logDir = './syslog/';
 var logName;
+
+var dicWriteStream;
+var dicDir = './dic/';
+var dicName = 'quickDic';
+
+var users = {};
+var blocks = {};
+var ctrlLock = {};
+var rooms = ['room1', 'room2'];  // [TBD] wait for login function 
 
 /* express initialization */
 app.use(express.static(__dirname + '/public'));
@@ -48,14 +58,24 @@ function initNewLog(){
 	}
 }
 
+function initQuickDic() {
+	dicWriteStream = fs.createWriteStream(dicDir + dicName, {'flags': 'a'});
+}
+
 io.on('connection', function(socket) {
 	// the first event: if a user is linked to this server, open a dialogue box and input user ID
-	socket.on('addMe', function(username) {
-		socket.username = username;
-		socket.emit('serverSelfMsg', '[SERVER] You have connected');
-		socket.broadcast.emit('serverOthersMsg', '[SERVER] ' + username + ' is on deck');
+	socket.on('addMe', function(userID) { // [TBD] user login
+		socket.username = userID;
+		socket.room = 'room1';
+		users[userID] = userID;
+		blocks[userID] = false;
+		socket.join('room1');
+
+		socket.emit('serverSelfMsg', '[SERVER] You have connected', 'room1');
+		socket.broadcast.to('room1').emit('serverOthersMsg', '[SERVER] ' + userID + ' is on deck');
 
 		// initNewLog();
+		// initQuickDic();
 
 		userNumber = userNumber + 1;
 		console.log('usernumber = ' + userNumber);
@@ -64,54 +84,74 @@ io.on('connection', function(socket) {
 	// when someone is disconnect, print server information
 	socket.on('disconnect', function() {
 		if (socket.username != null){
-			socket.broadcast.emit('serverOthersMsg', '[SERVER] ' + socket.username + ' has left');
+			socket.broadcast.to('room1').emit('serverOthersMsg', '[SERVER] ' + socket.username + ' has left');
 			// logStream.end();
-			
+			// delete usernames[socket.username];
+
 			userNumber = userNumber - 1;
 			console.log('usernumber = ' + userNumber);
 		}
 	});
 
 	// when the socket with tag 'chat message' is received, send socket with tag 'chat' to all the user
-	socket.on('chat message', function(msg) {
+	socket.on('chat message', function(input) {
 		var sysTime = getDateTime();
-		var content = {uid: socket.username, msg: msg, sysTime: sysTime};
-		io.sockets.emit('chat', content);
+		var content = {
+			uid: socket.username, 
+			msg: input, 
+			sysTime: sysTime, 
+			pID: postID, 
+			block: blocks[socket.username]
+		};
+		postID++;
+		
+		io.sockets.in(socket.room).emit('chat', content);
 
 		// var logMsg = socket.username + ',' + msg + '\n';
 		// logStream.write(logMsg);
 	});
 
 	// Pass translate result from server
-	socket.on('translate', function(input) {
-		var params = {
-			text: input.word,
-			from: input.fromLanguage,
-			to: input.toLanguage
-		};
+	socket.on('translate', function(packet) {
+		if (ctrlLock.hasOwnProperty(packet.pID)) {
+			var params = { text: packet.word, from: packet.fromLanguage, to: packet.toLanguage };
+			var result = { owner: packet.owner, fromWord: packet.word, toWord: null, pID: packet.pID };
 
-		translateWizard.translate(params, function(err, data) {
-			// for now, just return to one user!
-			// io.sockets.emit('is BINDED', {fromWord: input.word, toWord: data, timeStamp: input.timeStamp});
-			io.sockets.emit('is BINDED', {fromWord: input.word, toWord: data, timeStamp: input.timeStamp});
-			// console.log(input.word + data);
-		});
-	})
-	socket.on('blockMsg', function(block) {
-		socket.broadcast.emit('partnerMsgBlock', block);
+			translateWizard.translate(params, function(err, data) {
+				result.toWord = data;
+				io.sockets.in(socket.room).emit('is BINDED', result);
+			});	
+		}
 	});
 
-	socket.on('shareMsg', function(timeStamp) {
-		socket.broadcast.emit('partnerMsgShare', timeStamp);
+	socket.on('ctrlLock', function(pID) {
+		ctrlLock[pID] = true;
+
 	});
 
-	socket.on('likeMsg', function(timeStamp) {
-		socket.broadcast.emit('partnerMsgLike', timeStamp);
+	socket.on('ctrlUnlock', function(pID) {
+		delete ctrlLock[pID];
 	});
 
-	socket.on('dislikeMsg', function(timeStamp) {
-		socket.broadcast.emit('partnerMsgDislike', timeStamp);
+	socket.on('blockMsg', function(input) {
+		blocks[socket.username] = input;
+		socket.broadcast.to('room1').emit('partnerMsgBlock', input);
+	});
+
+	socket.on('shareMsg', function(pID) {
+		socket.broadcast.to('room1').emit('partnerMsgShare', pID);
+	});
+
+	socket.on('likeMsg', function(pID) {
+		socket.broadcast.to('room1').emit('partnerMsgLike', pID);
+	});
+
+	socket.on('dislikeMsg', function(pID) {
+		socket.broadcast.to('room1').emit('partnerMsgDislike', pID);
+	});
+
+	socket.on('revert', function(packet) {
+		io.sockets.in(socket.room).emit('revertMsg', packet);
 	});
 
 });
-
