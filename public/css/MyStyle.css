@@ -30,7 +30,7 @@ body {
 }
 
 #partnerMsgContainer {
-  border-right: 4px dashed #2c9076;
+  border-right: 2px dashed #2c9076;
   overflow: auto;
   background-color: transparent;
   -webkit-flex: 1;
@@ -38,7 +38,7 @@ body {
 }
 
 #userMsgContainer {
-  /*border-left: 2px dashed #2c9076;*/
+  border-left: 2px dashed #2c9076;
   overflow: auto;
   background-color: transparent;
   -webkit-flex: 1;
@@ -107,7 +107,7 @@ body {
 }
 
 .highlight {
-  background-color: #F3DF2C;
+  background-color: rgba(246, 112, 83, 0.25);
 }
 
 .block {
@@ -144,19 +144,17 @@ body {
 
 .translateBt {
   float: right;
-  height: 25px;
+  width: 21px;
+  height: 21px;
   border: 0px solid blue;
   border-radius: 0;
-  background-image:url(./pic/Translate.png);
-  background-size: 36px;
+  background-image:url(./pic/tran2.png);
+  background-size: 22px;
   background-color: transparent;
   outline: none;
   box-shadow: none;
   -webkit-box-shadow: none;
-  color: #75736B;
-  font-family: 'Open Sans', 微軟正黑體, sans-serif;
-  font-size: 18px;
-  padding: 13px 18px;
+  padding: 10;
   margin: 6px 5px 2px 3px;
 }
 
@@ -191,25 +189,35 @@ body {
 
 .revertBt {
   float: right;
-  height: 25px;
+  width: 21px;
+  height: 21px;
   border: 0px solid blue;
   border-radius: 0;
+  background-image: url(./pic/tran1.png);
   background-size: 22px;
   background-color: transparent;
   outline: none;
   box-shadow: none;
   -webkit-box-shadow: none;
-  color: #75736B;
-  font-family: 'Open Sans', 微軟正黑體, sans-serif;
-  font-size: 18px;
-  padding: 2px;
-  margin: 6px;
+  padding: 10px;
+  margin: 8px 5px 2px 3px;
 }
 
 .revertBt:hover {
   cursor: pointer;
-  color: #2c9076;
-  text-decoration: underline;
+}
+
+.timeStamp {
+  color: #b2b2b2;
+  font-size: 0.8em;
+  float: left;
+  margin: 15px 5px 0px 3px;
+}
+.name {
+  color: #b2b2b2;
+  font-size: 0.8em;
+  float: left;
+  margin: 15px 5px 0px 3px;
 }
 
 #controlPanel {
@@ -362,6 +370,12 @@ body {
   cursor:pointer;
   /*background-image:url(./pic/setting_click.png);*/
   background-image:url(./pic/back.png);
+}
+
+#settingBt.clicked:hover{
+  cursor:pointer;
+  /*background-image:url(./pic/setting_click.png);*/
+  background-image:url(./pic/back_click.png);
 }
 
 

@@ -55,25 +55,26 @@ socket.on('chat', function(packet) {
 
 	var msgContainer;
 	var content = $('<span>').addClass('msgTxt').text(packet.msg).append('<br>');
-	var shareBt = $('<input>').addClass('shareBt').prop({type: 'button', value:''});
-	var likeBt = $('<input>').addClass('likeBt').prop({type: 'button', value:''});
+	var shareBt = $('<input>').addClass('shareBt').prop({type: 'button', value: ''});
+	var likeBt = $('<input>').addClass('likeBt').prop({type: 'button', value: ''});
 	var translateBt = $('<input>').addClass('translateBt').prop({type: 'button', value: ''});
 	var revertBt = $('<input>').addClass('revertBt').prop({type: 'button', value: 'revert'});
-	var timeStamp = $('<span>').addClass('timeStamp').hide().html(postTime);
+	var timeStamp = $('<span>').addClass('timeStamp').html(postTime);
 	var postID = $('<span>').addClass('postID').hide().html(packet.pID);
 
+	var nameSpace = $('<span>').addClass('name').text(uid);
 	var icon = $('<div>').addClass('partnerIcon partnerA'); // temp setting
 	
 	content.html(content.html().replace(/\n/g, '<br>'));
-	content = $('<span>').addClass('msgCntnt').append(content).append(timeStamp).append(postID);
+	content = $('<span>').addClass('msgCntnt').append(content).append(likeBt).append(postID);
 
 	if (uid == username) {
 		msgContainer = $('#userMsgContainer');
-		content = content.append(shareBt).append(likeBt);
+		content = content.append(shareBt).append(timeStamp);
 		content = $('<div>').addClass('userMessage').append(content);
 	}else {
 		msgContainer = $('#partnerMsgContainer');
-		content = content.append(likeBt).append(translateBt).append(revertBt);
+		content = content.append(nameSpace).append(timeStamp).append(translateBt).append(revertBt);
 		content = $('<div>').addClass('partnerMessage').append(icon).append(content);
 
 		if (packet.block == true) content.find('.msgCntnt').addClass('block');

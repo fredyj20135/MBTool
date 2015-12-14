@@ -5,6 +5,7 @@
   "dependencies": {
     "express": "^4.13.3",
     "socket.io": "^1.3.6",
-    "mstranslator": "^2.0.0"
+    "mstranslator": "^2.0.0",
+    "ejs": "^2.3.4"
   }
 }
