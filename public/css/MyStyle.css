@@ -148,7 +148,7 @@ body {
   height: 21px;
   border: 0px solid blue;
   border-radius: 0;
-  background-image:url(./pic/tran2.png);
+  background-image:url(./pic/translate.png);
   background-size: 22px;
   background-color: transparent;
   outline: none;
@@ -160,6 +160,7 @@ body {
 
 .translateBt:hover {
   cursor: pointer;
+  background-image:url(./pic/translate_hover.png);
   /*color: #2c9076;*/
   /*text-decoration: underline;*/
 }
@@ -193,7 +194,7 @@ body {
   height: 21px;
   border: 0px solid blue;
   border-radius: 0;
-  background-image: url(./pic/tran1.png);
+  background-image: url(./pic/revert.png);
   background-size: 22px;
   background-color: transparent;
   outline: none;
@@ -205,6 +206,7 @@ body {
 
 .revertBt:hover {
   cursor: pointer;
+  background-image: url(./pic/revert_hover.png);
 }
 
 .timeStamp {
