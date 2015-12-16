@@ -72,7 +72,7 @@ io.on('connection', function(socket) {
 		socket.join('room1');
 
 		socket.emit('serverSelfMsg', '[SERVER] You have connected', 'room1');
-		socket.broadcast.to('room1').emit('serverOthersMsg', '[SERVER] ' + userID + ' is on deck');
+		socket.broadcast.to('room1').emit('serverOthersMsg', '[SERVER] ' + userID + ' has login');
 
 		// initNewLog();
 		// initQuickDic();
