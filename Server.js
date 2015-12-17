@@ -5,9 +5,6 @@ var server = require('http').createServer(app);
 var io = require('socket.io')(server);
 var fs = require('fs');
 
-var userInfo = JSON.parse(fs.readFileSync('UserFile', 'utf8'));
-var hash = require('./pass').hash;
-
 /* Bing translator initialization */
 var mstranslator = require('mstranslator');
 var config = JSON.parse(fs.readFileSync('./translatorConfig', 'utf8'));
@@ -64,25 +61,18 @@ function authenticate(name, pass, fn) {
 }
 
 io.on('connection', function(socket) {
-	socket.on('login', function(packet) {
-		authenticate(packet.usr, packet.pwd, function(err, user) {
-			if (user) {
-				socket.username = packet.usr;
-				socket.room = 'room1';
-				loginUsers[packet.usr] = packet.usr;
-				blocks[packet.usr] = false;
-				socket.join('room1');
+	socket.on('addMe', function(input) {
+		socket.username = input;
+		socket.room = 'room1';
+		loginUsers[input] = input;
+		blocks[input] = false;
+		socket.join('room1');
 
-				socket.emit('userConfirm', packet.usr, 'room1');
-				socket.emit('serverSelfMsg', '[SERVER] You have connected', 'room1');
-				socket.broadcast.to('room1').emit('serverOthersMsg', '[SERVER] ' + packet.usr + ' has login');
+		socket.emit('serverSelfMsg', '[SERVER] You have connected', 'room1');
+		socket.broadcast.to('room1').emit('serverOthersMsg', '[SERVER] ' + input + ' has login');
 				
-				userNumber = userNumber + 1;
-				console.log('usernumber = ' + userNumber);
-			} else {
-				socket.emit('loginError', 'Wrong log in information');
-			}
-		});
+		userNumber = userNumber + 1;
+		console.log('usernumber = ' + userNumber);
 	});
 
 	// when someone is disconnect, print server information
@@ -90,7 +80,7 @@ io.on('connection', function(socket) {
 		if (socket.username != null){
 			socket.broadcast.to('room1').emit('serverOthersMsg', '[SERVER] ' + socket.username + ' has left');
 			// logStream.end();
-			delete loginUsers[socket.username];
+			// delete loginUsers[socket.username];
 
 			userNumber = userNumber - 1;
 			console.log('usernumber = ' + userNumber);
