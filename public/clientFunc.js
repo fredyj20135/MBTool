@@ -12,9 +12,13 @@ socket.on('loginError', function(msg) {
 });
 
 socket.on('userConfirm', function(msg) {
-	$('#login').fadeOut('slow');
-	$('#BSTBody').show('slow')
-  	$('loginInput').unbind('click', loginBtHandler);
+	$('loginInput').unbind('click', loginBtHandler);
+	
+  	$("#login").animate({ opacity: 0, hight: 0}, 700, 'swing', function() {
+  		$("#login").hide();
+    	$('#BSTBody').fadeIn('fast');
+  	});
+
   	username = msg;
 });
 
@@ -44,7 +48,6 @@ socket.on('revertMsg', function(packet) { /* Erase translation in specific bubbl
 	for (var i = 0; i < msgPool.length; i++) {
 		var msgText = $(msgPool[i]).find('.msgTxt');
 		var highlight = msgText.find('.highlight');
-	
 		var elmt, temp;
 		var revertHTML = msgText.html();
 	
@@ -103,7 +106,7 @@ socket.on('chat', function(packet) {
 
 socket.on('partnerMsgBlock', function(block){
 	$('.partnerMessage').each(function(){
-		if ( !$(this).hasClass('share')) {
+		if (!$(this).hasClass('share')) {
 			if (block == true) $(this).find('.msgCntnt').addClass('block');
 			else $(this).find('.msgCntnt').removeClass('block');
 		}
@@ -260,7 +263,6 @@ $('#container').on('click', 'input.shareBt', function() {
 
 	for (var i = 0; i < userMsg.length; i++) {
 		var shareBt = $(userMsg[i]).find('input.shareBt');
-
 		clickControl(shareBt);
 
 		if (shareBt.hasClass('clicked')) {
@@ -321,5 +323,6 @@ $( document ).ready(function() {
   	$('#settingBt').bind('click', settingBtHandler);
   	$('#BSTBody').hide();
   	$('loginInput').bind('click', loginBtHandler);
+
   	// $(window).bind('beforeunload', function(){ return 'All messages will be lost if you leave or relaod this page. \n\nAre you sure?'; });
 });

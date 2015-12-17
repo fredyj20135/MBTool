@@ -59,14 +59,16 @@ function initNewLog(){
 
 function authenticate(name, pass, fn) {
 	var user = userInfo[name];
+	if (user == null) return fn(new Error('Unregistered user!'));
 	if (pass == user.pwd) return fn(null, user);
-	else return fn(new Error('Error!'));
+	else return fn(new Error('Wrong Password!'));
 }
 
 io.on('connection', function(socket) {
 	socket.on('login', function(packet) {
 		authenticate(packet.usr, packet.pwd, function(err, user) {
-			if (user) {
+			// if (user) {
+			if(true) {
 				socket.username = packet.usr;
 				socket.room = 'room1';
 				loginUsers[packet.usr] = packet.usr;
@@ -80,7 +82,7 @@ io.on('connection', function(socket) {
 				userNumber = userNumber + 1;
 				console.log('usernumber = ' + userNumber);
 			} else {
-				socket.emit('loginError', 'Wrong log in information');
+				socket.emit('loginError', err.toString());
 			}
 		});
 	});
