@@ -7,48 +7,76 @@
 		<link href="css/MyStyle.css" rel="stylesheet" type="text/css" media="screen">
 	</head>
 	<body>
-		<div id="container">
-			<div id="partnerMsgContainer"></div>
-			<div id="userMsgContainer"></div>
-		</div>
-		<div id="controlPanel">
+		<div id="login">
+			<h1>Login</h1>
+			<div id="loginMsg">hello!</div>
 			<form>
-				<div class="toolBar">
-					<input id="settingBt" type="button" value=""></input>
-					<button id="sendButton" type="button">Send</button>
-					</br>
-				</div>
-				<div class="toolBar">
-					<textarea id="textInput" rows="5" cols="30" placeholder="Your message here"></textarea>
-					<div id="settingPanel">
-						<div class="listRow">
-							<select id="oriLang" class="langSelector">
-                        		<option value="en" selected = "selected">English</option>
-                        		<option value="zh-CHT" >中文</option>
-                        		<option value="ja" >日本語</option>
-                        		<option value="ko" >한국의</option>
-                        		<option value="fr" >Franch</option>
-                        		<option value="de" >Deutsch</option>
-                    		</select>
-                    		<div id="arrow" ></div>
-                    		<select id="transLang" class ="langSelector">
-                        		<option value="en" >English</option>
-                        		<option value="zh-CHT" selected="selected">中文</option>
-                        		<option value="ja" >日本語</option>
-                        		<option value="ko" >한국의</option>
-                        		<option value="fr" >Franch</option>
-                        		<option value="de" >Deutsch</option>
-                    		</select>
-						</div>
-                    	<div class="listRow">
-                    		<input id="blockAll" type="button" value="Block my all unshared messages">
-                   		</div>
-                   		<div class="listRow"> 
-                    		<input id="hideUnshare" type="button" value="Only show the unblocked messages">
-                   		</div>
-					</div>
-				</div>
+				<p>
+					<label>Username:</label>
+					<input id="username" type="text" name="username">
+				</p>
+				<p>
+					<label>Password:</label>
+					<input id="pwd" type="password" name="password">
+				</p>
+				<p>
+					<select id="groupSelect">
+                        <option value="g1" selected = "selected">Group1</option>
+                        <option value="g2" >Group2</option>
+                        <option value="g3" >Group3</option>
+                       	<option value="g4" >Group4</option>
+                    </select>
+				</p>
+				<p>
+				<button id="loginInput" type="button">login</button>
+				</p>
 			</form>
+			
+		</div>
+		<div id="BSTBody">
+			<div id="container">
+				<div id="partnerMsgContainer"></div>
+				<div id="userMsgContainer"></div>
+			</div>
+			<div id="controlPanel">
+				<form>
+					<div class="toolBar">
+						<input id="settingBt" type="button" value=""></input>
+						<button id="sendButton" type="button">Send</button>
+						</br>
+					</div>
+					<div class="toolBar">
+						<textarea id="textInput" rows="5" cols="30" placeholder="Your message here"></textarea>
+						<div id="settingPanel">
+							<div class="listRow">
+								<select id="oriLang" class="langSelector">
+                        			<option value="en" selected = "selected">English</option>
+                        			<option value="zh-CHT" >中文</option>
+                        			<option value="ja" >日本語</option>
+                        			<option value="ko" >한국의</option>
+                        			<option value="fr" >Franch</option>
+                        			<option value="de" >Deutsch</option>
+                    			</select>
+                    			<div id="arrow" ></div>
+                    			<select id="transLang" class ="langSelector">
+                        			<option value="en" >English</option>
+                        			<option value="zh-CHT" selected="selected">中文</option>
+                        			<option value="ja" >日本語</option>
+                        			<option value="ko" >한국의</option>
+                        			<option value="fr" >Franch</option>
+                        			<option value="de" >Deutsch</option>
+                    			</select>
+							</div>
+                    		<div class="listRow">
+                    			<input id="blockAll" type="button" value="Block my all unshared messages">
+                   			</div>
+                   			<div class="listRow"> 
+                    			<input id="hideUnshare" type="button" value="Only show the unblocked messages">
+                   			</div>
+						</div>
+					</div>
+				</form>
+			</div>
 		</div>
 		<script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
 		<script src="http://code.jquery.com/jquery-1.11.1.js"></script>

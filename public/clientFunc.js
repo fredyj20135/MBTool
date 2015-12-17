@@ -4,9 +4,18 @@ var highlightWord = '';
 			
 /* Welcome and start */
 socket.on('connect', function() {
-	username = prompt('Who are you?');
-	socket.emit('addMe', username);
-	// console.log(username);
+	$('#loginInput').bind('click', loginBtHandler);
+});
+
+socket.on('loginError', function(msg) {
+	$('#loginMsg').text(msg);
+});
+
+socket.on('userConfirm', function(msg) {
+	$('#login').fadeOut('slow');
+	$('#BSTBody').show('slow')
+  	$('loginInput').unbind('click', loginBtHandler);
+  	username = msg;
 });
 
 /* distribute System Msg. Start */ 
@@ -161,6 +170,12 @@ function hideEmptyBubble(elmt) {
 	$('#partnerMsgContainer').scrollTop($('#partnerMsgContainer').prop("scrollHeight"));
 }
 
+function loginBtHandler() {
+	socket.emit('login', {usr: $('#username').val(), pwd: $('#pwd').val()});
+	$('#username').val('');
+	$('#pwd').val('');
+}
+
 /* Buttons in controlPanel. Concept by Allie. Start */
 function sendBtHandler() {
 	socket.emit('chat message', $('#textInput').val());
@@ -274,5 +289,7 @@ $( document ).ready(function() {
   	$('#sendButton').bind('click', sendBtHandler);
   	$('#settingPanel').hide();
   	$('#settingBt').bind('click', settingBtHandler);
+  	$('#BSTBody').hide();
+  	$('loginInput').bind('click', loginBtHandler);
   	// $(window).bind('beforeunload', function(){ return 'All messages will be lost if you leave or relaod this page. \n\nAre you sure?'; });
 });

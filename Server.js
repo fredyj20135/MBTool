@@ -5,6 +5,9 @@ var server = require('http').createServer(app);
 var io = require('socket.io')(server);
 var fs = require('fs');
 
+var userInfo = JSON.parse(fs.readFileSync('UserFile', 'utf8'));
+var hash = require('./pass').hash;
+
 /* Bing translator initialization */
 var mstranslator = require('mstranslator');
 var config = JSON.parse(fs.readFileSync('./translatorConfig', 'utf8'));
@@ -20,11 +23,7 @@ var logStream;
 var logDir = './syslog/';
 var logName;
 
-var dicWriteStream;
-var dicDir = './dic/';
-var dicName = 'quickDic';
-
-var users = {};
+var loginUsers = {};
 var blocks = {};
 var ctrlLock = {};
 var rooms = ['room1', 'room2'];  // [TBD] wait for login function 
@@ -58,27 +57,32 @@ function initNewLog(){
 	}
 }
 
-function initQuickDic() {
-	dicWriteStream = fs.createWriteStream(dicDir + dicName, {'flags': 'a'});
+function authenticate(name, pass, fn) {
+	var user = userInfo[name];
+	if (pass == user.pwd) return fn(null, user);
+	else return fn(new Error('Error!'));
 }
 
 io.on('connection', function(socket) {
-	// the first event: if a user is linked to this server, open a dialogue box and input user ID
-	socket.on('addMe', function(userID) { // [TBD] user login
-		socket.username = userID;
-		socket.room = 'room1';
-		users[userID] = userID;
-		blocks[userID] = false;
-		socket.join('room1');
+	socket.on('login', function(packet) {
+		authenticate(packet.usr, packet.pwd, function(err, user) {
+			if (user) {
+				socket.username = packet.usr;
+				socket.room = 'room1';
+				loginUsers[packet.usr] = packet.usr;
+				blocks[packet.usr] = false;
+				socket.join('room1');
 
-		socket.emit('serverSelfMsg', '[SERVER] You have connected', 'room1');
-		socket.broadcast.to('room1').emit('serverOthersMsg', '[SERVER] ' + userID + ' has login');
-
-		// initNewLog();
-		// initQuickDic();
-
-		userNumber = userNumber + 1;
-		console.log('usernumber = ' + userNumber);
+				socket.emit('userConfirm', packet.usr, 'room1');
+				socket.emit('serverSelfMsg', '[SERVER] You have connected', 'room1');
+				socket.broadcast.to('room1').emit('serverOthersMsg', '[SERVER] ' + packet.usr + ' has login');
+				
+				userNumber = userNumber + 1;
+				console.log('usernumber = ' + userNumber);
+			} else {
+				socket.emit('loginError', 'Wrong log in information');
+			}
+		});
 	});
 
 	// when someone is disconnect, print server information
@@ -86,7 +90,7 @@ io.on('connection', function(socket) {
 		if (socket.username != null){
 			socket.broadcast.to('room1').emit('serverOthersMsg', '[SERVER] ' + socket.username + ' has left');
 			// logStream.end();
-			// delete usernames[socket.username];
+			delete loginUsers[socket.username];
 
 			userNumber = userNumber - 1;
 			console.log('usernumber = ' + userNumber);
