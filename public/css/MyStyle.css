@@ -21,6 +21,7 @@ body {
   height:100%;
   background: #c9e1ce;
 }
+
 #BSTBody {
   height:100%;
 }
@@ -113,8 +114,12 @@ body {
   border-bottom-right-radius: 5px;
 }
 
-.highlight {
-  background-color: rgba(246, 112, 83, 0.25);
+.highlight.note {
+  background-color: rgba(246, 112, 83, 0.25); /* F3DF2C */
+}
+
+.highlight.warn {
+  background-color: #F3DF2C
 }
 
 .block {
@@ -188,7 +193,7 @@ body {
   margin: 8px 5px 2px 3px;
 }
 
-.likeBt:hover {
+.partnerMessage input.likeBt:hover {
   cursor: pointer;
 }
 .likeBt.clicked {

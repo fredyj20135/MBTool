@@ -143,7 +143,11 @@ io.on('connection', function(socket) {
 	});
 
 	socket.on('shareMsg', function(pID) {
-		socket.broadcast.to('room1').emit('partnerMsgShare', pID);
+		socket.broadcast.to('room1').emit('partnerMsgShare', {pID: pID, blockInfo: blocks[socket.username]});
+	});
+
+	socket.on('unshareMsg', function(pID) {
+		socket.broadcast.to('room1').emit('partnerMsgUnshare', {pID: pID, blockInfo: blocks[socket.username]});
 	});
 
 	socket.on('likeMsg', function(pID) {

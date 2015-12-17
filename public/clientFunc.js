@@ -29,30 +29,35 @@ socket.on('serverOthersMsg', function(msg) { /* server msg related to others */
 });
 
 socket.on('partnerMsgLike', function(pID) { /* set like */
-	$('.postID:contains("' + pID + '")').closest('.msgCntnt').find('.likeBt').addClass('clicked');
+	var post = $('.postID:contains("' + pID + '")').parent();
+	for (var i = 0; i < post.length; i++) $(post[i]).find('.likeBt').addClass('clicked');
 });
 
 socket.on('partnerMsgDislike', function(pID) { /* Disliked */
-	$('.postID:contains("' + pID + '")').closest('.msgCntnt').find('.likeBt').removeClass('clicked');
+	var post = $('.postID:contains("' + pID + '")').parent();
+	for (var i = 0; i < post.length; i++) $(post[i]).find('.likeBt').removeClass('clicked');
 });
 
 socket.on('revertMsg', function(packet) { /* Erase translation in specific bubbles, improvable! */
-	var target = $('.postID:contains("' + packet.pID + '")').closest('.msgCntnt');
-	var msgText = target.find('.msgTxt');
-	var highlight = msgText.find('.highlight');
+	var msgPool = $('.postID:contains("' + packet.pID + '")').parent();
+
+	for (var i = 0; i < msgPool.length; i++) {
+		var msgText = $(msgPool[i]).find('.msgTxt');
+		var highlight = msgText.find('.highlight');
 	
-	var elmt, temp;
-	var revertHTML = msgText.html();
+		var elmt, temp;
+		var revertHTML = msgText.html();
 	
-	for (var i = 0; i < highlight.length; i++) { 
-		elmt = $(highlight[i]);
-		if (elmt != null && elmt.prop('title').slice(3, elmt.prop('title').length) == packet.user) {
-			temp = elmt.clone();
-			elmt.find('.trans:last').detach();
-			revertHTML = revertHTML.replace(temp.prop('outerHTML'), elmt.html());
+		for (var j = 0; j < highlight.length; j++) { 
+			elmt = $(highlight[j]);
+			if (elmt != null && elmt.prop('title').slice(3, elmt.prop('title').length) == packet.user) {
+				temp = elmt.clone();
+				elmt.find('.trans:last').detach();
+				revertHTML = revertHTML.replace(temp.prop('outerHTML'), elmt.html());
+			}
 		}
+		msgText.html(revertHTML);
 	}
-	msgText.html(revertHTML);
 	if (packet.owner == username) socket.emit('ctrlUnlock', packet.pID);
 });
 
@@ -62,7 +67,6 @@ socket.on('chat', function(packet) {
 	var uid = packet.uid;
 	var postTime = packet.sysTime;
 
-	var msgContainer;
 	var content = $('<span>').addClass('msgTxt').text(packet.msg).append('<br>');
 	var shareBt = $('<input>').addClass('shareBt').prop({type: 'button', value: ''});
 	var likeBt = $('<input>').addClass('likeBt').prop({type: 'button', value: ''});
@@ -70,26 +74,31 @@ socket.on('chat', function(packet) {
 	var revertBt = $('<input>').addClass('revertBt').prop({type: 'button', value: 'revert'});
 	var timeStamp = $('<span>').addClass('timeStamp').html(postTime);
 	var postID = $('<span>').addClass('postID').hide().html(packet.pID);
-
 	var nameSpace = $('<span>').addClass('name').text(uid);
 	var icon = $('<div>').addClass('partnerIcon partnerA'); // temp setting
 	
 	content.html(content.html().replace(/\n/g, '<br>'));
-	content = $('<span>').addClass('msgCntnt').append(content).append(likeBt).append(postID);
+	content = $('<span>').addClass('msgCntnt').append(content).append(likeBt);
 
 	if (uid == username) {
-		msgContainer = $('#userMsgContainer');
 		content = content.append(shareBt).append(timeStamp);
-		content = $('<div>').addClass('userMessage').append(content);
+		content = $('<div>').addClass('userMessage').append(postID).append(content);
+
+		var hidden = content.clone();
+		// var hidden = content.clone().hide();
+
+		$('#userMsgContainer').append(content);
+		$('#userMsgContainer').scrollTop($('#userMsgContainer').prop('scrollHeight'));
+		$('#partnerMsgContainer').append(hidden); // user itself change mode, access a global var to determine toshow or not
 	}else {
-		msgContainer = $('#partnerMsgContainer');
 		content = content.append(nameSpace).append(timeStamp).append(translateBt).append(revertBt);
-		content = $('<div>').addClass('partnerMessage').append(icon).append(content);
+		content = $('<div>').addClass('partnerMessage').append(postID).append(icon).append(content);
 
 		if (packet.block == true) content.find('.msgCntnt').addClass('block');
+
+		$('#partnerMsgContainer').append(content);
+		$('#partnerMsgContainer').scrollTop($('#partnerMsgContainer').prop('scrollHeight'));
 	}
-	msgContainer.append(content);
-	msgContainer.scrollTop(msgContainer.prop("scrollHeight"));
 });
 
 socket.on('partnerMsgBlock', function(block){
@@ -102,24 +111,37 @@ socket.on('partnerMsgBlock', function(block){
 	hideEmptyBubble($('#hideUnshare'));
 });
 
-socket.on('partnerMsgShare', function(pID) { /* Share on the specific message */
-	var partnerMsg = $('.postID:contains("' + pID + '")').closest('.partnerMessage');
-				
-	if (partnerMsg.hasClass('share') ){
-		partnerMsg.removeClass('share');
-		partnerMsg.find('.msgCntnt').addClass('block');
-	} else {
-		partnerMsg.addClass('share');
-		partnerMsg.find('.msgCntnt').removeClass('block');
+socket.on('partnerMsgShare', function(packet) { /* Share on the specific message */
+	var partnerMsg = $('.postID:contains("' + packet.pID + '")').parent();
+
+	for (var i = 0; i < partnerMsg.length; i++) {
+		$(partnerMsg[i]).addClass('share');
+		$(partnerMsg[i]).find('.msgCntnt').removeClass('block');	
+	}
+});
+
+socket.on('partnerMsgUnshare', function(packet) {
+	var partnerMsg = $('.postID:contains("' + packet.pID + '")').parent();
+
+	for (var i = 0; i < partnerMsg.length; i++) {
+		$(partnerMsg[i]).removeClass('share');
+		if (packet.blockInfo == true) $(partnerMsg[i]).find('.msgCntnt').addClass('block');
 	}
 });
 
 socket.on('is BINDED', function(packet) { /* Get translated data and add to message */
 	var result = $('<span>').addClass('trans').html(' (' + packet.toWord + ')');
-	var transMsg = $(".postID:contains('" + packet.pID + "')").closest('.msgCntnt').find('.msgTxt');
-	
+	var transMsg = $(".postID:contains('" + packet.pID + "')").parent();
+
 	result = $('<span>').addClass('highlight').prop('title', 'By ' + packet.owner).html(packet.fromWord).append(result);
-	transMsg.html(powerReplace(transMsg.html(), packet.fromWord, result.prop('outerHTML')));
+
+	for (var i = 0; i < transMsg.length; i++) {
+		var transMsgTxt = $(transMsg[i]).find('.msgTxt');
+
+		if (transMsg.hasClass('partnerMessage')) result.addClass('note');
+		else if (transMsg.hasClass('userMessage')) result.addClass('warn');
+		transMsgTxt.html(powerReplace(transMsgTxt.html(), packet.fromWord, result.prop('outerHTML')));
+	}
 	
 	if (packet.owner == username) socket.emit('ctrlUnlock', packet.pID);
 });
@@ -232,15 +254,23 @@ $('#container').on('click', '.partnerMessage input.likeBt', function() {
 
 /* Share "user's" message button*/
 $('#container').on('click', 'input.shareBt', function() { 
-	clickControl($(this)); 
-	
-	var userMsg = $(this).closest('.userMessage');
-	var postID = userMsg.find('.postID').text();
+	var temp = $(this).closest('.userMessage');
+	var postID = temp.find('.postID').text();
+	var userMsg = $('.postID:contains("' + postID + '")').parent();
 
-	if ($(this).hasClass('clicked')) userMsg.addClass('share');
-	else userMsg.removeClass('share');
+	for (var i = 0; i < userMsg.length; i++) {
+		var shareBt = $(userMsg[i]).find('input.shareBt');
 
-	socket.emit('shareMsg', postID);
+		clickControl(shareBt);
+
+		if (shareBt.hasClass('clicked')) {
+			$(userMsg[i]).addClass('share');
+			socket.emit('shareMsg', postID);
+		} else {
+			$(userMsg[i]).removeClass('share');
+			socket.emit('unshareMsg', postID);
+		}
+	}
 });
 /* end */ 
 
