@@ -93,15 +93,21 @@ socket.on('partnerMsgBlock', function(block){
 	hideEmptyBubble($('#hideUnshare'));
 });
 
-socket.on('partnerMsgShare', function(pID) { /* Share on the specific message */
-	var partnerMsg = $('.postID:contains("' + pID + '")').closest('.partnerMessage');
-				
-	if (partnerMsg.hasClass('share') ){
-		partnerMsg.removeClass('share');
-		partnerMsg.find('.msgCntnt').addClass('block');
-	} else {
-		partnerMsg.addClass('share');
-		partnerMsg.find('.msgCntnt').removeClass('block');
+socket.on('partnerMsgShare', function(packet) { /* Share on the specific message */
+	var partnerMsg = $('.postID:contains("' + packet.pID + '")').closest('.partnerMessage');
+
+	for (var i = 0; i < partnerMsg.length; i++) {
+		$(partnerMsg[i]).addClass('share');
+		$(partnerMsg[i]).find('.msgCntnt').removeClass('block');	
+	}
+});
+
+socket.on('partnerMsgUnshare', function(packet) {
+	var partnerMsg = $('.postID:contains("' + packet.pID + '")').closest('.partnerMessage');
+
+	for (var i = 0; i < partnerMsg.length; i++) {
+		$(partnerMsg[i]).removeClass('share');
+		if (packet.blockInfo == true) $(partnerMsg[i]).find('.msgCntnt').addClass('block');
 	}
 });
 
@@ -222,10 +228,16 @@ $('#container').on('click', 'input.shareBt', function() {
 	var userMsg = $(this).closest('.userMessage');
 	var postID = userMsg.find('.postID').text();
 
-	if ($(this).hasClass('clicked')) userMsg.addClass('share');
-	else userMsg.removeClass('share');
+	if ($(this).hasClass('clicked')) {
+		userMsg.addClass('share');
+		socket.emit('shareMsg', postID);
+	}
+	else {
+		userMsg.removeClass('share');
+		socket.emit('unshareMsg', postID);
+	}
 
-	socket.emit('shareMsg', postID);
+	
 });
 /* end */ 
 
