@@ -18,15 +18,15 @@ var translateWizard = new mstranslator({
 
 /* system log initialization */ 
 var userNumber = 0;
+var colorName = ['partnerA', 'partnerB', 'partnerC'];
+
 var postID = 0;
 var logStream;
 var logDir = './syslog/';
 var logName;
 
 var loginUsers = {};
-var blocks = {};
 var ctrlLock = {};
-var rooms = ['room1', 'room2'];  // [TBD] wait for login function 
 
 /* express initialization */
 app.use(express.static(__dirname + '/public'));
@@ -40,11 +40,11 @@ server.listen(5092, '127.0.0.1', function() { console.log('listening on #: 5092'
 function getDateTime() {
 	var date = new Date();
 	var hour = date.getHours();			hour = (hour < 10 ? "0" : "") + hour;    
-    var min  = date.getMinutes();		min = (min < 10 ? "0" : "") + min;
-    var sec  = date.getSeconds();		sec = (sec < 10 ? "0" : "") + sec;
-    var year = date.getFullYear();
-    var month = date.getMonth() + 1;	month = (month < 10 ? "0" : "") + month;
-    var day  = date.getDate();			day = (day < 10 ? "0" : "") + day;
+	var min  = date.getMinutes();		min = (min < 10 ? "0" : "") + min;
+	var sec  = date.getSeconds();		sec = (sec < 10 ? "0" : "") + sec;
+	var year = date.getFullYear();
+	var month = date.getMonth() + 1;	month = (month < 10 ? "0" : "") + month;
+	var day  = date.getDate();			day = (day < 10 ? "0" : "") + day;
 
     return year + month + day + '-' + hour + '-' + min + '-' + sec;
 }
@@ -57,27 +57,36 @@ function initNewLog(){
 	}
 }
 
-function authenticate(name, pass, fn) {
+function authenticate(name, pass, fn) { // add a condition check for "room" or "team"
 	var user = userInfo[name];
 	if (user == null) return fn(new Error('Unregistered user!'));
 	if (pass == user.pwd) return fn(null, user);
 	else return fn(new Error('Wrong Password!'));
 }
 
+function colorCode (name) {
+	var i = 0, j = 0;
+	for (var i = 0; i < name.length; i++) j = j + name.charCodeAt(i);
+
+	return j % 3; // since there are only three colors!
+}
+
 io.on('connection', function(socket) {
-	socket.on('login', function(packet) {
+	socket.on('login', function(packet) { // there is a room name in packet now!
 		authenticate(packet.usr, packet.pwd, function(err, user) {
 			// if (user) {
-			if(true) {
-				socket.username = packet.usr;
-				socket.room = 'room1';
-				loginUsers[packet.usr] = packet.usr;
-				blocks[packet.usr] = false;
-				socket.join('room1');
-
-				socket.emit('userConfirm', packet.usr, 'room1');
-				socket.emit('serverSelfMsg', '[SERVER] You have connected', 'room1');
-				socket.broadcast.to('room1').emit('serverOthersMsg', '[SERVER] ' + packet.usr + ' has login');
+			if(true) { //  any users are allowed!
+				var temp = {userID: packet.usr, userColor: colorCode(packet.usr), blocks: false};
+				socket.username = temp.userID;
+				socket.room = 'room1'; 
+				// socket.room = packet.group;
+				loginUsers[temp.userID] = temp;
+				
+				socket.join('room1'); 
+				// socket.join(packet.group);
+				socket.emit('userConfirm', socket.username, socket.room);
+				socket.emit('serverSelfMsg', '[SERVER] You have connected', socket.room);
+				socket.broadcast.to(socket.room).emit('serverOthersMsg', '[SERVER] ' + packet.usr + ' has login');
 				
 				userNumber = userNumber + 1;
 				console.log('usernumber = ' + userNumber);
@@ -90,7 +99,7 @@ io.on('connection', function(socket) {
 	// when someone is disconnect, print server information
 	socket.on('disconnect', function() {
 		if (socket.username != null){
-			socket.broadcast.to('room1').emit('serverOthersMsg', '[SERVER] ' + socket.username + ' has left');
+			socket.broadcast.to(socket.room).emit('serverOthersMsg', '[SERVER] ' + socket.username + ' has left');
 			// logStream.end();
 			delete loginUsers[socket.username];
 
@@ -107,7 +116,8 @@ io.on('connection', function(socket) {
 			msg: input, 
 			sysTime: sysTime, 
 			pID: postID, 
-			block: blocks[socket.username]
+			block: loginUsers[socket.username].block,
+			uColor: colorName[loginUsers[socket.username].userColor]
 		};
 		postID++;
 		
@@ -132,7 +142,6 @@ io.on('connection', function(socket) {
 
 	socket.on('ctrlLock', function(pID) {
 		ctrlLock[pID] = true;
-
 	});
 
 	socket.on('ctrlUnlock', function(pID) {
@@ -140,24 +149,24 @@ io.on('connection', function(socket) {
 	});
 
 	socket.on('blockMsg', function(input) {
-		blocks[socket.username] = input;
-		socket.broadcast.to('room1').emit('partnerMsgBlock', input);
+		loginUsers[socket.username].block = input;
+		socket.broadcast.to(socket.room).emit('partnerMsgBlock', input);
 	});
 
 	socket.on('shareMsg', function(pID) {
-		socket.broadcast.to('room1').emit('partnerMsgShare', {pID: pID, blockInfo: blocks[socket.username]});
+		socket.broadcast.to(socket.room).emit('partnerMsgShare', {pID: pID, blockInfo: loginUsers[socket.username].block});
 	});
 
 	socket.on('unshareMsg', function(pID) {
-		socket.broadcast.to('room1').emit('partnerMsgUnshare', {pID: pID, blockInfo: blocks[socket.username]});
+		socket.broadcast.to(socket.room).emit('partnerMsgShare', {pID: pID, blockInfo: loginUsers[socket.username].block});
 	});
 
 	socket.on('likeMsg', function(pID) {
-		socket.broadcast.to('room1').emit('partnerMsgLike', pID);
+		socket.broadcast.to(socket.room).emit('partnerMsgLike', pID);
 	});
 
 	socket.on('dislikeMsg', function(pID) {
-		socket.broadcast.to('room1').emit('partnerMsgDislike', pID);
+		socket.broadcast.to(socket.room).emit('partnerMsgDislike', pID);
 	});
 
 	socket.on('revert', function(packet) {

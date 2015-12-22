@@ -12,14 +12,16 @@ socket.on('loginError', function(msg) {
 });
 
 socket.on('userConfirm', function(msg) {
-	$('loginInput').unbind('click', loginBtHandler);
+	$('#loginInput').unbind('click', loginBtHandler);
 	
-  	$("#login").animate({ opacity: 0, hight: 0}, 700, 'swing', function() {
-  		$("#login").hide();
-    	$('#BSTBody').fadeIn('fast');
-  	});
+	$("#loginBody").animate({ opacity: 0, hight: 0}, 700, 'swing', function() {
+		$("#loginBody").hide();
+		$('#controlPanel').css('visibility', 'visible');
+		$('#BSTBody').css('visibility', 'visible');
+		$('#BSTBody').fadeIn('fast');
+	});
 
-  	username = msg;
+	username = msg;
 });
 
 /* distribute System Msg. Start */ 
@@ -70,15 +72,15 @@ socket.on('chat', function(packet) {
 	var uid = packet.uid;
 	var postTime = packet.sysTime;
 
-	var content = $('<span>').addClass('msgTxt').text(packet.msg).append('<br>');
-	var shareBt = $('<input>').addClass('shareBt').prop({type: 'button', value: ''});
-	var likeBt = $('<input>').addClass('likeBt').prop({type: 'button', value: ''});
+	var content 	= $('<span>').addClass('msgTxt').text(packet.msg).append('<br>');
+	var shareBt 	= $('<input>').addClass('shareBt').prop({type: 'button', value: ''});
+	var likeBt 		= $('<input>').addClass('likeBt').prop({type: 'button', value: ''});
 	var translateBt = $('<input>').addClass('translateBt').prop({type: 'button', value: ''});
-	var revertBt = $('<input>').addClass('revertBt').prop({type: 'button', value: 'revert'});
-	var timeStamp = $('<span>').addClass('timeStamp').html(postTime);
-	var postID = $('<span>').addClass('postID').hide().html(packet.pID);
-	var nameSpace = $('<span>').addClass('name').text(uid);
-	var icon = $('<div>').addClass('partnerIcon partnerA'); // temp setting
+	var revertBt 	= $('<input>').addClass('revertBt').prop({type: 'button', value: 'revert'});
+	var timeStamp 	= $('<span>').addClass('timeStamp').html(postTime);
+	var postID 		= $('<span>').addClass('postID').hide().html(packet.pID);
+	var nameSpace 	= $('<span>').addClass('name').text(uid);
+	var icon 		= $('<div>').addClass('partnerIcon').addClass(packet.uColor); // temp setting
 	
 	content.html(content.html().replace(/\n/g, '<br>'));
 	content = $('<span>').addClass('msgCntnt').append(content).append(likeBt);
@@ -87,13 +89,13 @@ socket.on('chat', function(packet) {
 		content = content.append(shareBt).append(timeStamp);
 		content = $('<div>').addClass('userMessage').append(postID).append(content);
 
-		var hidden = content.clone();
-		// var hidden = content.clone().hide();
+		// var hidden = content.clone(); // for debug
+		var hidden = content.clone().hide();
 
 		$('#userMsgContainer').append(content);
 		$('#userMsgContainer').scrollTop($('#userMsgContainer').prop('scrollHeight'));
-		$('#partnerMsgContainer').append(hidden); // user itself change mode, access a global var to determine toshow or not
-	}else {
+		$('#partnerMsgContainer').append(hidden); // user itself change mode, access a global var to determine show or not
+	} else {
 		content = content.append(nameSpace).append(timeStamp).append(translateBt).append(revertBt);
 		content = $('<div>').addClass('partnerMessage').append(postID).append(icon).append(content);
 
@@ -111,7 +113,7 @@ socket.on('partnerMsgBlock', function(block){
 			else $(this).find('.msgCntnt').removeClass('block');
 		}
 	});
-	hideEmptyBubble($('#hideUnshare'));
+	hideEmptyBubble();
 });
 
 socket.on('partnerMsgShare', function(packet) { /* Share on the specific message */
@@ -184,8 +186,8 @@ function powerReplace(oriHTML, fromWord, transResult) {
 	return outHTML.toString();
 }
 /* when others block their msgs, redraw element in partnerMsgContainer */
-function hideEmptyBubble(elmt) {
-	if(elmt.hasClass('clicked')) {
+function hideEmptyBubble() {
+	if($('#hideUnshare').hasClass('clicked')) {
 		$('.partnerMessage').each(function() { 
 			if ($(this).find('.msgCntnt').hasClass('block')) $(this).hide('slow');
 			else $(this).show('slow');
@@ -196,9 +198,21 @@ function hideEmptyBubble(elmt) {
 }
 
 function loginBtHandler() {
-	socket.emit('login', {usr: $('#username').val(), pwd: $('#pwd').val()});
+	socket.emit('login', {usr: $('#username').val(), pwd: $('#pwd').val(), group: $('#groupSelect').val()});
 	$('#username').val('');
 	$('#pwd').val('');
+}
+
+function windowCtrlBtHandler() { // animation can be improved......
+	if ($('#windowCtrlBt').hasClass('clicked')) {
+		$('#partnerMsgContainer .userMessage').each(function() { $(this).show('slow'); });
+		$('#userMsgContainer .userMessage').each(function() { $(this).hide('slow'); });
+		$('#userMsgContainer').hide('slow');
+	} else {
+		$('#partnerMsgContainer .userMessage').each(function() { $(this).hide('slow'); });
+		$('#userMsgContainer .userMessage').each(function() { $(this).show('slow'); });
+		$('#userMsgContainer').show('slow');
+	}
 }
 
 /* Buttons in controlPanel. Concept by Allie. Start */
@@ -223,7 +237,7 @@ function settingBtHandler() {
 /* Buttons controling bubbles. Concept by Allie and Seraphina. Start */
 function clickControl(elmt) {
 	if (elmt.hasClass('clicked')) elmt.removeClass('clicked');
-   	else elmt.addClass('clicked');
+	else elmt.addClass('clicked');
 }
 
 /* Block message button*/
@@ -236,11 +250,15 @@ $('#blockAll').click(function() {
 
 $('#hideUnshare').click(function() { 
 	clickControl($(this));
-	hideEmptyBubble($(this));
+	hideEmptyBubble();
 });
 
 /* Setting Button */
 $('#settingBt').click(function() {
+	clickControl($(this));
+});
+
+$('#windowCtrlBt').click(function() {
 	clickControl($(this));
 });
 
@@ -318,11 +336,12 @@ $('#container').on('click', 'input.revertBt', function () {
 
 /* initial page setting */		
 $( document ).ready(function() {
-  	$('#sendButton').bind('click', sendBtHandler);
-  	$('#settingPanel').hide();
-  	$('#settingBt').bind('click', settingBtHandler);
-  	$('#BSTBody').hide();
-  	$('loginInput').bind('click', loginBtHandler);
+	$('#BSTBody').hide();
+	$('#settingPanel').hide();
+
+	$('#sendButton').bind('click', sendBtHandler);
+	$('#settingBt').bind('click', settingBtHandler);
+ 	$('#windowCtrlBt').bind('click', windowCtrlBtHandler);
 
   	// $(window).bind('beforeunload', function(){ return 'All messages will be lost if you leave or relaod this page. \n\nAre you sure?'; });
 });

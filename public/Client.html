@@ -4,34 +4,34 @@
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 		<title>Brainstorming Tool</title>
 		<link href="https://fonts.googleapis.com/css?family=Open+Sans:400,300,600,700|Archivo+Narrow:400,700" rel="stylesheet" type="text/css">
-		<link href="css/MyStyle.css" rel="stylesheet" type="text/css" media="screen">
+		<link href="css/BSTStyle.css" rel="stylesheet" type="text/css" media="screen">
+		<link href="css/loginStyle.css" rel="stylesheet" type="text/css" media="screen">
 	</head>
 	<body>
-		<div id="login">
-			<h1>Login</h1>
-			<div id="loginMsg">Welcome!</div>
-			<form>
-				<p>
-					<label>Username:</label>
-					<input id="username" type="text" name="username">
-				</p>
-				<p>
-					<label>Password:</label>
-					<input id="pwd" type="password" name="password">
-				</p>
-				<p>
-					<select id="groupSelect">
-                        <option value="g1" selected = "selected">Group1</option>
-                        <option value="g2" >Group2</option>
-                        <option value="g3" >Group3</option>
-                       	<option value="g4" >Group4</option>
-                    </select>
-				</p>
-				<p>
-				<button id="loginInput" type="button">login</button>
-				</p>
-			</form>
-			
+		<div id="loginBody">
+			<div id="login">
+				<h1>Login</h1>
+				<div id="loginMsg">Welcome!</div>
+				<form>
+					<p>
+						<input id="username" type="text" placeholder="Username" name="username">
+					</p>
+					<p>
+						<input id="pwd" type="password" placeholder="Password" name="password">
+					</p>
+					<p>
+						<button id="loginInput" type="button">SUBMIT</button>
+					</p>
+					<p>
+						<select id="groupSelect">
+							<option value="g1" selected = "selected">Group1</option>
+							<option value="g2" >Group2</option>
+							<option value="g3" >Group3</option>
+							<option value="g4" >Group4</option>
+						</select>
+					</p>
+				</form>
+			</div>
 		</div>
 		<div id="BSTBody">
 			<div id="container">
@@ -41,7 +41,8 @@
 			<div id="controlPanel">
 				<form>
 					<div class="toolBar">
-						<input id="settingBt" type="button" value=""></input>
+						<button id="settingBt" type="button"></button>
+						<button id="windowCtrlBt" type="button">WCTRL</button>
 						<button id="sendButton" type="button">Send</button>
 						</br>
 					</div>
@@ -50,29 +51,29 @@
 						<div id="settingPanel">
 							<div class="listRow">
 								<select id="oriLang" class="langSelector">
-                        			<option value="en" selected = "selected">English</option>
-                        			<option value="zh-CHT" >中文</option>
-                        			<option value="ja" >日本語</option>
-                        			<option value="ko" >한국의</option>
-                        			<option value="fr" >Franch</option>
-                        			<option value="de" >Deutsch</option>
-                    			</select>
-                    			<div id="arrow" ></div>
-                    			<select id="transLang" class ="langSelector">
-                        			<option value="en" >English</option>
-                        			<option value="zh-CHT" selected="selected">中文</option>
-                        			<option value="ja" >日本語</option>
-                        			<option value="ko" >한국의</option>
-                        			<option value="fr" >Franch</option>
-                        			<option value="de" >Deutsch</option>
-                    			</select>
+									<option value="en" selected = "selected">English</option>
+									<option value="zh-CHT" >中文</option>
+									<option value="ja" >日本語</option>
+									<option value="ko" >한국의</option>
+									<option value="fr" >Franch</option>
+									<option value="de" >Deutsch</option>
+								</select>
+								<div id="arrow" ></div>
+								<select id="transLang" class ="langSelector">
+									<option value="en" >English</option>
+									<option value="zh-CHT" selected="selected">中文</option>
+									<option value="ja" >日本語</option>
+									<option value="ko" >한국의</option>
+									<option value="fr" >Franch</option>
+									<option value="de" >Deutsch</option>
+								</select>
 							</div>
-                    		<div class="listRow">
-                    			<input id="blockAll" type="button" value="Block my all unshared messages">
-                   			</div>
-                   			<div class="listRow"> 
-                    			<input id="hideUnshare" type="button" value="Only show the unblocked messages">
-                   			</div>
+							<div class="listRow">
+								<input id="blockAll" type="button" value="Block my all unshared messages">
+							</div>
+							<div class="listRow"> 
+								<input id="hideUnshare" type="button" value="Only show the unblocked messages">
+							</div>
 						</div>
 					</div>
 				</form>
