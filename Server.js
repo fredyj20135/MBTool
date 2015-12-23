@@ -18,7 +18,7 @@ var translateWizard = new mstranslator({
 
 /* system log initialization */ 
 var userNumber = 0;
-var colorName = ['partnerA', 'partnerB', 'partnerC'];
+var colorName = ['partnerA', 'partnerB', 'partnerC', 'partnerD', 'partnerE', 'partnerF'];
 
 var postID = 0;
 var logStream;
@@ -68,7 +68,7 @@ function colorCode (name) {
 	var i = 0, j = 0;
 	for (var i = 0; i < name.length; i++) j = j + name.charCodeAt(i);
 
-	return j % 3; // since there are only three colors!
+	return j % 6; // since there are only three colors!
 }
 
 io.on('connection', function(socket) {
