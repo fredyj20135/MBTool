@@ -223,21 +223,21 @@ function loginBtEnterHandler(event) {
 	}
 }
 
-function windowCtrlBtHandler() {
+function windowCtrlBtHandler() { // animation still improvable
 	if ($('#windowCtrlBt').hasClass('clicked')) {
 		$('#userMsgContainer .userMessage').each(function() { $(this).hide('slow'); });
 		$(function () { 
-			$("#userMsgContainer").animate({ width: '0%' }, { duration: 500, queue: false });
-			$("#partnerMsgContainer").animate({ width: '100%' }, { duration: 500, queue: false });
+			$("#userMsgContainer").animate({ width: '0%' }, { duration: 600, queue: false });
+			$("#partnerMsgContainer").animate({ width: '100%' }, { duration: 600, queue: false });
 		});
 		$('#partnerMsgContainer .userMessage').each(function() { $(this).show('fast'); });
 	} else {
-		$('#userMsgContainer .userMessage').each(function() { $(this).show('fast'); });
-		$(function () { 
-			$("#userMsgContainer").animate({ width: '50%' }, { duration: 500, queue: false });
-			$("#partnerMsgContainer").animate({ width: '50%' }, { duration: 500, queue: false });
-		});
 		$('#partnerMsgContainer .userMessage').each(function() { $(this).hide('slow'); });
+		$(function () { 
+			$("#userMsgContainer").animate({ width: '50%' }, { duration: 600, queue: false });
+			$("#partnerMsgContainer").animate({ width: '50%' }, { duration: 600, queue: false });
+		});
+		$('#userMsgContainer .userMessage').each(function() { $(this).show('fast'); });
 	}
 }
 
