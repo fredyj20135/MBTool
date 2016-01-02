@@ -1,41 +1,43 @@
+/* Default lib initialization */
 var express = require('express');
 var app = express();
 var server = require('http').createServer(app);
-
 var io = require('socket.io')(server);
 var fs = require('fs');
-
-var userInfo = JSON.parse(fs.readFileSync('UserFile', 'utf8'));
 var hash = require('./pass').hash;
 
-/* Bing translator initialization */
+/* System attribute initialization*/
+var config = JSON.parse(fs.readFileSync('./config', 'utf8'));
+
+/* Postgres database initialization*/
+var pg = require('pg');
+var dbLink = new pg.Client(config.DB);
+dbLink.connect();
+
+/* Bing Translator initialization */
 var mstranslator = require('mstranslator');
-var config = JSON.parse(fs.readFileSync('./translatorConfig', 'utf8'));
-var translateWizard = new mstranslator({
-	client_id: config.cID,
-	client_secret: config.secret
-}, true);
+var translateWizard = new mstranslator({ client_id: config.MT.cID, client_secret: config.MT.secret}, true);
 
 /* system log initialization */ 
 var userNumber = 0;
-var colorName = ['partnerA', 'partnerB', 'partnerC', 'partnerD', 'partnerE', 'partnerF'];
-
 var postID = 0;
-var logStream;
-var logDir = './syslog/';
-var logName;
-
 var loginUsers = {};
 var ctrlLock = {};
+var colorName = ['partnerA', 'partnerB', 'partnerC', 'partnerD', 'partnerE', 'partnerF'];
 
-/* express initialization */
+/* express ignite */
 app.use(express.static(__dirname + '/public'));
 
 app.get('/', function(req, res) {
 	res.sendFile(__dirname + '/public/Client.html');
 });
 
-server.listen(5092, '127.0.0.1', function() { console.log('listening on #: 5092'); });
+app.get('/signUp', function(req, res) {
+	res.sendFile(__dirname + '/public/SignIn.html');
+});
+
+/* Server ignite */
+server.listen(5092, '127.0.0.1', function() { console.log('Server Start! Listening on #: 5092'); });
 
 function getDateTime() {
 	var date = new Date();
@@ -49,42 +51,43 @@ function getDateTime() {
     return year + month + day + '-' + hour + '-' + min + '-' + sec;
 }
 
-function initNewLog(){
-	if (userNumber == 0) {
-		logName = getDateTime() + '.csv';
-		logStream = fs.createWriteStream(logDir + logName);
-		logStream.write('User,Dialogue\n');
-	}
-}
-
 function authenticate(name, pass, fn) { // add a condition check for "room" or "team"
-	var user = userInfo[name];
-	if (user == null) return fn(new Error('Unregistered user!'));
-	if (pass == user.pwd) return fn(null, user);
-	else return fn(new Error('Wrong Password!'));
+	dbLink.query("SELECT * FROM userInfo WHERE uid = $1", [name], function(err, result) {
+		if(err) fn(new Error('Query Problem!'));
+
+		if (result.rows[0] == null) {
+			return fn(new Error('Unregistered user!'));
+		} else {
+			hash(pass, result.rows[0].salt, function(err, cipher) {
+				if (err) return fn(err);
+				
+				if (cipher.toString() == result.rows[0].pwd) return fn(null, {usr: name, room: result.rows[0].groupname});
+				else return fn(new Error('Invalid password'));
+			});
+		}
+	});
 }
 
 function colorCode (name) {
-	var i = 0, j = 0;
+	var j = 0;
 	for (var i = 0; i < name.length; i++) j = j + name.charCodeAt(i);
-
-	return j % 6; // since there are only three colors!
+	return j % 6;
 }
 
 io.on('connection', function(socket) {
 	socket.on('login', function(packet) { // there is a room name in packet now!
 		authenticate(packet.usr, packet.pwd, function(err, user) {
 			// if (user) {
-			if(true) { //  any users are allowed!
+			if (true) { //  any users are allowed!
 				var temp = {userID: packet.usr, userColor: colorCode(packet.usr), blocks: false};
 				socket.username = temp.userID;
 				socket.room = 'room1'; 
-				// socket.room = packet.group;
+				// socket.room = user.group;
 				loginUsers[temp.userID] = temp;
 				
 				socket.join('room1'); 
-				// socket.join(packet.group);
-				socket.emit('userConfirm', socket.username, socket.room);
+				// socket.join(user.group);
+				socket.emit('userConfirm', {uID: socket.username, msg: 'Success!'}, socket.room);
 				socket.emit('serverSelfMsg', '[SERVER] You have connected', socket.room);
 				socket.broadcast.to(socket.room).emit('serverOthersMsg', '[SERVER] ' + packet.usr + ' has login');
 				
@@ -100,7 +103,6 @@ io.on('connection', function(socket) {
 	socket.on('disconnect', function() {
 		if (socket.username != null){
 			socket.broadcast.to(socket.room).emit('serverOthersMsg', '[SERVER] ' + socket.username + ' has left');
-			// logStream.end();
 			delete loginUsers[socket.username];
 
 			userNumber = userNumber - 1;
@@ -112,26 +114,26 @@ io.on('connection', function(socket) {
 	socket.on('chat message', function(input) {
 		var sysTime = getDateTime();
 		var content = {
-			uid: socket.username, 
-			msg: input, 
-			sysTime: sysTime, 
-			pID: postID, 
+			uID: socket.username,
+			pID: postID,
+			msg: input,
+			sysTime: sysTime,
 			block: loginUsers[socket.username].block,
 			uColor: colorName[loginUsers[socket.username].userColor]
 		};
-		postID++;
 		
-		io.sockets.in(socket.room).emit('chat', content);
+		// dbLink.query("INSERT INTO syslog VALUES ($1, $2, $3, $4, $5)", [content.uID, postID, socket.room, content.sysTime, input]);
+		postID++;
 
-		// var logMsg = socket.username + ',' + msg + '\n';
-		// logStream.write(logMsg);
+		io.sockets.in(socket.room).emit('chat', content);
 	});
 
 	// Pass translate result from server
 	socket.on('translate', function(packet) {
 		if (ctrlLock.hasOwnProperty(packet.pID)) {
+
 			var params = { text: packet.word, from: packet.fromLanguage, to: packet.toLanguage };
-			var result = { owner: packet.owner, fromWord: packet.word, toWord: null, pID: packet.pID };
+			var result = { uID: packet.uID, fromWord: packet.word.replace(/\n/g, '<br>'), toWord: null, pID: packet.pID };
 
 			translateWizard.translate(params, function(err, data) {
 				result.toWord = data;
@@ -150,7 +152,7 @@ io.on('connection', function(socket) {
 
 	socket.on('blockMsg', function(input) {
 		loginUsers[socket.username].block = input;
-		socket.broadcast.to(socket.room).emit('partnerMsgBlock', input);
+		socket.broadcast.to(socket.room).emit('partnerMsgBlock', {blockInfo: input, uID: socket.username});
 	});
 
 	socket.on('shareMsg', function(pID) {
@@ -158,7 +160,7 @@ io.on('connection', function(socket) {
 	});
 
 	socket.on('unshareMsg', function(pID) {
-		socket.broadcast.to(socket.room).emit('partnerMsgShare', {pID: pID, blockInfo: loginUsers[socket.username].block});
+		socket.broadcast.to(socket.room).emit('partnerMsgUnshare', {pID: pID, blockInfo: loginUsers[socket.username].block});
 	});
 
 	socket.on('likeMsg', function(pID) {
@@ -173,4 +175,27 @@ io.on('connection', function(socket) {
 		io.sockets.in(socket.room).emit('revertMsg', packet);
 	});
 
+	socket.on('reg', function(packet) {
+		dbLink.query("SELECT uID FROM userInfo", function(err, result) {
+			var reged = false;
+			if(err) return console.error('error running query', err); 
+			
+			regUsers = result.rows;
+
+			for(var i = 0; i < result.rows.length; i ++) {
+				if (result.rows[i].uid === packet.usr) reged = true;
+			}
+
+			if (reged) {
+				socket.emit('regError', 'this userID is registered!');
+			} else {
+				var msg = 'Success! Back to <a href="/">Login Page</a> !';
+				hash(packet.pwd, function(err, salt, cipher) {
+					if (err) throw err;
+					dbLink.query("INSERT INTO userInfo VALUES ($1, $2, $3, $4)", [packet.usr, cipher.toString(), salt, packet.group]);
+				});
+				socket.emit('regSuccess', msg);
+			}
+		});
+	});
 });

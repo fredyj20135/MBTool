@@ -3,7 +3,7 @@
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 		<title>Brainstorming Tool</title>
-		<link href="https://fonts.googleapis.com/css?family=Open+Sans:400,300,600,700|Archivo+Narrow:400,700" rel="stylesheet" type="text/css">
+		<link href="css/fontStyle.css" rel="stylesheet" type="text/css" media="screen">
 		<link href="css/BSTStyle.css" rel="stylesheet" type="text/css" media="screen">
 		<link href="css/loginStyle.css" rel="stylesheet" type="text/css" media="screen">
 	</head>
@@ -11,10 +11,10 @@
 		<div id="loginBody">
 			<div id="login">
 				<h1>Login</h1>
-				<div id="loginMsg">Welcome!</div>
+				<div id="loginMsg">Welcome !</div>
 				<form>
 					<p>
-						<input id="username" type="text" placeholder="Username" name="username">
+						<input id="username" type="text" placeholder="Username" name="username" autofocus>
 					</p>
 					<p>
 						<input id="pwd" type="password" placeholder="Password" name="password">
@@ -22,15 +22,10 @@
 					<p>
 						<button id="loginInput" type="button">SUBMIT</button>
 					</p>
-					<p>
-						<select id="groupSelect">
-							<option value="g1" selected = "selected">Group1</option>
-							<option value="g2" >Group2</option>
-							<option value="g3" >Group3</option>
-							<option value="g4" >Group4</option>
-						</select>
-					</p>
 				</form>
+				<p>
+					Do not have account? Just <a href="/signUp">Sign In</a> !
+				</p>
 			</div>
 		</div>
 		<div id="BSTBody">

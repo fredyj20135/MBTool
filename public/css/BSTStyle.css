@@ -37,19 +37,21 @@ body {
 }
 
 #partnerMsgContainer {
+  width: 50%;
   border-right: 2px dashed #2c9076;
   overflow: auto;
   background-color: transparent;
-  -webkit-flex: 1;
-          flex: 1;
+  /*-webkit-flex: 1;*/
+          /*flex: 1;*/
 }
 
 #userMsgContainer {
+  width: 50%;
   border-left: 2px dashed #2c9076;
   overflow: auto;
   background-color: transparent;
-  -webkit-flex: 1;
-          flex: 1;
+  /*-webkit-flex: 1;*/
+          /*flex: 1;*/
 }
 
 /* insert by Allie */
@@ -198,7 +200,7 @@ body {
   margin: 8px 5px 2px 3px;
 }
 
-.partnerMessage input.likeBt:hover {
+.likeBt:hover {
   cursor: pointer;
 }
 .likeBt.clicked {
