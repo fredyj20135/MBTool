@@ -79,7 +79,7 @@ socket.on('chat', function(packet) {
 		$('#partnerMsgContainer').append(hidden); // user itself change mode, access a global var to determine show or not
 	} else {
 		content = content.append(nameSpace).append(timeStamp).append(translateBt).append(revertBt);
-		content = $('<div>').addClass('partnerMessage').append(postID).append(icon).append(content);
+		content = $('<div>').addClass('partnerMessage').append(icon).append(postID).append(content);
 
 		if (packet.block == true) content.find('.msgCntnt').addClass('block');
 
