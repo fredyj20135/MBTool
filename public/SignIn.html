@@ -1,15 +1,15 @@
 <html>
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-		<title>Brainstorming Tool Sign In</title>
+		<title>NBrain Sign Up Page</title>
 		<link href="css/fontStyle.css" rel="stylesheet" type="text/css" media="screen">
 		<link href="css/loginStyle.css" rel="stylesheet" type="text/css" media="screen">
 	</head>
 	<body>
 		<div id="loginBody">
 			<div id="login">
-				<h1>Signin</h1>
-				<div id="regMsg">Welcome!</div>
+				<h1>Sign up</h1>
+				<div id="regMsg">User Information</div>
 				<form>
 					<p>
 						<input id="uID" type="text" placeholder="Username" name="username">
@@ -26,14 +26,14 @@
 						</select>
 					</p>
 					<p>
-						<button id="regInput" type="button">SUBMIT</button>
+						<button id="regInput" type="button">REGISTER</button>
 					</p>
 				</form>
 			</div>
 		</div>
 	</body>
-	<script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
-	<script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+	<script src="js/socket.io-1.2.0.js"></script>
+	<script src="js/jquery.js"></script>
 	<script>
 		var socket = io.connect('http://localhost:5092');
 
@@ -42,27 +42,20 @@
 			$(document).bind('keypress', regBtEnterHandler);
 		});
 
-		socket.on('regError', function(msg) {
-			$('#regMsg').text(msg);
-			$('#uID').val('').show('slow');
-			$('#pwd').val('').show('slow');
-		});
+		socket.on('regError', function(msg) { $('#regMsg').text(msg); });
 
 		socket.on('regSuccess', function(msg) {
 			$('#regMsg').html(msg);
-			
+
+			$('#uID').val('').hide('slow');
+			$('#pwd').val('').hide('slow');
+			$('#groupID').hide('slow');
 			$('#regInput').unbind('click', regBtHandler);
 			$(document).unbind('keypress', regBtEnterHandler);
 		});
 
 		function regBtHandler() {
-			if 		($('#uID').val() == '') $('#regMsg').text('invalid username!');
-			else if ($('#pwd').val() == '') $('#regMsg').text('invalid password!');
-			else {
-				socket.emit('reg', {usr: $('#uID').val(), pwd: $('#pwd').val(), group: $('#groupSelect').val()});
-				$('#uID').val('').hide('slow');
-				$('#pwd').val('').hide('slow');
-			} 
+			socket.emit('reg', {usr: $('#uID').val(), pwd: $('#pwd').val(), group: $('#groupSelect').val()});
 		}
 		function regBtEnterHandler(event) {
 			if (event.which == 13) $('#regInput').click();

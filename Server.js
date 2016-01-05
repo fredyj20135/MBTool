@@ -6,10 +6,10 @@ var io = require('socket.io')(server);
 var fs = require('fs');
 var hash = require('./pass').hash;
 
-/* System attribute initialization*/
+/* System attribute initialization */
 var config = JSON.parse(fs.readFileSync('./config', 'utf8'));
 
-/* Postgres database initialization*/
+/* Postgres database initialization */
 var pg = require('pg');
 var dbLink = new pg.Client(config.DB);
 dbLink.connect();
@@ -80,17 +80,25 @@ io.on('connection', function(socket) {
 			// if (user) {
 			if (true) { //  any users are allowed!
 				var temp = {userID: packet.usr, userColor: colorCode(packet.usr), blocks: false};
+				// var temp = {userID: packet.usr, userColor: colorCode(packet.usr), blocks: false, room: user.group};
+				// var temp = {userID: packet.usr, userColor: colorCode(packet.usr), blocks: false, room: 'room1'};
 				socket.username = temp.userID;
 				socket.room = 'room1'; 
 				// socket.room = user.group;
-				loginUsers[temp.userID] = temp;
 				
 				socket.join('room1'); 
 				// socket.join(user.group);
 				socket.emit('userConfirm', {uID: socket.username, msg: 'Success!'}, socket.room);
-				socket.emit('serverSelfMsg', '[SERVER] You have connected', socket.room);
+
+				// for (e in loginUsers) {
+				// 	if (loginUsers[e].room == socket.room) 
+				// 		socket.emit('serverSelfMsg', '[SERVER] ' + loginUsers[e].userID + ' is now in room!', socket.room);
+				// }
+
+				socket.emit('serverSelfMsg', '[SERVER] Hello ' + packet.usr + ' !', socket.room);
 				socket.broadcast.to(socket.room).emit('serverOthersMsg', '[SERVER] ' + packet.usr + ' has login');
 				
+				loginUsers[temp.userID] = temp;
 				userNumber = userNumber + 1;
 				console.log('usernumber = ' + userNumber);
 			} else {
@@ -176,26 +184,31 @@ io.on('connection', function(socket) {
 	});
 
 	socket.on('reg', function(packet) {
-		dbLink.query("SELECT uID FROM userInfo", function(err, result) {
-			var reged = false;
-			if(err) return console.error('error running query', err); 
+		if 		(packet.usr == '') socket.emit('regError', 'invalid username!');
+		else if (packet.pwd == '') socket.emit('regError', 'invalid password!');
+		else {
+			dbLink.query("SELECT uID FROM userInfo", function(err, result) {
+				var reged = false;
+				if(err) return console.error('error running query', err); 
 			
-			regUsers = result.rows;
+				regUsers = result.rows;
 
-			for(var i = 0; i < result.rows.length; i ++) {
-				if (result.rows[i].uid === packet.usr) reged = true;
-			}
+				for(var i = 0; i < result.rows.length; i ++) {
+					if (result.rows[i].uid === packet.usr) reged = true;
+				}
 
-			if (reged) {
-				socket.emit('regError', 'this userID is registered!');
-			} else {
-				var msg = 'Success! Back to <a href="/">Login Page</a> !';
-				hash(packet.pwd, function(err, salt, cipher) {
-					if (err) throw err;
-					dbLink.query("INSERT INTO userInfo VALUES ($1, $2, $3, $4)", [packet.usr, cipher.toString(), salt, packet.group]);
-				});
-				socket.emit('regSuccess', msg);
-			}
-		});
+				if (reged) {
+					socket.emit('regError', 'this userID is registered!');
+				} else {
+					var msg = 'Success! Back to <a href="/">Login Page</a> !';
+					hash(packet.pwd, function(err, salt, cipher) {
+						if (err) throw err;
+						dbLink.query("INSERT INTO userInfo VALUES ($1, $2, $3, $4)", 
+							[packet.usr, cipher.toString(), salt, packet.group]);
+					});
+					socket.emit('regSuccess', msg);
+				}
+			});
+		}
 	});
 });

@@ -1,8 +1,9 @@
 var socket = io.connect('http://localhost:5092');
 var username;
+var windowAdj = false;
 var highlightWord = '';
 			
-/* Welcome and start */
+/* Socket.io function, start */
 socket.on('connect', function() {
 	$('#loginInput').bind('click', loginBtHandler);
 	$(document).bind('keypress', loginBtEnterHandler);
@@ -28,7 +29,7 @@ socket.on('userConfirm', function(packet) {
 	username = packet.uID;
 });
 
-/* distribute System Msg. Start */ 
+/* distribute System Msg */ 
 socket.on('serverSelfMsg', function(msg) { /* server msg related to user */
 	$('#userMsgContainer').append($('<div>').text(msg).addClass('userMessage'));
 });
@@ -74,17 +75,21 @@ socket.on('chat', function(packet) {
 		// var hidden = content.clone(); // for debug
 		var hidden = content.clone().hide(); 
 
-		$('#userMsgContainer').append(content);
-		$('#userMsgContainer').scrollTop($('#userMsgContainer').prop('scrollHeight'));
-		$('#partnerMsgContainer').append(hidden); // user itself change mode, access a global var to determine show or not
+		if (!windowAdj) {
+			$('#partnerMsgContainer').append(hidden);
+			$('#userMsgContainer').append(content).scrollTop($('#userMsgContainer').prop('scrollHeight'));
+		} else {
+			$('#userMsgContainer').append(hidden);
+			$('#partnerMsgContainer').append(content).scrollTop($('#partnerMsgContainer').prop('scrollHeight'));
+		}
+		
 	} else {
 		content = content.append(nameSpace).append(timeStamp).append(translateBt).append(revertBt);
 		content = $('<div>').addClass('partnerMessage').append(icon).append(postID).append(content);
 
 		if (packet.block == true) content.find('.msgCntnt').addClass('block');
 
-		$('#partnerMsgContainer').append(content);
-		$('#partnerMsgContainer').scrollTop($('#partnerMsgContainer').prop('scrollHeight'));
+		$('#partnerMsgContainer').append(content).scrollTop($('#partnerMsgContainer').prop('scrollHeight'));
 	}
 });
 
@@ -95,7 +100,7 @@ socket.on('partnerMsgBlock', function(packet){
 			else $(this).find('.msgCntnt').removeClass('block');
 		}
 	});
-	hideEmptyBubble();
+	bubbleCtrl();
 });
 
 socket.on('partnerMsgShare', function(packet) { /* Share on the specific message */
@@ -105,6 +110,8 @@ socket.on('partnerMsgShare', function(packet) { /* Share on the specific message
 		$(partnerMsg[i]).addClass('share');
 		$(partnerMsg[i]).find('.msgCntnt').removeClass('block');	
 	}
+
+	bubbleCtrl()
 });
 
 socket.on('partnerMsgUnshare', function(packet) {
@@ -114,6 +121,8 @@ socket.on('partnerMsgUnshare', function(packet) {
 		$(partnerMsg[i]).removeClass('share');
 		if (packet.blockInfo == true) $(partnerMsg[i]).find('.msgCntnt').addClass('block');
 	}
+
+	bubbleCtrl()
 });
 
 socket.on('is BINDED', function(packet) { /* Get translated data and add to message */
@@ -200,7 +209,7 @@ socket.on('revertMsg', function(packet) { /* Erase translation in specific bubbl
 });
 
 /* when others block their msgs, redraw element in partnerMsgContainer */
-function hideEmptyBubble() {
+function bubbleCtrl() {
 	if($('#hideUnshare').hasClass('clicked')) {
 		$('.partnerMessage').each(function() { 
 			if ($(this).find('.msgCntnt').hasClass('block')) $(this).hide('slow');
@@ -225,6 +234,7 @@ function loginBtEnterHandler(event) {
 
 function windowCtrlBtHandler() { // animation still improvable
 	if ($('#windowCtrlBt').hasClass('clicked')) {
+		windowAdj = true;
 		$('#userMsgContainer .userMessage').each(function() { $(this).hide('slow'); });
 		$(function () { 
 			$("#userMsgContainer").animate({ width: '0%' }, { duration: 600, queue: false });
@@ -232,6 +242,7 @@ function windowCtrlBtHandler() { // animation still improvable
 		});
 		$('#partnerMsgContainer .userMessage').each(function() { $(this).show('fast'); });
 	} else {
+		windowAdj = false;
 		$('#partnerMsgContainer .userMessage').each(function() { $(this).hide('slow'); });
 		$(function () { 
 			$("#userMsgContainer").animate({ width: '50%' }, { duration: 600, queue: false });
@@ -239,6 +250,8 @@ function windowCtrlBtHandler() { // animation still improvable
 		});
 		$('#userMsgContainer .userMessage').each(function() { $(this).show('fast'); });
 	}
+	$('#userMsgContainer').scrollTop($('#userMsgContainer').prop('scrollHeight'));
+	$('#partnerMsgContainer').scrollTop($('#partnerMsgContainer').prop('scrollHeight'));
 }
 
 /* Buttons in controlPanel. Concept by Allie. Start */
@@ -276,7 +289,7 @@ $('#blockAll').click(function() {
 
 $('#hideUnshare').click(function() { 
 	clickControl($(this));
-	hideEmptyBubble();
+	bubbleCtrl();
 });
 
 /* Setting Button */
