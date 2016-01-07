@@ -25,7 +25,7 @@ var postID = 0;
 var loginUsers = {};
 var ctrlLock = {};
 var colorName = ['partnerA', 'partnerB', 'partnerC', 'partnerD', 'partnerE', 'partnerF'];
-var DBON = false;
+var DBON = true;
 
 /* express ignite */
 app.use(express.static(__dirname + '/public'));
