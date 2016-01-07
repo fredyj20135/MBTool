@@ -5,25 +5,27 @@ var server = require('http').createServer(app);
 var io = require('socket.io')(server);
 var fs = require('fs');
 var hash = require('./pass').hash;
+var IP = '127.0.0.1';
 
 /* System attribute initialization */
 var config = JSON.parse(fs.readFileSync('./config', 'utf8'));
 
 /* Postgres database initialization */
 var pg = require('pg');
-var dbLink = new pg.Client(config.DB);
-dbLink.connect();
+var db = new pg.Client(config.DB);
+db.connect();
 
 /* Bing Translator initialization */
 var mstranslator = require('mstranslator');
 var translateWizard = new mstranslator({ client_id: config.MT.cID, client_secret: config.MT.secret}, true);
 
-/* system log initialization */ 
+/* System tracking initialization */ 
 var userNumber = 0;
 var postID = 0;
 var loginUsers = {};
 var ctrlLock = {};
 var colorName = ['partnerA', 'partnerB', 'partnerC', 'partnerD', 'partnerE', 'partnerF'];
+var DBON = false;
 
 /* express ignite */
 app.use(express.static(__dirname + '/public'));
@@ -37,7 +39,7 @@ app.get('/signUp', function(req, res) {
 });
 
 /* Server ignite */
-server.listen(5092, '127.0.0.1', function() { console.log('Server Start! Listening on #: 5092'); });
+server.listen(5092, IP, function() { console.log('Server Start! Listening on #: 5092'); });
 
 function getDateTime() {
 	var date = new Date();
@@ -52,7 +54,7 @@ function getDateTime() {
 }
 
 function authenticate(name, pass, fn) { // add a condition check for "room" or "team"
-	dbLink.query("SELECT * FROM userInfo WHERE uid = $1", [name], function(err, result) {
+	db.query("SELECT * FROM userInfo WHERE uid = $1", [name], function(err, result) {
 		if(err) fn(new Error('Query Problem!'));
 
 		if (result.rows[0] == null) {
@@ -60,7 +62,7 @@ function authenticate(name, pass, fn) { // add a condition check for "room" or "
 		} else {
 			hash(pass, result.rows[0].salt, function(err, cipher) {
 				if (err) return fn(err);
-				
+
 				if (cipher.toString() == result.rows[0].pwd) return fn(null, {usr: name, room: result.rows[0].groupname});
 				else return fn(new Error('Invalid password'));
 			});
@@ -77,29 +79,37 @@ function colorCode (name) {
 io.on('connection', function(socket) {
 	socket.on('login', function(packet) { // there is a room name in packet now!
 		authenticate(packet.usr, packet.pwd, function(err, user) {
-			// if (user) {
-			if (true) { //  any users are allowed!
-				var temp = {userID: packet.usr, userColor: colorCode(packet.usr), blocks: false};
-				// var temp = {userID: packet.usr, userColor: colorCode(packet.usr), blocks: false, room: user.group};
-				// var temp = {userID: packet.usr, userColor: colorCode(packet.usr), blocks: false, room: 'room1'};
-				socket.username = temp.userID;
-				socket.room = 'room1'; 
-				// socket.room = user.group;
+			if (user) {
+			// if (true) { //  any users are allowed!
+				if (DBON) {
+					socket.room = user.room;
+					socket.join(user.room);
+					var temp = {userID: packet.usr, userColor: colorCode(packet.usr), blocks: false, room: user.room};
+				} else {
+					socket.room = 'room1'; 
+					socket.join('room1'); 
+					var temp = {userID: packet.usr, userColor: colorCode(packet.usr), blocks: false, room: 'room1'};
+				}
 				
-				socket.join('room1'); 
-				// socket.join(user.group);
+				socket.username = temp.userID;
 				socket.emit('userConfirm', {uID: socket.username, msg: 'Success!'}, socket.room);
-
-				// for (e in loginUsers) {
-				// 	if (loginUsers[e].room == socket.room) 
-				// 		socket.emit('serverSelfMsg', '[SERVER] ' + loginUsers[e].userID + ' is now in room!', socket.room);
-				// }
-
-				socket.emit('serverSelfMsg', '[SERVER] Hello ' + packet.usr + ' !', socket.room);
+				socket.emit('serverSelfMsg', '[SERVER] Hello ' + socket.username + ' !', socket.room);
 				socket.broadcast.to(socket.room).emit('serverOthersMsg', '[SERVER] ' + packet.usr + ' has login');
+
+				var i = 0;
+				for (e in loginUsers) {
+					if (loginUsers[e].room == socket.room) {
+						socket.emit('serverSelfMsg', '[SERVER] ' + loginUsers[e].userID + ' is now in room!', socket.room);
+						i++;
+					}
+				}
+				if (DBON && i == 0) 
+					db.query("INSERT INTO syslog VALUES ($1, $2, $3, $4, $5, $6)", 
+						['SYSTEM', socket.room, 'I', -1, getDateTime(), 'START ' + socket.room]);
 				
 				loginUsers[temp.userID] = temp;
 				userNumber = userNumber + 1;
+
 				console.log('usernumber = ' + userNumber);
 			} else {
 				socket.emit('loginError', err.toString());
@@ -129,8 +139,11 @@ io.on('connection', function(socket) {
 			block: loginUsers[socket.username].block,
 			uColor: colorName[loginUsers[socket.username].userColor]
 		};
+		// now in DB: uID, room, action:I/M/B/S/L/T, pID, systime, content
+		if (DBON) 
+			db.query("INSERT INTO syslog VALUES ($1, $2, $3, $4, $5, $6)", 
+				[content.uID, socket.room, 'M', postID, content.sysTime, input]);
 		
-		// dbLink.query("INSERT INTO syslog VALUES ($1, $2, $3, $4, $5)", [content.uID, postID, socket.room, content.sysTime, input]);
 		postID++;
 
 		io.sockets.in(socket.room).emit('chat', content);
@@ -146,7 +159,11 @@ io.on('connection', function(socket) {
 			translateWizard.translate(params, function(err, data) {
 				result.toWord = data;
 				io.sockets.in(socket.room).emit('is BINDED', result);
-			});	
+			});
+
+			if (DBON) 
+				db.query("INSERT INTO syslog VALUES ($1, $2, $3, $4, $5, $6)", 
+					[socket.username, socket.room, 'T', postID, getDateTime(), packet.word]);
 		}
 	});
 
@@ -161,33 +178,57 @@ io.on('connection', function(socket) {
 	socket.on('blockMsg', function(input) {
 		loginUsers[socket.username].block = input;
 		socket.broadcast.to(socket.room).emit('partnerMsgBlock', {blockInfo: input, uID: socket.username});
+
+		if (DBON) 
+			db.query("INSERT INTO syslog VALUES ($1, $2, $3, $4, $5, $6)", 
+				[socket.username, socket.room, 'B', -1, getDateTime(), input]);
 	});
 
 	socket.on('shareMsg', function(pID) {
 		socket.broadcast.to(socket.room).emit('partnerMsgShare', {pID: pID, blockInfo: loginUsers[socket.username].block});
+
+		if (DBON) 
+			db.query("INSERT INTO syslog VALUES ($1, $2, $3, $4, $5, $6)",
+				[socket.username, socket.room, 'S', pID, getDateTime(), '1']);
 	});
 
 	socket.on('unshareMsg', function(pID) {
 		socket.broadcast.to(socket.room).emit('partnerMsgUnshare', {pID: pID, blockInfo: loginUsers[socket.username].block});
+
+		if (DBON) 
+			db.query("INSERT INTO syslog VALUES ($1, $2, $3, $4, $5, $6)", 
+				[socket.username, socket.room, 'S', pID, getDateTime(), '0']);
 	});
 
 	socket.on('likeMsg', function(pID) {
-		socket.broadcast.to(socket.room).emit('partnerMsgLike', pID);
+		io.sockets.in(socket.room).emit('partnerMsgLike', pID);
+
+		if (DBON) 
+			db.query("INSERT INTO syslog VALUES ($1, $2, $3, $4, $5, $6)", 
+				[socket.username, socket.room, 'L', pID, getDateTime(), '1']);
 	});
 
 	socket.on('dislikeMsg', function(pID) {
-		socket.broadcast.to(socket.room).emit('partnerMsgDislike', pID);
+		io.sockets.in(socket.room).emit('partnerMsgDislike', pID);
+
+		if (DBON) 
+			db.query("INSERT INTO syslog VALUES ($1, $2, $3, $4, $5, $6)", 
+				[socket.username, socket.room, 'L', pID, getDateTime(), '0']);
 	});
 
 	socket.on('revert', function(packet) {
 		io.sockets.in(socket.room).emit('revertMsg', packet);
+
+		if (DBON) 
+			db.query("INSERT INTO syslog VALUES ($1, $2, $3, $4, $5, $6)", 
+				[socket.username, socket.room, 'R', packet.pID, getDateTime(), '-']);
 	});
 
 	socket.on('reg', function(packet) {
 		if 		(packet.usr == '') socket.emit('regError', 'invalid username!');
 		else if (packet.pwd == '') socket.emit('regError', 'invalid password!');
 		else {
-			dbLink.query("SELECT uID FROM userInfo", function(err, result) {
+			db.query("SELECT uID FROM userInfo", function(err, result) {
 				var reged = false;
 				if(err) return console.error('error running query', err); 
 			
@@ -203,7 +244,7 @@ io.on('connection', function(socket) {
 					var msg = 'Success! Back to <a href="/">Login Page</a> !';
 					hash(packet.pwd, function(err, salt, cipher) {
 						if (err) throw err;
-						dbLink.query("INSERT INTO userInfo VALUES ($1, $2, $3, $4)", 
+						db.query("INSERT INTO userInfo VALUES ($1, $2, $3, $4)", 
 							[packet.usr, cipher.toString(), salt, packet.group]);
 					});
 					socket.emit('regSuccess', msg);

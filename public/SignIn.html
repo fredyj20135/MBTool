@@ -19,10 +19,10 @@
 					</p>
 					<p>
 						<select id="groupID" class="langSelector">
-							<option value="room1" selected = "selected">room1</option>
-							<option value="room2" >room2</option>
-							<option value="room3" >room3</option>
-							<option value="room4" >room4</option>
+							<option value="G1" selected = "selected">room1</option>
+							<option value="G2" >room2</option>
+							<option value="G3" >room3</option>
+							<option value="G4" >room4</option>
 						</select>
 					</p>
 					<p>
@@ -50,12 +50,13 @@
 			$('#uID').val('').hide('slow');
 			$('#pwd').val('').hide('slow');
 			$('#groupID').hide('slow');
+			
 			$('#regInput').unbind('click', regBtHandler);
 			$(document).unbind('keypress', regBtEnterHandler);
 		});
 
 		function regBtHandler() {
-			socket.emit('reg', {usr: $('#uID').val(), pwd: $('#pwd').val(), group: $('#groupSelect').val()});
+			socket.emit('reg', {usr: $('#uID').val(), pwd: $('#pwd').val(), group: $('#groupID').val()});
 		}
 		function regBtEnterHandler(event) {
 			if (event.which == 13) $('#regInput').click();

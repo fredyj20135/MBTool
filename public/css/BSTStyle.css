@@ -207,6 +207,12 @@ body {
   background-image:url(./pic/like_click.png);
 }
 
+.likeNum {
+  color: #2c9076;
+  float: right;
+  font-size: 0.8em;
+}
+
 .revertBt {
   float: right;
   width: 21px;
