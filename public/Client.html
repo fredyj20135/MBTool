@@ -2,11 +2,32 @@
 <html>
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-		<title>Brainstorming Tool</title>
-		<link href="https://fonts.googleapis.com/css?family=Open+Sans:400,300,600,700|Archivo+Narrow:400,700" rel="stylesheet" type="text/css">
-		<link href="css/MyStyle.css" rel="stylesheet" type="text/css" media="screen">
+		<title>NBrain</title>
+		<link href="css/fontStyle.css" rel="stylesheet" type="text/css" media="screen">
+		<link href="css/BSTStyle.css" rel="stylesheet" type="text/css" media="screen">
+		<link href="css/loginStyle.css" rel="stylesheet" type="text/css" media="screen">
 	</head>
 	<body>
+		<div id="loginBody">
+			<div id="login">
+				<h1>Login</h1>
+				<div id="loginMsg">Welcome !</div>
+				<form>
+					<p>
+						<input id="username" type="text" placeholder="Username" name="username" autofocus>
+					</p>
+					<p>
+						<input id="pwd" type="password" placeholder="Password" name="password">
+					</p>
+					<p>
+						<button id="loginInput" type="button">SUBMIT</button>
+					</p>
+				</form>
+				<p>
+					Do not have account? Just <a href="/signUp">Sign In</a> !
+				</p>
+			</div>
+		</div>
 		<div id="BSTBody">
 			<div id="container">
 				<div id="partnerMsgContainer"></div>
@@ -15,7 +36,8 @@
 			<div id="controlPanel">
 				<form>
 					<div class="toolBar">
-						<input id="settingBt" type="button" value=""></input>
+						<button id="settingBt" type="button"></button>
+						<button id="windowCtrlBt" type="button">To one colume</button>
 						<button id="sendButton" type="button">Send</button>
 						</br>
 					</div>
@@ -24,37 +46,37 @@
 						<div id="settingPanel">
 							<div class="listRow">
 								<select id="oriLang" class="langSelector">
-                        			<option value="en" selected = "selected">English</option>
-                        			<option value="zh-CHT" >中文</option>
-                        			<option value="ja" >日本語</option>
-                        			<option value="ko" >한국의</option>
-                        			<option value="fr" >Franch</option>
-                        			<option value="de" >Deutsch</option>
-                    			</select>
-                    			<div id="arrow" ></div>
-                    			<select id="transLang" class ="langSelector">
-                        			<option value="en" >English</option>
-                        			<option value="zh-CHT" selected="selected">中文</option>
-                        			<option value="ja" >日本語</option>
-                        			<option value="ko" >한국의</option>
-                        			<option value="fr" >Franch</option>
-                        			<option value="de" >Deutsch</option>
-                    			</select>
+									<option value="en" selected = "selected">English</option>
+									<option value="zh-CHT" >中文</option>
+									<option value="ja" >日本語</option>
+									<option value="ko" >한국의</option>
+									<option value="fr" >Franch</option>
+									<option value="de" >Deutsch</option>
+								</select>
+								<div id="arrow" ></div>
+								<select id="transLang" class ="langSelector">
+									<option value="en" >English</option>
+									<option value="zh-CHT" selected="selected">中文</option>
+									<option value="ja" >日本語</option>
+									<option value="ko" >한국의</option>
+									<option value="fr" >Franch</option>
+									<option value="de" >Deutsch</option>
+								</select>
 							</div>
-                    		<div class="listRow">
-                    			<input id="blockAll" type="button" value="Block my all unshared messages">
-                   			</div>
-                   			<div class="listRow"> 
-                    			<input id="hideUnshare" type="button" value="Only show the unblocked messages">
-                   			</div>
+							<div class="listRow">
+								<input id="blockAll" type="button" value="Block all my messages">
+							</div>
+							<div class="listRow"> 
+								<input id="hideUnshare" type="button" value="Show shared messages only">
+							</div>
 						</div>
 					</div>
 				</form>
 			</div>
 		</div>
-		<script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
-		<script src="http://code.jquery.com/jquery-1.11.1.js"></script>
-		<script src="http://localhost:5092/clientFunc.js"></script>
+		<script src="js/socket.io-1.2.0.js"></script>
+		<script src="js/jquery.js"></script>
+		<script src="js/clientFunc.js"></script>
 	</body>
 </html>
 

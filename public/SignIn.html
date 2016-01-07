@@ -1,0 +1,65 @@
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>NBrain Sign Up Page</title>
+		<link href="css/fontStyle.css" rel="stylesheet" type="text/css" media="screen">
+		<link href="css/loginStyle.css" rel="stylesheet" type="text/css" media="screen">
+	</head>
+	<body>
+		<div id="loginBody">
+			<div id="login">
+				<h1>Sign up</h1>
+				<div id="regMsg">User Information</div>
+				<form>
+					<p>
+						<input id="uID" type="text" placeholder="Username" name="username">
+					</p>
+					<p>
+						<input id="pwd" type="password" placeholder="Password" name="password">
+					</p>
+					<p>
+						<select id="groupID" class="langSelector">
+							<option value="G1" selected = "selected">room1</option>
+							<option value="G2" >room2</option>
+							<option value="G3" >room3</option>
+							<option value="G4" >room4</option>
+						</select>
+					</p>
+					<p>
+						<button id="regInput" type="button">REGISTER</button>
+					</p>
+				</form>
+			</div>
+		</div>
+	</body>
+	<script src="js/socket.io-1.2.0.js"></script>
+	<script src="js/jquery.js"></script>
+	<script>
+		var socket = io.connect('http://localhost:5092');
+
+		socket.on('connect', function() {
+			$('#regInput').bind('click', regBtHandler);
+			$(document).bind('keypress', regBtEnterHandler);
+		});
+
+		socket.on('regError', function(msg) { $('#regMsg').text(msg); });
+
+		socket.on('regSuccess', function(msg) {
+			$('#regMsg').html(msg);
+
+			$('#uID').val('').hide('slow');
+			$('#pwd').val('').hide('slow');
+			$('#groupID').hide('slow');
+			
+			$('#regInput').unbind('click', regBtHandler);
+			$(document).unbind('keypress', regBtEnterHandler);
+		});
+
+		function regBtHandler() {
+			socket.emit('reg', {usr: $('#uID').val(), pwd: $('#pwd').val(), group: $('#groupID').val()});
+		}
+		function regBtEnterHandler(event) {
+			if (event.which == 13) $('#regInput').click();
+		}
+	</script>
+</html>

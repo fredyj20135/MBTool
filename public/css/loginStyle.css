@@ -1,0 +1,95 @@
+#loginBody { 
+  height:100%;
+  margin: 0;
+  padding: 0;
+  background: #e6e6e6;/*#c9e1ce;*/
+  font-family: 'Open Sans', 微軟正黑體, sans-serif;
+  font-size: 1.2em;
+  color: #37342d;
+  display: -webkit-flex;
+  display:         flex;
+  -webkit-align-items: center;
+          align-items: center;
+  -webkit-justify-content: center;
+          justify-content: center;
+  background: rgb(249,249,249); /* Old browsers */
+  background: -moz-radial-gradient(center, ellipse cover, rgba(249,249,249,1) 0%, rgba(204,204,204,1) 100%); /* FF3.6-15 */
+  background: -webkit-radial-gradient(center, ellipse cover, rgba(249,249,249,1) 0%,rgba(204,204,204,1) 100%); /* Chrome10-25,Safari5.1-6 */
+  background: radial-gradient(ellipse at center, rgba(249,249,249,1) 0%,rgba(204,204,204,1) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f9f9f9', endColorstr='#cccccc',GradientType=1 ); /* IE6-9 fallback on horizontal gradient */
+}
+
+#login {
+  padding: 20px 15px 30px 15px;
+  border: 0px solid green;
+  background: #FFF;
+  border-top: 12px solid #2c9076;
+}
+
+#loginBody h1 {
+  text-align: center;
+  padding: 30px 0px 35px 0px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #6e6e6e; 
+}
+
+#loginMsg {
+
+}
+
+#loginBody p {
+  margin: 5px auto;
+  height: 70px;
+  text-align: center;
+}
+
+#loginBody label {
+  line-height: 50px;
+}
+
+#loginBody input {
+  margin: 5px 20px;
+  width:370px;
+  height:60px;
+  font-size : 1.2em;
+  font-weight: 300;
+  letter-spacing: 1px;
+  box-shadow: inset;
+  border : 1px solid #6e6e6e;
+  border-radius : 5px;
+  padding: 15px; 
+}
+
+#loginBody input:focus {
+  border: 1px solid #2c9076;
+  outline: none;
+}
+
+::-webkit-input-placeholder { color:#737373; font-weight: lighter; letter-spacing:1px;}
+::-moz-placeholder { color:#737373; font-weight: lighter;letter-spacing:1px;} /* firefox 19+ */
+:-ms-input-placeholder { color:#737373; font-weight: lighter;letter-spacing:1px;} /* ie */
+input:-moz-placeholder { color:#737373;  font-weight: lighter; letter-spacing:1px;}
+
+#loginBody button {
+  margin: 5px 20px;
+  width:370px;
+  height:60px;
+  color: #FFF;
+  font-family: 'Open Sans';
+  font-size : 1em;
+  box-shadow: inset;
+  border : 1px solid #2c9076;
+  border-radius : 5px;
+  padding: 15px;
+  background: #2c9076;
+}
+
+#loginBody button:hover {
+  background: #56a691;
+  cursor: pointer;
+}
+
+#loginBody button:focus {
+  outline: none;  
+}
+

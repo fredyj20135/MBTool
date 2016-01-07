@@ -1,7 +1,9 @@
 * {
   margin: 0; 
 	padding: 0; 
-	box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+     -moz-box-sizing: border-box;
+          box-sizing: border-box;
 }
 
 html {
@@ -14,12 +16,13 @@ body {
   padding: 0;
   background: #e6e6e6;/*#c9e1ce;*/
   font-family: 'Open Sans', 微軟正黑體, sans-serif;
-  font-size: 1.2em;
+  font-size: 1.1em;
   color: #37342d;
 }
 
 #BSTBody {
   height:100%;
+  visibility: hidden;
 }
 
 #container {
@@ -34,19 +37,21 @@ body {
 }
 
 #partnerMsgContainer {
+  width: 50%;
   border-right: 2px dashed #2c9076;
   overflow: auto;
   background-color: transparent;
-  -webkit-flex: 1;
-          flex: 1;
+  /*-webkit-flex: 1;*/
+          /*flex: 1;*/
 }
 
 #userMsgContainer {
+  width: 50%;
   border-left: 2px dashed #2c9076;
   overflow: auto;
   background-color: transparent;
-  -webkit-flex: 1;
-          flex: 1;
+  /*-webkit-flex: 1;*/
+          /*flex: 1;*/
 }
 
 /* insert by Allie */
@@ -61,17 +66,23 @@ body {
   left: -50px;
 }
 
-/* insert by Allie */
 .partnerA {
-  background: #4eccc3;
+  background: #ff6b6b;
 }
-
 .partnerB {
-  background: #ff6b64;
+  background: #ffa500;
 }
-
 .partnerC {
-  background: #ffb04d;
+  background: #ffff00;
+}
+.partnerD {
+  background: #bfe15b; 
+}
+.partnerE {
+  background: #4ecdc4;
+}
+.partnerF {
+  background: #8a2be2;
 }
 
 .partnerMessage {
@@ -110,8 +121,12 @@ body {
   border-bottom-right-radius: 5px;
 }
 
-.highlight {
-  background-color: rgba(246, 112, 83, 0.25);
+.highlight.note {
+  background-color: rgba(246, 112, 83, 0.25); /* F3DF2C */
+}
+
+.highlight.warn {
+  background-color: #F3DF2C
 }
 
 .block {
@@ -119,7 +134,7 @@ body {
 }
 
 .share {
-  border: 4px solid #2c9076;
+  border: 3px solid #2c9076;
 }
 
 .shareBt {
@@ -192,6 +207,12 @@ body {
   background-image:url(./pic/like_click.png);
 }
 
+.likeNum {
+  color: #2c9076;
+  float: right;
+  font-size: 0.8em;
+}
+
 .revertBt {
   float: right;
   width: 21px;
@@ -235,6 +256,7 @@ body {
   border: 0px solid red;
   background: white;
   box-shadow: 0 -3px 2px transparent, 0 -3px 3px rgba(0, 0, 0, 0.09);
+  visibility: hidden;
 }
 
 #controlPanel form { 

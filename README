@@ -7,3 +7,4 @@ Using Microtranslator 'Bing' as part of the function. Please check your own id a
 node.js
 express
 mstranslator
+pg
