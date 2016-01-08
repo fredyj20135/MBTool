@@ -241,10 +241,14 @@ function windowCtrlBtHandler() { // animation still improvable
 		windowAdj = true;
 
 		$('#userMsgContainer .userMessage').each(function() { $(this).hide('slow'); });
-		$(function () { 
-			$("#userMsgContainer").animate({ width: '0%' }, { duration: 600, queue: false });
-			$("#partnerMsgContainer").animate({ width: '100%' }, { duration: 600, queue: false });
+		$(function () {
+			$('#windowCtrlBt').prop('disabled', true);
+			$("#userMsgContainer").animate({ width: '0%' }, { duration: 600, queue: true });
+			$("#partnerMsgContainer").animate({ width: '100%' }, { duration: 600, queue: true, complete: function() {
+      			$('#windowCtrlBt').prop('disabled', false);
+    		}});
 		});
+
 		$('#partnerMsgContainer .userMessage').each(function() { $(this).show('fast'); });
 	} else {
 		$('#windowCtrlBt').text('To one column');
@@ -252,12 +256,14 @@ function windowCtrlBtHandler() { // animation still improvable
 
 		$('#partnerMsgContainer .userMessage').each(function() { $(this).hide('slow'); });
 		$(function () { 
-			$("#userMsgContainer").animate({ width: '50%' }, { duration: 600, queue: false });
-			$("#partnerMsgContainer").animate({ width: '50%' }, { duration: 600, queue: false });
+			$('#windowCtrlBt').prop('disabled', true);
+			$("#userMsgContainer").animate({ width: '50%' }, { duration: 600, queue: true });
+			$("#partnerMsgContainer").animate({ width: '50%' }, { duration: 600, queue: false, complete: function() {
+      			$('#windowCtrlBt').prop('disabled', false);
+    		}});
 		});
 		$('#userMsgContainer .userMessage').each(function() { $(this).show('fast'); });
 	}
-
 	$('#userMsgContainer').scrollTop($('#userMsgContainer').prop('scrollHeight'));
 	$('#partnerMsgContainer').scrollTop($('#partnerMsgContainer').prop('scrollHeight'));
 }
@@ -308,7 +314,9 @@ $('#hideUnshare').click(function() {
 /* Setting Button */
 $('#settingBt').click(function() { clickControl($(this)); });
 
-$('#windowCtrlBt').click(function() { clickControl($(this)); });
+$('#windowCtrlBt').click(function() {
+	clickControl($(this));
+});
 
 /* Like "partner's" message button */
 $('#container').on('click', 'input.likeBt', function() { 
@@ -397,5 +405,5 @@ $( document ).ready(function() {
 	$('#settingBt').bind('click', settingBtHandler);
  	$('#windowCtrlBt').bind('click', windowCtrlBtHandler);
 
-  	// $(window).bind('beforeunload', function(){ return 'All messages will be droped if you leave or relaod this page. \n\nAre you sure?'; });
+  	$(window).bind('beforeunload', function(){ return 'All messages will be droped if you leave or relaod this page. \n\nAre you sure?'; });
 });
