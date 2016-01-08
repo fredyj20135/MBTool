@@ -225,9 +225,12 @@ io.on('connection', function(socket) {
 	});
 
 	socket.on('reg', function(packet) {
-		if 		(packet.usr == '') socket.emit('regError', 'invalid username!');
-		else if (packet.pwd == '') socket.emit('regError', 'invalid password!');
+		if 		(packet.usr == '' || packet.usr == null) socket.emit('regError', 'invalid username!');
+		else if (packet.pwd == '' || packet.pwd == null) socket.emit('regError', 'invalid password!');
+		else if (packet.usr.indexOf(0x00) > 0 || packet.pwd.indexOf(0x00) > 0) socket.emit('regError', 'invalid input');
 		else {
+			packet.usr.replace(/[\\$'"]/g, "\\$&");
+			console.log('user sign up: ' + packet.usr);
 			db.query("SELECT uID FROM userInfo", function(err, result) {
 				var reged = false;
 				if(err) return console.error('error running query', err); 

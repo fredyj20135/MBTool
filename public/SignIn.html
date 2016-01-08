@@ -35,13 +35,14 @@
 	<script src="js/socket.io-1.2.0.js"></script>
 	<script src="js/jquery.js"></script>
 	<script>
-		var socket = io.connect('http://localhost:5092');
+	var socket = io.connect('http://localhost:5092');
 
-		socket.on('connect', function() {
-			$('#regInput').bind('click', regBtHandler);
-			$(document).bind('keypress', regBtEnterHandler);
-		});
-
+	$( document ).ready(function() {
+		socket.io.on('connect_error', function(err) { console.log('Error connecting to server'); });
+		
+		$('#regInput').bind('click', regBtHandler);
+		$(this).bind('keypress', regBtEnterHandler);
+		
 		socket.on('regError', function(msg) { $('#regMsg').text(msg); });
 
 		socket.on('regSuccess', function(msg) {
@@ -52,7 +53,7 @@
 			$('#groupID').hide('slow');
 			
 			$('#regInput').unbind('click', regBtHandler);
-			$(document).unbind('keypress', regBtEnterHandler);
+			$(this).unbind('keypress', regBtEnterHandler);
 		});
 
 		function regBtHandler() {
@@ -61,5 +62,8 @@
 		function regBtEnterHandler(event) {
 			if (event.which == 13) $('#regInput').click();
 		}
+	});
+
+		
 	</script>
 </html>

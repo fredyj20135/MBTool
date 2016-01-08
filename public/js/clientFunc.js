@@ -25,8 +25,10 @@ socket.on('userConfirm', function(packet) {
 		$('#BSTBody').fadeIn('fast');
 		$('#textInput').focus();
 	});
-
+	
 	username = packet.uID;
+
+	$(window).bind('beforeunload', function(){ return 'All messages will be droped if you leave or relaod this page. \n\nAre you sure?'; });
 });
 
 /* distribute System Msg */ 
@@ -86,6 +88,7 @@ socket.on('chat', function(packet) {
 		} else {
 			$('#userMsgContainer').append(hidden);
 			$('#partnerMsgContainer').append(content).scrollTop($('#partnerMsgContainer').prop('scrollHeight'));
+			shareBt.show();
 		}
 		
 	} else {
@@ -404,6 +407,4 @@ $( document ).ready(function() {
 	$('#sendButton').bind('click', sendBtHandler);
 	$('#settingBt').bind('click', settingBtHandler);
  	$('#windowCtrlBt').bind('click', windowCtrlBtHandler);
-
-  	$(window).bind('beforeunload', function(){ return 'All messages will be droped if you leave or relaod this page. \n\nAre you sure?'; });
 });
