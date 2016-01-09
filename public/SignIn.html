@@ -70,7 +70,7 @@
 			socket.emit('reg', {usr: $('#uID').val(), pwd: $('#pwd').val(), group: $('#groupID').val()});
 		}
 		function regBtEnterHandler(event) {
-			if (event.which == 13) $('#regInput').click().prop('background', '#56a691');
+			if (event.which == 13) $('#regInput').click();
 		}
 	});
 
