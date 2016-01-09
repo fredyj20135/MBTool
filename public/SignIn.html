@@ -38,12 +38,22 @@
 	var socket = io.connect('http://localhost:5092');
 
 	$( document ).ready(function() {
-		socket.io.on('connect_error', function(err) { console.log('Error connecting to server'); });
+		socket.io.on('connect_error', function(err) { 
+			$('#regInput').unbind('click', regBtHandler);
+			$(this).unbind('keypress', regBtEnterHandler);
+			console.log('Error connecting to server'); 
+		});
 		
-		$('#regInput').bind('click', regBtHandler);
-		$(this).bind('keypress', regBtEnterHandler);
+		socket.on('connect', function() {
+			$('#regInput').bind('click', regBtHandler);
+			$(document).bind('keypress', regBtEnterHandler);
+		});
 		
-		socket.on('regError', function(msg) { $('#regMsg').text(msg); });
+		socket.on('regError', function(msg) { 
+			$('#regMsg').text(msg);
+			$('#uID').val('');
+			$('#pwd').val('');
+		});
 
 		socket.on('regSuccess', function(msg) {
 			$('#regMsg').html(msg);
@@ -53,14 +63,14 @@
 			$('#groupID').hide('slow');
 			
 			$('#regInput').unbind('click', regBtHandler);
-			$(this).unbind('keypress', regBtEnterHandler);
+			$(document).unbind('keypress', regBtEnterHandler);
 		});
 
 		function regBtHandler() {
 			socket.emit('reg', {usr: $('#uID').val(), pwd: $('#pwd').val(), group: $('#groupID').val()});
 		}
 		function regBtEnterHandler(event) {
-			if (event.which == 13) $('#regInput').click();
+			if (event.which == 13) $('#regInput').click().prop('background', '#56a691');
 		}
 	});
 

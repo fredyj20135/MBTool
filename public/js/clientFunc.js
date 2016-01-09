@@ -7,6 +7,9 @@ var highlightWord = '';
 socket.on('connect', function() {
 	$('#loginInput').bind('click', loginBtHandler);
 	$(document).bind('keypress', loginBtEnterHandler);
+	$('#sendButton').bind('click', sendBtHandler);
+	$('#settingBt').bind('click', settingBtHandler);
+ 	$('#windowCtrlBt').bind('click', windowCtrlBtHandler);
 });
 
 socket.on('loginError', function(msg) {
@@ -25,7 +28,7 @@ socket.on('userConfirm', function(packet) {
 		$('#BSTBody').fadeIn('fast');
 		$('#textInput').focus();
 	});
-	
+
 	username = packet.uID;
 
 	$(window).bind('beforeunload', function(){ return 'All messages will be droped if you leave or relaod this page. \n\nAre you sure?'; });
@@ -79,6 +82,8 @@ socket.on('chat', function(packet) {
 		content = content.append(shareBt).append(timeStamp);
 		content = $('<div>').addClass('userMessage').append(postID).append(content);
 
+		if (packet.block == true) shareBt.show();
+
 		// var hidden = content.clone(); // for debug
 		var hidden = content.clone().hide(); 
 
@@ -88,9 +93,7 @@ socket.on('chat', function(packet) {
 		} else {
 			$('#userMsgContainer').append(hidden);
 			$('#partnerMsgContainer').append(content).scrollTop($('#partnerMsgContainer').prop('scrollHeight'));
-			shareBt.show();
 		}
-		
 	} else {
 		content = content.append(nameSpace).append(timeStamp).append(translateBt).append(revertBt);
 		content = $('<div>').addClass('partnerMessage').append(icon).append(postID).append(content);
@@ -118,7 +121,6 @@ socket.on('partnerMsgShare', function(packet) { /* Share on the specific message
 		$(partnerMsg[i]).addClass('share');
 		$(partnerMsg[i]).find('.msgCntnt').removeClass('block');	
 	}
-
 	bubbleCtrl()
 });
 
@@ -129,7 +131,6 @@ socket.on('partnerMsgUnshare', function(packet) {
 		$(partnerMsg[i]).removeClass('share');
 		if (packet.blockInfo == true) $(partnerMsg[i]).find('.msgCntnt').addClass('block');
 	}
-
 	bubbleCtrl()
 });
 
@@ -299,6 +300,7 @@ function clickControl(elmt) {
 /* Block message button*/
 $('#blockAll').click(function() { 
 	clickControl($(this));
+	$(this).val('Unblock all my messages');
 
 	if ($(this).hasClass('clicked')) {
 		socket.emit('blockMsg', true);
@@ -403,8 +405,4 @@ $('#container').on('click', 'input.revertBt', function () {
 $( document ).ready(function() {
 	$('#BSTBody').hide();
 	$('#settingPanel').hide();
-
-	$('#sendButton').bind('click', sendBtHandler);
-	$('#settingBt').bind('click', settingBtHandler);
- 	$('#windowCtrlBt').bind('click', windowCtrlBtHandler);
 });
