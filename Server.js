@@ -83,8 +83,7 @@ function dbLogInsert(user, room, action, pID, sysTime, content) {
 			[user, room, action, pID, sysTime, content],
 			function(err, result) {
 				if(err) return console.error('error running query', err);
-				
-				console.log(result);
+				// console.log(result);
 			}
 		);
 	}
