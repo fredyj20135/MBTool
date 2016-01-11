@@ -1,6 +1,7 @@
 var socket = io.connect('http://localhost:5092');
 var username;
-var windowAdj = false;
+var twoCol = true;
+var hideEmp = false;
 var highlightWord = '';
 			
 /* Socket.io function, start */
@@ -21,8 +22,7 @@ socket.on('userConfirm', function(packet) {
 	$("#loginBody").animate({opacity: 0, hight: 0}, 700, 'swing', function() {
 		$("#loginBody").hide();
 		$('#controlPanel').css('visibility', 'visible');
-		$('#BSTBody').css('visibility', 'visible');
-		$('#BSTBody').fadeIn('fast');
+		$('#BSTBody').css('visibility', 'visible').fadeIn('fast');
 		$('#textInput').focus();
 	});
 
@@ -31,7 +31,9 @@ socket.on('userConfirm', function(packet) {
 	$('#sendButton').bind('click', sendBtHandler);
 	$('#settingBt').bind('click', settingBtHandler);
  	$('#windowCtrlBt').bind('click', windowCtrlBtHandler);
-	$(window).bind('beforeunload', function(){ return 'All messages will be droped if you leave or relaod this page. \n\nAre you sure?'; });
+	$(window).bind('beforeunload', function() {
+		return 'All messages will be droped if you leave or relaod this page. \n\nAre you sure?'; 
+	});
 });
 
 /* distribute System Msg */ 
@@ -39,12 +41,12 @@ socket.on('serverSelfMsg', function(msg) { /* server msg related to user */
 	var serverMsg = $('<div>').text(msg).addClass('userMessage serverMessage');
 	var hidden = serverMsg.clone().hide();
 
-	if (!windowAdj) {
-		$('#userMsgContainer').append(serverMsg);
+	if (twoCol) {
 		$('#partnerMsgContainer').append(hidden);
+		$('#userMsgContainer').append(serverMsg).scrollTop($('#userMsgContainer').prop("scrollHeight"));
 	} else {
 		$('#userMsgContainer').append(hidden);
-		$('#partnerMsgContainer').append(serverMsg);
+		$('#partnerMsgContainer').append(serverMsg).scrollTop($('#partnerMsgContainer').prop("scrollHeight"));
 	}
 });
 
@@ -96,7 +98,7 @@ socket.on('chat', function(packet) {
 		// var hidden = content.clone(); // for debug
 		var hidden = content.clone().hide(); 
 
-		if (!windowAdj) {
+		if (twoCol) {
 			$('#partnerMsgContainer').append(hidden);
 			$('#userMsgContainer').append(content).scrollTop($('#userMsgContainer').prop('scrollHeight'));
 		} else {
@@ -108,6 +110,7 @@ socket.on('chat', function(packet) {
 		content = $('<div>').addClass('partnerMessage').append(icon).append(postID).append(content);
 
 		if (packet.block == true) content.find('.msgCntnt').addClass('block');
+		if (hideEmp == true) content.hide();
 
 		$('#partnerMsgContainer').append(content).scrollTop($('#partnerMsgContainer').prop('scrollHeight'));
 	}
@@ -234,8 +237,6 @@ function bubbleCtrl() {
 			else $(this).show('slow');
 		});
 	} else $('.partnerMessage').each(function(){ $(this).show('slow'); });
-
-	$('#partnerMsgContainer').scrollTop($('#partnerMsgContainer').prop("scrollHeight"));
 }
 
 function loginBtHandler() {
@@ -250,20 +251,18 @@ function loginBtEnterHandler(event) {
 
 function windowCtrlBtHandler() {
 	var stretch, shrink, uWidth, pWidth;
+	twoCol == true? twoCol = false : twoCol = true;
 
 	if ($('#windowCtrlBt').hasClass('clicked')) {
 		$('#windowCtrlBt').text('To two columns');
-		windowAdj = true;
 		pWidth = '100%';	uWidth = '0%';
 		shrink = $('#userMsgContainer .userMessage');
 		stretch = $('#partnerMsgContainer .userMessage');
 	} else {
 		$('#windowCtrlBt').text('To one column');
-		windowAdj = false;
 		pWidth = '50%';		uWidth = '50%';
 		stretch = $('#userMsgContainer .userMessage');
 		shrink = $('#partnerMsgContainer .userMessage');
-
 	}
 	shrink.each(function() { $(this).hide('slow'); });
 	windowAnimate(uWidth, pWidth);
@@ -337,15 +336,17 @@ $('#hideUnshare').click(function() {
 
 	if ($(this).hasClass('clicked')) $(this).val('Show all bubbles');
 	else $(this).val('Hide empty bubbles');
+	
+	hideEmp == true? hideEmp = false : hideEmp = true;
+
 	bubbleCtrl();
 });
 
 /* Setting Button */
 $('#settingBt').click(function() { clickControl($(this)); });
 
-$('#windowCtrlBt').click(function() {
-	clickControl($(this));
-});
+/* One column or two column */
+$('#windowCtrlBt').click(function() { clickControl($(this)); });
 
 /* Like "partner's" message button */
 $('#container').on('click', 'input.likeBt', function() { 

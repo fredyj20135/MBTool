@@ -57,9 +57,8 @@ function authenticate(name, pass, fn) { // add a condition check for "room" or "
 	db.query("SELECT * FROM userInfo WHERE uid = $1", [name], function(err, result) {
 		if(err) fn(new Error('Query Problem!'));
 
-		if (result.rows[0] == null) {
-			return fn(new Error('Unregistered user!'));
-		} else {
+		if (result.rows[0] == null) return fn(new Error('Unregistered user!'));
+		else {
 			hash(pass, result.rows[0].salt, function(err, cipher) {
 				if (err) return fn(err);
 
@@ -77,6 +76,7 @@ function colorCode(name) {
 }
 
 // now in DB: uID, room, action:I/M/B/S/L/T, pID, systime, content
+// I: Initial, M: Message, B: Block, S: Share, L: Like, T: Translate
 function dbLogInsert(user, room, action, pID, sysTime, content) {
 	if (DBON) {
 		db.query("INSERT INTO syslog VALUES ($1, $2, $3, $4, $5, $6)", 
@@ -94,19 +94,19 @@ io.on('connection', function(socket) {
 		authenticate(packet.usr, packet.pwd, function(err, user) {
 			if (user) {
 			// if (true) { //  any users are allowed!
-				if (DBON) {
-					socket.room = user.room;
-					socket.join(user.room);
-					var temp = {userID: packet.usr, userColor: colorCode(packet.usr), blocks: false, room: user.room};
-				} else {
+				socket.room = user.room;
+				socket.join(user.room);
+				var temp = {userID: packet.usr, userColor: colorCode(packet.usr), blocks: false, room: user.room};
+
+				if (!DBON) {
 					socket.room = 'room1'; 
 					socket.join('room1'); 
-					var temp = {userID: packet.usr, userColor: colorCode(packet.usr), blocks: false, room: 'room1'};
+					temp.room = 'room1';
 				}
 				
 				socket.username = temp.userID;
 				socket.emit('userConfirm', {uID: socket.username, msg: 'Success!'}, socket.room);
-				socket.emit('serverSelfMsg', '[SERVER] Hello ' + socket.username + ' !', socket.room);
+				socket.emit('serverSelfMsg', '[SERVER] Hello ' + socket.username + '!', socket.room);
 				socket.broadcast.to(socket.room).emit('serverOthersMsg', '[SERVER] ' + packet.usr + ' has login');
 
 				var i = 0;
@@ -121,7 +121,7 @@ io.on('connection', function(socket) {
 				loginUsers[temp.userID] = temp;
 				userNumber = userNumber + 1;
 
-				console.log('usernumber = ' + userNumber);
+				console.log('usern #: ' + userNumber);
 			} else {
 				socket.emit('loginError', err.toString());
 			}
@@ -135,7 +135,7 @@ io.on('connection', function(socket) {
 			delete loginUsers[socket.username];
 
 			userNumber = userNumber - 1;
-			console.log('usernumber = ' + userNumber);
+			console.log('user #: ' + userNumber);
 		}
 	});
 
@@ -189,7 +189,7 @@ io.on('connection', function(socket) {
 		var msg;
 		input == true? msg = ' ' : msg = ' un';
 		loginUsers[socket.username].block = input;
-		
+
 		socket.broadcast.to(socket.room).emit('partnerMsgBlock', {blockInfo: input, uID: socket.username});
 		socket.emit('serverSelfMsg', '[SERVER] You are in' + msg + 'block mode!', socket.room);
 		socket.broadcast.to(socket.room).emit('serverOthersMsg', '[SERVER] ' + socket.username + ' is in' + msg + 'block mode!');
