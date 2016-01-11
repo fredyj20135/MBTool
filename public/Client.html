@@ -39,11 +39,10 @@
 						<button id="settingBt" type="button"></button>
 						<button id="windowCtrlBt" type="button">To one colume</button>
 						<button id="sendButton" type="button">Send</button>
-						<span id="inputHint">500 characters rest</span>
 						</br>
 					</div>
 					<div class="toolBar">
-						<textarea id="textInput" rows="5" cols="30" placeholder="Your message here"></textarea>
+						<textarea id="textInput" rows="5" cols="30" placeholder="Your message here" maxlength="500"></textarea>
 						<div id="settingPanel">
 							<div class="listRow">
 								<select id="oriLang" class="langSelector">
@@ -66,9 +65,10 @@
 							</div>
 							<div class="listRow">
 								<input id="blockAll" type="button" value="Block all my messages">
+								<input id="emitAll" type="button" value="Emit all">
 							</div>
 							<div class="listRow"> 
-								<input id="hideUnshare" type="button" value="Show shared messages only">
+								<input id="hideUnshare" type="button" value="Hide empty bubble">
 							</div>
 						</div>
 					</div>

@@ -186,8 +186,13 @@ io.on('connection', function(socket) {
 	});
 
 	socket.on('blockMsg', function(input) {
+		var msg;
+		input == true? msg = ' ' : msg = ' un';
 		loginUsers[socket.username].block = input;
+		
 		socket.broadcast.to(socket.room).emit('partnerMsgBlock', {blockInfo: input, uID: socket.username});
+		socket.emit('serverSelfMsg', '[SERVER] You are in' + msg + 'block mode!', socket.room);
+		socket.broadcast.to(socket.room).emit('serverOthersMsg', '[SERVER] ' + socket.username + ' is in' + msg + 'block mode!');
 
 		dbLogInsert(socket.username, socket.room, 'B', -1, getDateTime(), input);
 	});
@@ -227,7 +232,8 @@ io.on('connection', function(socket) {
 		else if (packet.pwd == '' || packet.pwd == null || packet.pwd.length > 20) socket.emit('regError', 'invalid password!');
 		else if (packet.usr.indexOf('/0x00') > 0 || packet.pwd.indexOf('/0x00') > 0) socket.emit('regError', 'invalid input');
 		else {
-			packet.usr.replace(/[\\$'"]/g, "\\$&");
+			console.log('user string: ' + packet.usr);
+			packet.usr.replace(/[\\$'"]/g, "\\$&").replace(/\u0000/g, '\\0');
 			console.log('user sign up: ' + packet.usr);
 			db.query("SELECT * FROM userInfo WHERE uid = ($1)" ,[packet.usr],  function(err, result) {
 				if(err) return console.error('error running query', err); 

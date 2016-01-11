@@ -7,9 +7,6 @@ var highlightWord = '';
 socket.on('connect', function() {
 	$('#loginInput').bind('click', loginBtHandler);
 	$(document).bind('keypress', loginBtEnterHandler);
-	$('#sendButton').bind('click', sendBtHandler);
-	$('#settingBt').bind('click', settingBtHandler);
- 	$('#windowCtrlBt').bind('click', windowCtrlBtHandler);
 });
 
 socket.on('loginError', function(msg) {
@@ -31,16 +28,28 @@ socket.on('userConfirm', function(packet) {
 
 	username = packet.uID;
 
+	$('#sendButton').bind('click', sendBtHandler);
+	$('#settingBt').bind('click', settingBtHandler);
+ 	$('#windowCtrlBt').bind('click', windowCtrlBtHandler);
 	$(window).bind('beforeunload', function(){ return 'All messages will be droped if you leave or relaod this page. \n\nAre you sure?'; });
 });
 
 /* distribute System Msg */ 
 socket.on('serverSelfMsg', function(msg) { /* server msg related to user */
-	$('#userMsgContainer').append($('<div>').text(msg).addClass('userMessage'));
+	var serverMsg = $('<div>').text(msg).addClass('userMessage serverMessage');
+	var hidden = serverMsg.clone().hide();
+
+	if (!windowAdj) {
+		$('#userMsgContainer').append(serverMsg);
+		$('#partnerMsgContainer').append(hidden);
+	} else {
+		$('#userMsgContainer').append(hidden);
+		$('#partnerMsgContainer').append(serverMsg);
+	}
 });
 
 socket.on('serverOthersMsg', function(msg) { /* server msg related to others */
-	$('#partnerMsgContainer').append($('<div>').text(msg).addClass('partnerMessage'));
+	$('#partnerMsgContainer').append($('<div>').text(msg).addClass('partnerMessage serverMessage'));
 	$('#partnerMsgContainer').scrollTop($('#partnerMsgContainer').prop("scrollHeight"));
 });
 
@@ -239,37 +248,37 @@ function loginBtEnterHandler(event) {
 	if (event.which == 13) $('#loginInput').click();
 }
 
-function windowCtrlBtHandler() { // animation still improvable
+function windowCtrlBtHandler() {
+	var stretch, shrink, uWidth, pWidth;
+
 	if ($('#windowCtrlBt').hasClass('clicked')) {
 		$('#windowCtrlBt').text('To two columns');
 		windowAdj = true;
-
-		$('#userMsgContainer .userMessage').each(function() { $(this).hide('slow'); });
-		$(function () {
-			$('#windowCtrlBt').prop('disabled', true);
-			$("#userMsgContainer").animate({ width: '0%' }, { duration: 600, queue: true });
-			$("#partnerMsgContainer").animate({ width: '100%' }, { duration: 600, queue: true, complete: function() {
-      			$('#windowCtrlBt').prop('disabled', false);
-    		}});
-		});
-
-		$('#partnerMsgContainer .userMessage').each(function() { $(this).show('fast'); });
+		pWidth = '100%';	uWidth = '0%';
+		shrink = $('#userMsgContainer .userMessage');
+		stretch = $('#partnerMsgContainer .userMessage');
 	} else {
 		$('#windowCtrlBt').text('To one column');
 		windowAdj = false;
+		pWidth = '50%';		uWidth = '50%';
+		stretch = $('#userMsgContainer .userMessage');
+		shrink = $('#partnerMsgContainer .userMessage');
 
-		$('#partnerMsgContainer .userMessage').each(function() { $(this).hide('slow'); });
-		$(function () { 
-			$('#windowCtrlBt').prop('disabled', true);
-			$("#userMsgContainer").animate({ width: '50%' }, { duration: 600, queue: true });
-			$("#partnerMsgContainer").animate({ width: '50%' }, { duration: 600, queue: false, complete: function() {
-      			$('#windowCtrlBt').prop('disabled', false);
-    		}});
-		});
-		$('#userMsgContainer .userMessage').each(function() { $(this).show('fast'); });
 	}
+	shrink.each(function() { $(this).hide('slow'); });
+	windowAnimate(uWidth, pWidth);
+	stretch.each(function() { $(this).show('fast'); });
+
 	$('#userMsgContainer').scrollTop($('#userMsgContainer').prop('scrollHeight'));
 	$('#partnerMsgContainer').scrollTop($('#partnerMsgContainer').prop('scrollHeight'));
+}
+
+function windowAnimate(uWidth, pWidth) {
+	$('#windowCtrlBt').prop('disabled', true);
+	$("#userMsgContainer").animate({ width: uWidth }, { duration: 600, queue: true });
+	$("#partnerMsgContainer").animate({ width: pWidth }, { duration: 600, queue: false, complete: function() {
+		$('#windowCtrlBt').prop('disabled', false);
+	}});
 }
 
 /* Buttons in controlPanel. Concept by Allie. Start */
@@ -300,19 +309,34 @@ function clickControl(elmt) {
 /* Block message button*/
 $('#blockAll').click(function() { 
 	clickControl($(this));
-	$(this).val('Unblock all my messages');
 
 	if ($(this).hasClass('clicked')) {
+		$('#emitAll').prop('disabled', false);
 		socket.emit('blockMsg', true);
 		$('.shareBt').each(function() { $(this).show(); });
+		$(this).val('Unblock all my messages');
 	} else {
+		$('#emitAll').prop('disabled', true);
 		socket.emit('blockMsg', false);
 		$('.shareBt').each(function() { $(this).hide(); });
+		$(this).val('Block all my messages');
 	}
+});
+
+$('#emitAll').click(function() {
+	// clickControl($(this));
+	$('input.shareBt').each(function() {
+		if (!$(this).hasClass('clicked')) {
+			$(this).click();
+		}
+	});
 });
 
 $('#hideUnshare').click(function() { 
 	clickControl($(this));
+
+	if ($(this).hasClass('clicked')) $(this).val('Show all bubbles');
+	else $(this).val('Hide empty bubbles');
 	bubbleCtrl();
 });
 
@@ -405,4 +429,5 @@ $('#container').on('click', 'input.revertBt', function () {
 $( document ).ready(function() {
 	$('#BSTBody').hide();
 	$('#settingPanel').hide();
+	$('#emitAll').prop('disabled', true);
 });

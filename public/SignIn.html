@@ -12,7 +12,7 @@
 				<div id="regMsg">User Information</div>
 				<form>
 					<p>
-						<input id="uID" type="text" placeholder="Username" name="username">
+						<input id="uID" type="text" placeholder="Username" name="username" maxlength="20">
 					</p>
 					<p>
 						<input id="pwd" type="password" placeholder="Password" name="password">
@@ -47,6 +47,8 @@
 		socket.on('connect', function() {
 			$('#regInput').bind('click', regBtHandler);
 			$(document).bind('keypress', regBtEnterHandler);
+			$('#uID').val('');
+			$('#pwd').val('');
 		});
 		
 		socket.on('regError', function(msg) { 
