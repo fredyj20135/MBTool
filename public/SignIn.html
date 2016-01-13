@@ -39,14 +39,14 @@
 
 	$( document ).ready(function() {
 		socket.io.on('connect_error', function(err) { 
-			$('#regInput').unbind('click', regBtHandler);
-			$(this).unbind('keypress', regBtEnterHandler);
+			$('#regInput').off('click', regBtHandler);
+			$(this).off('keypress', regBtEnterHandler);
 			console.log('Error connecting to server'); 
 		});
 		
 		socket.on('connect', function() {
-			$('#regInput').bind('click', regBtHandler);
-			$(document).bind('keypress', regBtEnterHandler);
+			$('#regInput').on('click', regBtHandler);
+			$(document).on('keypress', regBtEnterHandler);
 			$('#uID').val('');
 			$('#pwd').val('');
 		});
@@ -64,8 +64,8 @@
 			$('#pwd').val('').hide('slow');
 			$('#groupID').hide('slow');
 			
-			$('#regInput').unbind('click', regBtHandler);
-			$(document).unbind('keypress', regBtEnterHandler);
+			$('#regInput').off('click', regBtHandler);
+			$(document).off('keypress', regBtEnterHandler);
 		});
 
 		function regBtHandler() {

@@ -121,7 +121,7 @@ io.on('connection', function(socket) {
 				loginUsers[temp.userID] = temp;
 				userNumber = userNumber + 1;
 
-				console.log('usern #: ' + userNumber);
+				console.log('user #: ' + userNumber);
 			} else {
 				socket.emit('loginError', err.toString());
 			}
@@ -141,7 +141,7 @@ io.on('connection', function(socket) {
 
 	// when the socket with tag 'chat message' is received, send socket with tag 'chat' to all the user
 	socket.on('chat message', function(input) {
-		if (input.length > 500) input.substring(0, 500);
+		if (input.length > 500) input = input.substring(0, 500);
 
 		var content = {
 			uID: socket.username,

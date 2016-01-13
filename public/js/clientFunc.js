@@ -6,20 +6,19 @@ var highlightWord = '';
 			
 /* Socket.io function, start */
 socket.on('connect', function() {
-	$('#loginInput').bind('click', loginBtHandler);
-	$(document).bind('keypress', loginBtEnterHandler);
+	$('#loginInput').on('click', loginBtHandler);
+	$(document).on('keypress', loginBtEnterHandler);
 });
 
-socket.on('loginError', function(msg) {
-	$('#loginMsg').text(msg);
-});
+socket.on('loginError', function(msg) { $('#loginMsg').text(msg); });
 
 socket.on('userConfirm', function(packet) {
 	$('#loginMsg').text(packet.msg);
-	$('#loginInput').unbind('click', loginBtHandler);
-	$(document).unbind('keypress', loginBtEnterHandler);
-	
-	$("#loginBody").animate({opacity: 0, hight: 0}, 700, 'swing', function() {
+
+	$('#loginInput').off('click', loginBtHandler);
+	$(document).off('keypress', loginBtEnterHandler);
+
+	$("#loginBody").animate({opacity: 0, hight: 0}, 600, 'swing', function() {
 		$("#loginBody").hide();
 		$('#controlPanel').css('visibility', 'visible');
 		$('#BSTBody').css('visibility', 'visible').fadeIn('fast');
@@ -28,10 +27,12 @@ socket.on('userConfirm', function(packet) {
 
 	username = packet.uID;
 
-	$('#sendButton').bind('click', sendBtHandler);
-	$('#settingBt').bind('click', settingBtHandler);
- 	$('#windowCtrlBt').bind('click', windowCtrlBtHandler);
-	$(window).bind('beforeunload', function() {
+	$('#sendButton').on('click', sendBtHandler);
+	$('#settingBt').on('click', settingBtHandler);
+	$('#windowCtrlBt').on('click', windowCtrlBtHandler);
+	$('#textInput').on('keyup keydown', inputCountHandler);
+
+	$(window).on('beforeunload', function() {
 		return 'All messages will be droped if you leave or relaod this page. \n\nAre you sure?'; 
 	});
 });
@@ -95,8 +96,7 @@ socket.on('chat', function(packet) {
 
 		if (packet.block == true) shareBt.show();
 
-		// var hidden = content.clone(); // for debug
-		var hidden = content.clone().hide(); 
+		var hidden = content.clone().hide(); // for debug
 
 		if (twoCol) {
 			$('#partnerMsgContainer').append(hidden);
@@ -280,10 +280,23 @@ function windowAnimate(uWidth, pWidth) {
 	}});
 }
 
+function inputCountHandler() {
+	var limit = 500;
+	if ($('#textInput').val().length < limit) {
+		$('#textLimit').text('');
+		$('#textInput').off('keypress').on('keypress');
+	} else {
+		$('#textInput').on('keypress', function() { return false });
+		$('#textLimit').text('You have exceeded the maximum input');
+		$('#textInput').val($('#textInput').val().substring(0, limit));
+	}
+}
+
 /* Buttons in controlPanel. Concept by Allie. Start */
 function sendBtHandler() {
 	socket.emit('chat message', $('#textInput').val());
-	$('#textInput').val('');
+	$('#textInput').val('').focus();
+	$('#textLimit').text('');
 }
 
 function settingBtHandler() {
@@ -350,7 +363,7 @@ $('#windowCtrlBt').click(function() { clickControl($(this)); });
 
 /* Like "partner's" message button */
 $('#container').on('click', 'input.likeBt', function() { 
-	var postID = $(this).parent().prev().text();
+	var postID = $(this).parent().prev().text(); // relatively unsave
 	var userMsg = $('.postID:contains("' + postID + '")').parent();
 
 	for (var i = 0; i < userMsg.length; i++) {
@@ -363,8 +376,7 @@ $('#container').on('click', 'input.likeBt', function() {
 
 /* Share "user's" message button*/
 $('#container').on('click', 'input.shareBt', function() { 
-	var temp = $(this).closest('.userMessage');
-	var postID = temp.find('.postID').text();
+	var postID = $(this).parent().prev().text(); // relatively unsave
 	var userMsg = $('.postID:contains("' + postID + '")').parent();
 
 	for (var i = 0; i < userMsg.length; i++) {
@@ -418,7 +430,7 @@ $('#container').on('click', 'input.translateBt', function() {
 });
 
 /* Send revert request */
-$('#container').on('click', 'input.revertBt', function () {
+$('#container').on('click', 'input.revertBt', function() {
 	var partnerMsg = $(this).closest('.partnerMessage');
 	var postID = partnerMsg.find('.postID').text();
 
