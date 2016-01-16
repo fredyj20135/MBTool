@@ -54,6 +54,7 @@ function getDateTime() {
 }
 
 function authenticate(name, pass, fn) { // add a condition check for "room" or "team"
+	if (loginUsers[name] != null) return fn(new Error('Multiple loggin'));
 	db.query("SELECT * FROM userInfo WHERE uid = $1", [name], function(err, result) {
 		if(err) fn(new Error('Query Problem!'));
 
@@ -227,6 +228,10 @@ io.on('connection', function(socket) {
 		dbLogInsert(socket.username, socket.room, 'R', packet.pID, getDateTime(), '-');
 	});
 
+
+	// bad design...
+	socket.on('pong', function(data) {});
+
 	socket.on('reg', function(packet) {
 		if 		(packet.usr == '' || packet.usr == null || packet.usr.length > 20) socket.emit('regError', 'invalid username!');
 		else if (packet.pwd == '' || packet.pwd == null || packet.pwd.length > 20) socket.emit('regError', 'invalid password!');
@@ -261,3 +266,10 @@ io.on('connection', function(socket) {
 		}
 	});
 });
+
+//
+function sendHeartbeat(){
+    setTimeout(sendHeartbeat, 300000);
+    io.sockets.emit('ping', { beat : 1 });
+}
+setTimeout(sendHeartbeat, 300000);

@@ -4,13 +4,33 @@ var twoCol = true;
 var hideEmp = false;
 var highlightWord = '';
 			
+socket.on('ping', function(data) { socket.emit('pong', {beat: 1 }); });
+
 /* Socket.io function, start */
 socket.on('connect', function() {
 	$('#loginInput').on('click', loginBtHandler);
 	$(document).on('keypress', loginBtEnterHandler);
 });
 
-socket.on('loginError', function(msg) { $('#loginMsg').text(msg); });
+socket.on('connect_error', function(err) { 
+	$('#sendButton').off('click', sendBtHandler);
+	$('#container').off('click', 'input.likeBt');
+	$('#container').off('click', 'input.shareBt');
+	$('#container').off('click', 'input.revertBt');
+	$('#container').off('click', 'input.translateBt');
+
+	var serverMsg = $('<div>').text('[SERVER] You are disconnected! Please check all the content is preserved!')
+		.addClass('userMessage serverMessage');
+
+	addUserMsgByColMode(serverMsg);
+
+	socket.io.close();
+});
+
+socket.on('loginError', function(msg) { 
+	$('#loginMsg').text(msg); 
+	$('#username').focus();
+});
 
 socket.on('userConfirm', function(packet) {
 	$('#loginMsg').text(packet.msg);
@@ -31,6 +51,9 @@ socket.on('userConfirm', function(packet) {
 	$('#settingBt').on('click', settingBtHandler);
 	$('#windowCtrlBt').on('click', windowCtrlBtHandler);
 	$('#textInput').on('keyup keydown', inputCountHandler);
+	$('#textInput').on('keypress', sendBtEnterHandler);
+
+	$("#enterCheck").click();
 
 	$(window).on('beforeunload', function() {
 		return 'All messages will be droped if you leave or relaod this page. \n\nAre you sure?'; 
@@ -40,20 +63,12 @@ socket.on('userConfirm', function(packet) {
 /* distribute System Msg */ 
 socket.on('serverSelfMsg', function(msg) { /* server msg related to user */
 	var serverMsg = $('<div>').text(msg).addClass('userMessage serverMessage');
-	var hidden = serverMsg.clone().hide();
-
-	if (twoCol) {
-		$('#partnerMsgContainer').append(hidden);
-		$('#userMsgContainer').append(serverMsg).scrollTop($('#userMsgContainer').prop("scrollHeight"));
-	} else {
-		$('#userMsgContainer').append(hidden);
-		$('#partnerMsgContainer').append(serverMsg).scrollTop($('#partnerMsgContainer').prop("scrollHeight"));
-	}
+	addUserMsgByColMode(serverMsg);
 });
 
 socket.on('serverOthersMsg', function(msg) { /* server msg related to others */
-	$('#partnerMsgContainer').append($('<div>').text(msg).addClass('partnerMessage serverMessage'));
-	$('#partnerMsgContainer').scrollTop($('#partnerMsgContainer').prop("scrollHeight"));
+	$('#partnerMsgContainer').append($('<div>').text(msg).addClass('partnerMessage serverMessage'))
+		.scrollTop($('#partnerMsgContainer').prop("scrollHeight"));
 });
 
 socket.on('partnerMsgLike', function(pID) { /* set like */
@@ -96,15 +111,7 @@ socket.on('chat', function(packet) {
 
 		if (packet.block == true) shareBt.show();
 
-		var hidden = content.clone().hide(); // for debug
-
-		if (twoCol) {
-			$('#partnerMsgContainer').append(hidden);
-			$('#userMsgContainer').append(content).scrollTop($('#userMsgContainer').prop('scrollHeight'));
-		} else {
-			$('#userMsgContainer').append(hidden);
-			$('#partnerMsgContainer').append(content).scrollTop($('#partnerMsgContainer').prop('scrollHeight'));
-		}
+		addUserMsgByColMode(content);
 	} else {
 		content = content.append(nameSpace).append(timeStamp).append(translateBt).append(revertBt);
 		content = $('<div>').addClass('partnerMessage').append(icon).append(postID).append(content);
@@ -156,7 +163,11 @@ socket.on('is BINDED', function(packet) { /* Get translated data and add to mess
 		var transMsgTxt = $(transMsg[i]).find('.msgTxt');
 
 		if (transMsg.hasClass('partnerMessage')) {
-			transMsg.find('.revertBt').show();
+			if (packet.uID == username) {
+				transMsg.find('.revertBt').show();
+				// transMsg.find('.translateBt').prop('disabled', false).val('Translate').show();
+				transMsg.find('.translateBt').prop('disabled', false).show();
+			}
 			result.addClass('note');
 		}
 		else if (transMsg.hasClass('userMessage')) result.addClass('warn');
@@ -185,7 +196,7 @@ function powerReplace(oriHTML, fromWord, transResult) { // the most important is
 	}
 
 	var index = temp.toString().indexOf(fromWord);
-	if (index < 0) return oriHTML;
+	if (index < 0) return oriHTML.toString().replace(/%br%/g, '<br>');
 
 	i = 0;
 	while (i <= oriHTML.length - fromWord.length + transResult.length) {
@@ -239,6 +250,17 @@ function bubbleCtrl() {
 	} else $('.partnerMessage').each(function(){ $(this).show('slow'); });
 }
 
+function addUserMsgByColMode(content) {
+	var hidden = content.clone().hide();
+	if (twoCol) {
+		$('#partnerMsgContainer').append(hidden);
+		$('#userMsgContainer').append(content).scrollTop($('#userMsgContainer').prop('scrollHeight'));
+	} else {
+		$('#userMsgContainer').append(hidden);
+		$('#partnerMsgContainer').append(content).scrollTop($('#partnerMsgContainer').prop('scrollHeight'));
+	}
+}
+
 function loginBtHandler() {
 	socket.emit('login', {usr: $('#username').val(), pwd: $('#pwd').val()});
 	$('#username').val('');
@@ -250,34 +272,36 @@ function loginBtEnterHandler(event) {
 }
 
 function windowCtrlBtHandler() {
+	var delay = 0;
 	var stretch, shrink, uWidth, pWidth;
 	twoCol == true? twoCol = false : twoCol = true;
+
+	$('#windowCtrlBt').prop('disabled', true);
 
 	if ($('#windowCtrlBt').hasClass('clicked')) {
 		$('#windowCtrlBt').text('To two columns');
 		pWidth = '100%';	uWidth = '0%';
-		shrink = $('#userMsgContainer .userMessage');
-		stretch = $('#partnerMsgContainer .userMessage');
+		shrink = '#userMsgContainer';
+		stretch = '#partnerMsgContainer';
 	} else {
 		$('#windowCtrlBt').text('To one column');
 		pWidth = '50%';		uWidth = '50%';
-		stretch = $('#userMsgContainer .userMessage');
-		shrink = $('#partnerMsgContainer .userMessage');
+		stretch = '#userMsgContainer';
+		shrink = '#partnerMsgContainer';
 	}
-	shrink.each(function() { $(this).hide('slow'); });
-	windowAnimate(uWidth, pWidth);
-	stretch.each(function() { $(this).show('fast'); });
-
-	$('#userMsgContainer').scrollTop($('#userMsgContainer').prop('scrollHeight'));
-	$('#partnerMsgContainer').scrollTop($('#partnerMsgContainer').prop('scrollHeight'));
-}
-
-function windowAnimate(uWidth, pWidth) {
-	$('#windowCtrlBt').prop('disabled', true);
-	$("#userMsgContainer").animate({ width: uWidth }, { duration: 600, queue: true });
-	$("#partnerMsgContainer").animate({ width: pWidth }, { duration: 600, queue: false, complete: function() {
-		$('#windowCtrlBt').prop('disabled', false);
+	$(shrink + ' .userMessage').each(function() { $(this).toggle(); });
+	$('#userMsgContainer').animate({ width: uWidth }, { duration: 400, queue: true });
+	$('#partnerMsgContainer').animate({ width: pWidth}, { duration: 400, queue: true, complete: function() {
+		$(stretch + ' .userMessage').each(function(index, element) { 
+			$(this).delay(delay).toggle(600, function() {
+				if ($(this).is(":visible")) 
+					$(stretch).animate({scrollTop: $(stretch).prop('scrollHeight') }, 150);		
+			});
+			delay += 100;
+		});
 	}});
+	$(shrink).animate({scrollTop: $(this).offset().top}, 100, function() { $('#windowCtrlBt').prop('disabled', false); });
+	$(stretch).animate({scrollTop: $(this).offset().top}, 100);	
 }
 
 function inputCountHandler() {
@@ -294,20 +318,29 @@ function inputCountHandler() {
 
 /* Buttons in controlPanel. Concept by Allie. Start */
 function sendBtHandler() {
-	socket.emit('chat message', $('#textInput').val());
-	$('#textInput').val('').focus();
-	$('#textLimit').text('');
+	if ($.trim($('#textInput').val()) !== "") {
+        socket.emit('chat message', $('#textInput').val());
+		$('#textInput').val('').focus();
+		$('#textLimit').text('');
+    }
+}
+
+function sendBtEnterHandler(event) {
+	if (event.which == 13 && !event.shiftKey) {
+		event.preventDefault();
+		$('#sendButton').click();
+	}
 }
 
 function settingBtHandler() {
 	if ($('#settingPanel').is(':visible')){
-		$('#settingPanel').hide();
-		$('#sendButton').show('slow');
-		$('#textInput').show('slow');
+		$('#settingPanel').toggle();
+		$('#sendFncWrap').toggle('slow');
+		$('#textInput').toggle('slow');
 	} else {
-		$('#settingPanel').show('slow');
-		$('#sendButton').hide('slow');
-		$('#textInput').hide();
+		$('#settingPanel').toggle('slow');
+		$('#sendFncWrap').toggle('slow');
+		$('#textInput').toggle();
 	}
 }
 /* end */
@@ -360,6 +393,14 @@ $('#settingBt').click(function() { clickControl($(this)); });
 
 /* One column or two column */
 $('#windowCtrlBt').click(function() { clickControl($(this)); });
+
+$('#enterCheck').click(function() {
+	$('#sendButton').toggle('fast');
+	if($(this).prop('checked')) $(document).on('keypress', sendBtEnterHandler);
+	else $(document).off('keypress', sendBtEnterHandler);
+});
+
+$('#checkWrap').click(function() { $('#enterCheck').click(); });
 
 /* Like "partner's" message button */
 $('#container').on('click', 'input.likeBt', function() { 
@@ -427,6 +468,8 @@ $('#container').on('click', 'input.translateBt', function() {
 		};
 		socket.emit('translate', transElement);
 	}
+	// $(this).prop('disabled', true).val('Wait...');
+	$(this).prop('disabled', true).hide();
 });
 
 /* Send revert request */

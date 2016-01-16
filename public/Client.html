@@ -14,10 +14,10 @@
 				<div id="loginMsg">Welcome !</div>
 				<form>
 					<p>
-						<input id="username" type="text" placeholder="Username" name="username" autofocus>
+						<input id="username" type="text" placeholder="Username" maxlength="20" name="username" autofocus>
 					</p>
 					<p>
-						<input id="pwd" type="password" placeholder="Password" name="password">
+						<input id="pwd" type="password" placeholder="Password" maxlength="50" name="password">
 					</p>
 					<p>
 						<button id="loginInput" type="button">SUBMIT</button>
@@ -38,7 +38,10 @@
 					<div class="toolBar">
 						<button id="settingBt" type="button"></button>
 						<button id="windowCtrlBt" type="button">To one colume</button>
-						<button id="sendButton" type="button">Send</button>
+						<span id="sendFncWrap">
+							<button id="sendButton" type="button">Send</button>
+							<input id="enterCheck" type="checkbox"><span id="checkWrap">Press enter to "SEND"</span>
+						</span>
 						<span id="textLimit"></span>
 						</br>
 					</div>

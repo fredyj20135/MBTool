@@ -12,10 +12,13 @@
 				<div id="regMsg">User Information</div>
 				<form>
 					<p>
-						<input id="uID" type="text" placeholder="Username" name="username" maxlength="20">
+						<input id="uID" type="text" placeholder="Username" name="username" maxlength="20" autofocus>
 					</p>
 					<p>
-						<input id="pwd" type="password" placeholder="Password" name="password">
+						<input id="pwd" type="password" placeholder="Password" name="password" maxlength="50">
+					</p>
+					<p>
+						<input id="pwdConfirm" type="password" placeholder="Input Password Again" name="pwdConfirm">
 					</p>
 					<p>
 						<select id="groupID" class="langSelector">
@@ -38,7 +41,7 @@
 	var socket = io.connect('http://localhost:5092');
 
 	$( document ).ready(function() {
-		socket.io.on('connect_error', function(err) { 
+		socket.on('connect_error', function(err) { 
 			$('#regInput').off('click', regBtHandler);
 			$(this).off('keypress', regBtEnterHandler);
 			console.log('Error connecting to server'); 
@@ -53,7 +56,7 @@
 		
 		socket.on('regError', function(msg) { 
 			$('#regMsg').text(msg);
-			$('#uID').val('');
+			$('#uID').val('').focus();
 			$('#pwd').val('');
 		});
 
@@ -69,7 +72,10 @@
 		});
 
 		function regBtHandler() {
-			socket.emit('reg', {usr: $('#uID').val(), pwd: $('#pwd').val(), group: $('#groupID').val()});
+			if ($('#pwd').val() == $('#pwdConfirm').val()) 
+				socket.emit('reg', {usr: $('#uID').val(), pwd: $('#pwd').val(), group: $('#groupID').val()});
+			else 
+				$('#regMsg').text('Please check your password!');
 		}
 		function regBtEnterHandler(event) {
 			if (event.which == 13) $('#regInput').click();
