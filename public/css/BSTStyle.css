@@ -437,7 +437,7 @@ body {
 }
 
 /* insert by Allie */
-#hideUnshare {
+#showLiked {
   float: left;
   height: 35px;
   border: 0px solid red;
@@ -452,12 +452,12 @@ body {
   margin-bottom: 0px;
 }
 
-#hideUnshare:hover {
+#showLiked:hover {
   cursor: pointer;
   text-decoration: underline;
 }
 
-#hideUnshare.clicked {
+#showLiked.clicked {
   color: #2c9076;
 }
 

@@ -194,8 +194,8 @@ io.on('connection', function(socket) {
 		loginUsers[socket.username].block = input;
 
 		socket.broadcast.to(socket.room).emit('partnerMsgBlock', {blockInfo: input, uID: socket.username});
-		socket.emit('serverSelfMsg', '[SERVER] You are in' + msg + 'block mode!', socket.room);
-		socket.broadcast.to(socket.room).emit('serverOthersMsg', '[SERVER] ' + socket.username + ' is in' + msg + 'block mode!');
+		// socket.emit('serverSelfMsg', '[SERVER] You are in' + msg + 'block mode!', socket.room);
+		// socket.broadcast.to(socket.room).emit('serverOthersMsg', '[SERVER] ' + socket.username + ' is in' + msg + 'block mode!');
 
 		dbLogInsert(socket.username, socket.room, 'B', -1, getDateTime(), input);
 	});

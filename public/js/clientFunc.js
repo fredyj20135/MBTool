@@ -1,7 +1,6 @@
 var socket = io.connect('http://localhost:5092');
 var username;
 var twoCol = true;
-var hideEmp = false;
 var highlightWord = '';
 			
 socket.on('ping', function(data) { socket.emit('pong', {beat: 1 }); });
@@ -47,14 +46,15 @@ socket.on('userConfirm', function(packet) {
 
 	username = packet.uID;
 
-	$('#sendButton').on('click', sendBtHandler);
 	$('#settingBt').on('click', settingBtHandler);
 	$('#windowCtrlBt').on('click', windowCtrlBtHandler);
+	$('#sendButton').on('click', sendBtHandler);
 	$('#textInput').on('keyup keydown', inputCountHandler);
 	$('#textInput').on('keypress', sendBtEnterHandler);
-	
-	// $('#showLiked').on('click', bubbleLikedControl);
+	$('#blockAll').on('click', blockCtrlHandler);
+	$('#showLiked').on('click', bubbleLikedCtrlHandler);
 
+	$('#emitAll').prop('disabled', true);
 	$("#enterCheck").click();
 
 	$(window).on('beforeunload', function() {
@@ -119,7 +119,6 @@ socket.on('chat', function(packet) {
 		content = $('<div>').addClass('partnerMessage').append(icon).append(postID).append(content);
 
 		if (packet.block == true) content.find('.msgCntnt').addClass('block');
-		if (hideEmp == true) content.hide();
 
 		$('#partnerMsgContainer').append(content).scrollTop($('#partnerMsgContainer').prop('scrollHeight'));
 	}
@@ -143,7 +142,6 @@ socket.on('partnerMsgBlock', function(packet){
 			else $(this).find('.msgCntnt').removeClass('block');
 		}
 	});
-	bubbleCtrl();
 });
 
 socket.on('partnerMsgShare', function(packet) { /* Share on the specific message */
@@ -153,7 +151,6 @@ socket.on('partnerMsgShare', function(packet) { /* Share on the specific message
 		$(partnerMsg[i]).addClass('share');
 		$(partnerMsg[i]).find('.msgCntnt').removeClass('block');	
 	}
-	bubbleCtrl()
 });
 
 socket.on('partnerMsgUnshare', function(packet) {
@@ -163,7 +160,6 @@ socket.on('partnerMsgUnshare', function(packet) {
 		$(partnerMsg[i]).removeClass('share');
 		if (packet.blockInfo == true) $(partnerMsg[i]).find('.msgCntnt').addClass('block');
 	}
-	bubbleCtrl()
 });
 
 socket.on('is BINDED', function(packet) { /* Get translated data and add to message */
@@ -253,16 +249,6 @@ socket.on('revertMsg', function(packet) { /* Erase translation in specific bubbl
 	if (packet.uID == username) socket.emit('ctrlUnlock', packet.pID);
 });
 
-/* when others block their msgs, redraw element in partnerMsgContainer */
-function bubbleCtrl() {
-	if($('#hideUnshare').hasClass('clicked')) {
-		$('.partnerMessage').each(function() { 
-			if ($(this).find('.msgCntnt').hasClass('block')) $(this).hide('slow');
-			else $(this).show('slow');
-		});
-	} else $('.partnerMessage').each(function(){ $(this).show('slow'); });
-}
-
 function loginBtHandler() {
 	socket.emit('login', {usr: $('#username').val(), pwd: $('#pwd').val()});
 	$('#username').val('');
@@ -271,6 +257,19 @@ function loginBtHandler() {
 
 function loginBtEnterHandler(event) {
 	if (event.which == 13) $('#loginInput').click();
+}
+
+/* Buttons in controlPanel. Concept by Allie. Start */
+function settingBtHandler() {
+	if ($('#settingPanel').is(':visible')){
+		$('#settingPanel').toggle();
+		$('#sendFncWrap').toggle('slow');
+		$('#textInput').toggle('slow');
+	} else {
+		$('#settingPanel').toggle('slow');
+		$('#sendFncWrap').toggle('slow');
+		$('#textInput').toggle();
+	}
 }
 
 function windowCtrlBtHandler() {
@@ -291,6 +290,9 @@ function windowCtrlBtHandler() {
 		stretch = '#userMsgContainer';
 		shrink = '#partnerMsgContainer';
 	}
+
+	if ($('#showLiked').hasClass('clicked')) $('#showLiked').click();
+
 	$(shrink + ' .userMessage').each(function() { $(this).hide().addClass('lie'); });
 	$('#userMsgContainer').animate({ width: uWidth }, { duration: 300, queue: true });
 	$('#partnerMsgContainer').animate({ width: pWidth}, { duration: 300, queue: true, complete: function() {
@@ -307,39 +309,6 @@ function windowCtrlBtHandler() {
 	$(stretch).animate({scrollTop: $(this).offset().top}, 100);	
 }
 
-function bubbleLikedControl() {
-	if ($('#showLiked').hasClass('clicked')) {
-		$('.msgCntnt').each(function() {
-			var likeNum = parseInt($(this).find('.likeNum').text());
-			var userMsg = $(this).parent();
-			if(likeNum == 0 && !userMsg.hasClass('lie')) userMsg.hide('fast').addClass('vote');
-		});
-		$('.serverMessage').each(function() { 
-			if (!$(this).hasClass('lie')) $(this).hide('fast').addClass('vote');
-		});
-
-		$('#showLiked').val('Return');
-	} else {
-		$('.vote').each(function() { $(this).show('fast'); });
-		$('#showLiked').val('Show liked bubbles');
-	}
-
-	// [TBD] lack of system message process
-}
-
-function inputCountHandler() {
-	var limit = 500;
-	if ($('#textInput').val().length < limit) {
-		$('#textLimit').text('');
-		$('#textInput').off('keypress').on('keypress');
-	} else {
-		$('#textInput').on('keypress', function() { return false });
-		$('#textLimit').text('You have exceeded the maximum input');
-		$('#textInput').val($('#textInput').val().substring(0, limit));
-	}
-}
-
-/* Buttons in controlPanel. Concept by Allie. Start */
 function sendBtHandler() {
 	if ($.trim($('#textInput').val()) !== "") {
         socket.emit('chat message', $('#textInput').val());
@@ -355,15 +324,50 @@ function sendBtEnterHandler(event) {
 	}
 }
 
-function settingBtHandler() {
-	if ($('#settingPanel').is(':visible')){
-		$('#settingPanel').toggle();
-		$('#sendFncWrap').toggle('slow');
-		$('#textInput').toggle('slow');
+function blockCtrlHandler() {
+	if ($('#blockAll').hasClass('clicked')) {
+		$('#emitAll').prop('disabled', false);
+		socket.emit('blockMsg', true);
 	} else {
-		$('#settingPanel').toggle('slow');
-		$('#sendFncWrap').toggle('slow');
-		$('#textInput').toggle();
+		$('#emitAll').prop('disabled', true);
+		socket.emit('blockMsg', false);
+	}
+	$('.shareBt').each(function() { $(this).toggle(); });
+}
+
+function bubbleLikedCtrlHandler() {
+	if ($('#showLiked').hasClass('clicked')) {
+		$('.msgCntnt').each(function() {
+			var likeNum = parseInt($(this).find('.likeNum').text());
+			var userMsg = $(this).parent();
+			if (likeNum == 0) {
+				if (!userMsg.hasClass('lie')) userMsg.hide('fast');
+				userMsg.addClass('vote');
+			}
+		});
+		$('.serverMessage').each(function() { 
+			if (!$(this).hasClass('lie')) $(this).hide('fast');
+			$(this).addClass('vote');
+		});
+	} else {
+		$('.vote').each(function() { 
+			if (!$(this).hasClass('lie')) $(this).show('fast');
+			$(this).removeClass('vote');
+		});
+	}
+
+	// [TBD] system message process may change
+}
+
+function inputCountHandler() {
+	var limit = 500;
+	if ($('#textInput').val().length < limit) {
+		$('#textLimit').text('');
+		$('#textInput').off('keypress').on('keypress');
+	} else {
+		$('#textInput').on('keypress', function() { return false });
+		$('#textLimit').text('You have exceeded the maximum input');
+		$('#textInput').val($('#textInput').val().substring(0, limit));
 	}
 }
 /* end */
@@ -378,16 +382,8 @@ function clickControl(elmt) {
 $('#blockAll').click(function() { 
 	clickControl($(this));
 
-	if ($(this).hasClass('clicked')) {
-		$('#emitAll').prop('disabled', false);
-		socket.emit('blockMsg', true);
-		$(this).val('Unblock all my messages');
-	} else {
-		$('#emitAll').prop('disabled', true);
-		socket.emit('blockMsg', false);
-		$(this).val('Block all my messages');
-	}
-	$('.shareBt').each(function() { $(this).toggle(); });
+	if ($(this).hasClass('clicked')) $(this).val('Unblock all my messages');
+	else $(this).val('Block all my messages');
 });
 
 $('#emitAll').click(function() {
@@ -397,19 +393,11 @@ $('#emitAll').click(function() {
 	});
 });
 
-$('#hideUnshare').click(function() { 
-	clickControl($(this));
-
-	if ($(this).hasClass('clicked')) $(this).val('Show all bubbles');
-	else $(this).val('Hide empty bubbles');
-	
-	hideEmp == true? hideEmp = false : hideEmp = true;
-
-	bubbleCtrl();
-});
-
 $('#showLiked').click(function() {
 	clickControl($(this));
+
+	if ($(this).hasClass('clicked')) $(this).val('Return');
+	else $(this).val('Show liked bubbles');
 });
 
 /* Setting Button */
@@ -418,13 +406,15 @@ $('#settingBt').click(function() { clickControl($(this)); });
 /* One column or two column */
 $('#windowCtrlBt').click(function() { clickControl($(this)); });
 
+/* Enter to send or Enter to next line */
+$('#checkWrap').click(function() { $('#enterCheck').click(); });
+
 $('#enterCheck').click(function() {
 	$('#sendButton').toggle('fast');
+
 	if($(this).prop('checked')) $(document).on('keypress', sendBtEnterHandler);
 	else $(document).off('keypress', sendBtEnterHandler);
 });
-
-$('#checkWrap').click(function() { $('#enterCheck').click(); });
 
 /* Like "partner's" message button */
 $('#container').on('click', 'input.likeBt', function() { 
@@ -510,5 +500,4 @@ $('#container').on('click', 'input.revertBt', function() {
 $( document ).ready(function() {
 	$('#BSTBody').hide();
 	$('#settingPanel').hide();
-	$('#emitAll').prop('disabled', true);
 });
