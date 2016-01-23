@@ -170,7 +170,9 @@ io.on('connection', function(socket) {
 			var result = { uID: packet.uID, fromWord: packet.word.replace(/\n/g, '<br>'), toWord: null, pID: packet.pID };
 
 			translateWizard.translate(params, function(err, data) {
+				// if(err) console.log(err);
 				result.toWord = data;
+				// console.log(result);
 				io.sockets.in(socket.room).emit('is BINDED', result);
 			});
 

@@ -52,6 +52,8 @@ socket.on('userConfirm', function(packet) {
 	$('#windowCtrlBt').on('click', windowCtrlBtHandler);
 	$('#textInput').on('keyup keydown', inputCountHandler);
 	$('#textInput').on('keypress', sendBtEnterHandler);
+	
+	// $('#showLiked').on('click', bubbleLikedControl);
 
 	$("#enterCheck").click();
 
@@ -123,6 +125,17 @@ socket.on('chat', function(packet) {
 	}
 });
 
+function addUserMsgByColMode(content) {
+	var hidden = content.clone().hide().addClass('lie');
+	if (twoCol) {
+		$('#partnerMsgContainer').append(hidden);
+		$('#userMsgContainer').append(content).scrollTop($('#userMsgContainer').prop('scrollHeight'));
+	} else {
+		$('#userMsgContainer').append(hidden);
+		$('#partnerMsgContainer').append(content).scrollTop($('#partnerMsgContainer').prop('scrollHeight'));
+	}
+}
+
 socket.on('partnerMsgBlock', function(packet){
 	$('.partnerMessage').each(function(){
 		if (!$(this).hasClass('share') && $(this).find('.name').text() == packet.uID) {
@@ -165,8 +178,8 @@ socket.on('is BINDED', function(packet) { /* Get translated data and add to mess
 		if (transMsg.hasClass('partnerMessage')) {
 			if (packet.uID == username) {
 				transMsg.find('.revertBt').show();
-				// transMsg.find('.translateBt').prop('disabled', false).val('Translate').show();
-				transMsg.find('.translateBt').prop('disabled', false).show();
+				transMsg.find('.translateBt').prop('disabled', false).val('Translate').show();
+				// transMsg.find('.translateBt').prop('disabled', false).show();
 			}
 			result.addClass('note');
 		}
@@ -250,17 +263,6 @@ function bubbleCtrl() {
 	} else $('.partnerMessage').each(function(){ $(this).show('slow'); });
 }
 
-function addUserMsgByColMode(content) {
-	var hidden = content.clone().hide();
-	if (twoCol) {
-		$('#partnerMsgContainer').append(hidden);
-		$('#userMsgContainer').append(content).scrollTop($('#userMsgContainer').prop('scrollHeight'));
-	} else {
-		$('#userMsgContainer').append(hidden);
-		$('#partnerMsgContainer').append(content).scrollTop($('#partnerMsgContainer').prop('scrollHeight'));
-	}
-}
-
 function loginBtHandler() {
 	socket.emit('login', {usr: $('#username').val(), pwd: $('#pwd').val()});
 	$('#username').val('');
@@ -289,19 +291,40 @@ function windowCtrlBtHandler() {
 		stretch = '#userMsgContainer';
 		shrink = '#partnerMsgContainer';
 	}
-	$(shrink + ' .userMessage').each(function() { $(this).toggle(); });
-	$('#userMsgContainer').animate({ width: uWidth }, { duration: 400, queue: true });
-	$('#partnerMsgContainer').animate({ width: pWidth}, { duration: 400, queue: true, complete: function() {
-		$(stretch + ' .userMessage').each(function(index, element) { 
-			$(this).delay(delay).toggle(600, function() {
+	$(shrink + ' .userMessage').each(function() { $(this).hide().addClass('lie'); });
+	$('#userMsgContainer').animate({ width: uWidth }, { duration: 300, queue: true });
+	$('#partnerMsgContainer').animate({ width: pWidth}, { duration: 300, queue: true, complete: function() {
+		$(stretch + ' .userMessage').each(function() { 
+			$(this).delay(delay).show(500, function() {
 				if ($(this).is(":visible")) 
-					$(stretch).animate({scrollTop: $(stretch).prop('scrollHeight') }, 150);		
+					$(stretch).animate({scrollTop: $(stretch).prop('scrollHeight') }, 150);
 			});
+			$(this).removeClass('lie');
 			delay += 100;
 		});
 	}});
 	$(shrink).animate({scrollTop: $(this).offset().top}, 100, function() { $('#windowCtrlBt').prop('disabled', false); });
 	$(stretch).animate({scrollTop: $(this).offset().top}, 100);	
+}
+
+function bubbleLikedControl() {
+	if ($('#showLiked').hasClass('clicked')) {
+		$('.msgCntnt').each(function() {
+			var likeNum = parseInt($(this).find('.likeNum').text());
+			var userMsg = $(this).parent();
+			if(likeNum == 0 && !userMsg.hasClass('lie')) userMsg.hide('fast').addClass('vote');
+		});
+		$('.serverMessage').each(function() { 
+			if (!$(this).hasClass('lie')) $(this).hide('fast').addClass('vote');
+		});
+
+		$('#showLiked').val('Return');
+	} else {
+		$('.vote').each(function() { $(this).show('fast'); });
+		$('#showLiked').val('Show liked bubbles');
+	}
+
+	// [TBD] lack of system message process
 }
 
 function inputCountHandler() {
@@ -358,22 +381,19 @@ $('#blockAll').click(function() {
 	if ($(this).hasClass('clicked')) {
 		$('#emitAll').prop('disabled', false);
 		socket.emit('blockMsg', true);
-		$('.shareBt').each(function() { $(this).show(); });
 		$(this).val('Unblock all my messages');
 	} else {
 		$('#emitAll').prop('disabled', true);
 		socket.emit('blockMsg', false);
-		$('.shareBt').each(function() { $(this).hide(); });
 		$(this).val('Block all my messages');
 	}
+	$('.shareBt').each(function() { $(this).toggle(); });
 });
 
 $('#emitAll').click(function() {
 	// clickControl($(this));
 	$('input.shareBt').each(function() {
-		if (!$(this).hasClass('clicked')) {
-			$(this).click();
-		}
+		if (!$(this).hasClass('clicked')) $(this).click();
 	});
 });
 
@@ -386,6 +406,10 @@ $('#hideUnshare').click(function() {
 	hideEmp == true? hideEmp = false : hideEmp = true;
 
 	bubbleCtrl();
+});
+
+$('#showLiked').click(function() {
+	clickControl($(this));
 });
 
 /* Setting Button */
@@ -467,9 +491,10 @@ $('#container').on('click', 'input.translateBt', function() {
 			toLanguage: $('#transLang').val()
 		};
 		socket.emit('translate', transElement);
+
+		// $(this).prop('disabled', true).val('Wait...');
+		$(this).prop('disabled', true).hide();
 	}
-	// $(this).prop('disabled', true).val('Wait...');
-	$(this).prop('disabled', true).hide();
 });
 
 /* Send revert request */
