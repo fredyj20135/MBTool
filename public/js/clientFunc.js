@@ -277,6 +277,7 @@ function windowCtrlBtHandler() {
 	var stretch, shrink, uWidth, pWidth;
 	twoCol == true? twoCol = false : twoCol = true;
 
+	clickControl($('#windowCtrlBt'));
 	$('#windowCtrlBt').prop('disabled', true);
 
 	if ($('#windowCtrlBt').hasClass('clicked')) {
@@ -311,10 +312,10 @@ function windowCtrlBtHandler() {
 
 function sendBtHandler() {
 	if ($.trim($('#textInput').val()) !== "") {
-        socket.emit('chat message', $('#textInput').val());
+		socket.emit('chat message', $('#textInput').val());
 		$('#textInput').val('').focus();
 		$('#textLimit').text('');
-    }
+	}
 }
 
 function sendBtEnterHandler(event) {
@@ -325,17 +326,24 @@ function sendBtEnterHandler(event) {
 }
 
 function blockCtrlHandler() {
+	clickControl($('#blockAll'));
+	var blocked = $('#blockAll').hasClass('clicked');
+
 	if ($('#blockAll').hasClass('clicked')) {
 		$('#emitAll').prop('disabled', false);
-		socket.emit('blockMsg', true);
+		$('#blockAll').val('Unblock all my messages');
 	} else {
 		$('#emitAll').prop('disabled', true);
-		socket.emit('blockMsg', false);
+		$('#blockAll').val('Block all my messages');
 	}
 	$('.shareBt').each(function() { $(this).toggle(); });
+
+	socket.emit('blockMsg', blocked);
 }
 
 function bubbleLikedCtrlHandler() {
+	clickControl($('#showLiked'));
+
 	if ($('#showLiked').hasClass('clicked')) {
 		$('.msgCntnt').each(function() {
 			var likeNum = parseInt($(this).find('.likeNum').text());
@@ -349,13 +357,16 @@ function bubbleLikedCtrlHandler() {
 			if (!$(this).hasClass('lie')) $(this).hide('fast');
 			$(this).addClass('vote');
 		});
+
+		$('#showLiked').val('Return')
 	} else {
 		$('.vote').each(function() { 
 			if (!$(this).hasClass('lie')) $(this).show('fast');
 			$(this).removeClass('vote');
 		});
-	}
 
+		$('#showLiked').val('Show liked bubbles')
+	}
 	// [TBD] system message process may change
 }
 
@@ -378,33 +389,12 @@ function clickControl(elmt) {
 	else elmt.addClass('clicked');
 }
 
-/* Block message button*/
-$('#blockAll').click(function() { 
-	clickControl($(this));
-
-	if ($(this).hasClass('clicked')) $(this).val('Unblock all my messages');
-	else $(this).val('Block all my messages');
-});
-
 $('#emitAll').click(function() {
 	// clickControl($(this));
 	$('input.shareBt').each(function() {
 		if (!$(this).hasClass('clicked')) $(this).click();
 	});
 });
-
-$('#showLiked').click(function() {
-	clickControl($(this));
-
-	if ($(this).hasClass('clicked')) $(this).val('Return');
-	else $(this).val('Show liked bubbles');
-});
-
-/* Setting Button */
-$('#settingBt').click(function() { clickControl($(this)); });
-
-/* One column or two column */
-$('#windowCtrlBt').click(function() { clickControl($(this)); });
 
 /* Enter to send or Enter to next line */
 $('#checkWrap').click(function() { $('#enterCheck').click(); });
@@ -497,7 +487,7 @@ $('#container').on('click', 'input.revertBt', function() {
 });
 
 /* initial page setting */		
-$( document ).ready(function() {
+$(document).ready(function() {
 	$('#BSTBody').hide();
 	$('#settingPanel').hide();
 });
