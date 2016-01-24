@@ -4,8 +4,8 @@
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 		<title>NBrain</title>
 		<link href="css/fontStyle.css" rel="stylesheet" type="text/css" media="screen">
-		<link href="css/BSTStyle.css" rel="stylesheet" type="text/css" media="screen">
 		<link href="css/loginStyle.css" rel="stylesheet" type="text/css" media="screen">
+		<link href="css/BSTStyle.css" rel="stylesheet" type="text/css" media="screen">
 	</head>
 	<body>
 		<div id="loginBody">
@@ -14,10 +14,10 @@
 				<div id="loginMsg">Welcome !</div>
 				<form>
 					<p>
-						<input id="username" type="text" placeholder="Username" maxlength="20" name="username" autofocus>
+						<input id="username" type="text" placeholder="USERNAME" maxlength="20" name="username" autofocus>
 					</p>
 					<p>
-						<input id="pwd" type="password" placeholder="Password" maxlength="50" name="password">
+						<input id="pwd" type="password" placeholder="PASSWORD" maxlength="50" name="password">
 					</p>
 					<p>
 						<button id="loginInput" type="button">SUBMIT</button>
@@ -29,54 +29,65 @@
 			</div>
 		</div>
 		<div id="BSTBody">
+			<div id="topMenu">
+				<input id="settingBt" type="button" value="">
+				<div id="switchBt">
+					<div class="switch">
+						<input type="radio" class="switch-input" name="view" value="block" id="block">
+						<label for="block" class="switch-label switch-label-off">Block</label>
+						<input type="radio" class="switch-input" name="view" value="unblock" id="unblock">
+						<label for="unblock" class="switch-label switch-label-on">Unblock</label>
+						<span class="switch-selection"></span>
+					</div>
+				</div>
+				<div id="switchBt">
+					<div class="switch">
+						<input type="radio" class="switch-input" name="colMode" value="twoCol" id="twoCol">
+						<label for="twoCol" class="switch-label switch-label-off">TwoCols</label>
+						<input type="radio" class="switch-input" name="colMode" value="oneCol" id="oneCol">
+						<label for="oneCol" class="switch-label switch-label-on">OneCol</label>
+						<span class="switch-selection"></span>
+					</div>
+				</div>
+				<div id="roomInfo"></div>
+			</div>
+			<div id="settingPanel">
+				<div class="listRow">
+					<select id="oriLang" class="langSelector">
+						<option value="en" selected="selected">English</option>
+						<option value="zh-CHT">中文</option>
+						<option value="ja">日本語</option>
+						<option value="ko">한국의</option>
+						<option value="fr">Franch</option>
+						<option value="de">Deutsch</option>
+					</select>
+					<div id="arrow"></div>
+					<select id="transLang" class="langSelector">
+						<option value="en">English</option>
+						<option value="zh-CHT" selected="selected">中文</option>
+						<option value="ja">日本語</option>
+						<option value="ko">한국의</option>
+						<option value="fr">Franch</option>
+						<option value="de">Deutsch</option>
+					</select>
+				</div>
+				<div class="listRow">
+					<input id="showLiked" type="button" value="Show liked messages">
+				</div>
+			</div>
 			<div id="container">
 				<div id="partnerMsgContainer"></div>
 				<div id="userMsgContainer"></div>
 			</div>
 			<div id="controlPanel">
 				<form>
-					<div class="toolBar">
-						<button id="settingBt" type="button"></button>
-						<button id="windowCtrlBt" type="button">To one colume</button>
-						<span id="sendFncWrap">
-							<button id="sendButton" type="button">Send</button>
-							<input id="enterCheck" type="checkbox"><span id="checkWrap">Press enter to "SEND"</span>
-						</span>
-						<span id="textLimit"></span>
-						</br>
-					</div>
-					<div class="toolBar">
-						<textarea id="textInput" rows="5" cols="30" placeholder="Your message here"></textarea>
-						<div id="settingPanel">
-							<div class="listRow">
-								<select id="oriLang" class="langSelector">
-									<option value="en" selected = "selected">English</option>
-									<option value="zh-CHT" >中文</option>
-									<option value="ja" >日本語</option>
-									<option value="ko" >한국의</option>
-									<option value="fr" >Franch</option>
-									<option value="de" >Deutsch</option>
-								</select>
-								<div id="arrow" ></div>
-								<select id="transLang" class ="langSelector">
-									<option value="en" >English</option>
-									<option value="zh-CHT" selected="selected">中文</option>
-									<option value="ja" >日本語</option>
-									<option value="ko" >한국의</option>
-									<option value="fr" >Franch</option>
-									<option value="de" >Deutsch</option>
-								</select>
-							</div>
-							<div class="listRow">
-								<input id="blockAll" type="button" value="Block all my messages">
-								<input id="emitAll" type="button" value="Emit all">
-							</div>
-							<div class="listRow"> 
-								<!-- <input id="hideUnshare" type="button" value="Hide empty bubbles"> -->
-								<input id="showLiked" type="button" value="Show liked bubbles">
-							</div>
-						</div>
-					</div>
+					<textarea id="textInput" rows="3" cols="30" placeholder="Your message here"></textarea>
+					<!-- <button id="colButton" type="button">colunm</button> -->
+					<span>
+						<input type="checkbox" id="enterCheck">
+						<label for="enterCheck" id="checkLabel">Enter to send</label>
+					</span>
+					<button id="sendButton" type="button">Send</button>
 				</form>
 			</div>
 		</div>

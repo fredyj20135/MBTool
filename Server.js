@@ -35,7 +35,7 @@ app.get('/', function(req, res) {
 });
 
 app.get('/signUp', function(req, res) {
-	res.sendFile(__dirname + '/public/SignIn.html');
+	res.sendFile(__dirname + '/public/SignUp.html');
 });
 
 /* Server ignite */
@@ -106,7 +106,7 @@ io.on('connection', function(socket) {
 				}
 				
 				socket.username = temp.userID;
-				socket.emit('userConfirm', {uID: socket.username, msg: 'Success!'}, socket.room);
+				socket.emit('userConfirm', {uID: socket.username, msg: 'Success!', room: socket.room}, socket.room);
 				socket.emit('serverSelfMsg', '[SERVER] Hello ' + socket.username + '!', socket.room);
 				socket.broadcast.to(socket.room).emit('serverOthersMsg', '[SERVER] ' + packet.usr + ' has login');
 
@@ -235,9 +235,9 @@ io.on('connection', function(socket) {
 	socket.on('pong', function(data) {});
 
 	socket.on('reg', function(packet) {
-		if 		(packet.usr == '' || packet.usr == null || packet.usr.length > 20) socket.emit('regError', 'invalid username!');
-		else if (packet.pwd == '' || packet.pwd == null || packet.pwd.length > 20) socket.emit('regError', 'invalid password!');
-		else if (packet.usr.indexOf('/0x00') > 0 || packet.pwd.indexOf('/0x00') > 0) socket.emit('regError', 'invalid input');
+		if 		(packet.usr == '' || packet.usr == null || packet.usr.length > 20) socket.emit('regError', 'Invalid username!');
+		else if (packet.pwd == '' || packet.pwd == null || packet.pwd.length > 20) socket.emit('regError', 'Invalid password!');
+		else if (packet.usr.indexOf('/0x00') > 0 || packet.pwd.indexOf('/0x00') > 0) socket.emit('regError', 'Invalid input');
 		else {
 			console.log('user string: ' + packet.usr);
 			packet.usr.replace(/[\\$'"]/g, "\\$&").replace(/\u0000/g, '\\0');
@@ -247,7 +247,7 @@ io.on('connection', function(socket) {
 
 				if (result.rows[0] != null) {
 					console.log(result.rows)
-					socket.emit('regError', 'this userID is registered!');
+					socket.emit('regError', 'This userID is registered!');
 				} else {
 					var msg = 'Success! Back to <a href="/">Login Page</a> !';
 					hash(packet.pwd, function(err, salt, cipher) {
@@ -257,7 +257,7 @@ io.on('connection', function(socket) {
 							function(err) {
 								if(err) {
 									return console.error('error running query', err);
-									socket.emit('regError', 'please recheck your information');
+									socket.emit('regError', 'Please recheck your information');
 								}
 								else socket.emit('regSuccess', msg);
 							}

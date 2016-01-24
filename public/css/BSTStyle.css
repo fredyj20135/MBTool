@@ -10,13 +10,14 @@ html {
   height: 100%;
 }
 
+/*edit*/
 body { 
   height:100%;
   margin: 0;
   padding: 0;
-  background: #e6e6e6;/*#c9e1ce;*/
+  background: #e6e6e6; /*#c9e1ce;*/
   font-family: 'Open Sans', 微軟正黑體, sans-serif;
-  font-size: 1.1em;
+  font-size: 1em; 
   color: #37342d;
 }
 
@@ -25,36 +26,180 @@ body {
   visibility: hidden;
 }
 
-#container {
-  padding: 10px; 
-  position: relative;
-  border: 0px solid green;
-  display: -webkit-flex;
-  display: flex;
-  height: calc(100% - 186px);
-  height: -moz-calc(100% - 186px);
-  height: -webkit-calc(100% - 186px);
+/*insert*/
+#topMenu {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  max-height: 45px;
+  min-height: 45px;
+  border: 0px solid red;
+  background: #2c9076;
+  z-index: 4;
+  box-shadow: 0 3px 2px transparent, 0 3px 3px rgba(0, 0, 0, 0.15);
 }
 
+/*insert*/
+#roomInfo {
+  display: inline-block;
+  border: 0px solid red;
+  /*width: calc(100vw - 280px - 60px - 16px);*/
+  margin: 10px 5px;
+  font-size: 1.1em;
+  color: white;
+  font-weight: bold;
+}
+
+/*switch button insert by Allie*/
+#switchBt {
+  margin-right: 10px; 
+  margin-left: 5px;
+  float: right;
+  display: inline-block;
+}
+
+.switch {
+  display: inline-block;  
+  position: relative;
+  margin: 10px 0px;
+  height: 26px;
+  width: 140px;
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 5px;
+  /*-webkit-box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px rgba(255, 255, 255, 0.1);*/
+}
+
+.switch-label {
+  position: relative;
+  z-index: 2;
+  float: left;
+  width: 68px;
+  line-height: 26px;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.85);
+  text-align: center;
+  /*text-shadow: 0 1px 1px rgba(0, 0, 0, 0.45);*/
+  cursor: pointer;
+}
+.switch-label:active {
+  font-weight: bold;
+}
+
+.switch-label-off {
+  padding-left: 2px;
+}
+
+.switch-label-on {
+  padding-left: 5px;
+}
+
+.switch-input {
+  display: none;
+}
+.switch-input:checked + .switch-label {
+  font-weight: bold;
+  color: rgba(0, 0, 0, 0.65);
+  text-shadow: 0 1px rgba(255, 255, 255, 0.25);
+  -webkit-transition: 0.15s ease-out;
+  -moz-transition: 0.15s ease-out;
+  -o-transition: 0.15s ease-out;
+  transition: 0.15s ease-out;
+}
+.switch-input:checked + .switch-label-on ~ .switch-selection {
+  left: 70px;
+  /* Note: left: 50% doesn't transition in WebKit */
+}
+
+.switch-selection {
+  display: block;
+  position: absolute;
+  z-index: 1;
+  top: 2px;
+  left: 2px;
+  width: 68px;
+  height: 22px;
+  background: #FFF;
+  border-radius: 5px;
+  -webkit-transition: left 0.15s ease-out;
+  -moz-transition: left 0.15s ease-out;
+  -o-transition: left 0.15s ease-out;
+  transition: left 0.15s ease-out;
+}
+
+/*end -------------- switch button insert by Allie*/
+
+/*edit*/
+#settingBt {
+  width: 30px;
+  height: 30px;
+  border: 0px solid blue;
+  border-radius: 0;
+  background-image:url(./pic/gear39.png); /*#75736B*/
+  background-size: 30px;
+  background-color: transparent;
+  outline: none;
+  box-shadow: none;
+  -webkit-box-shadow: none;
+  padding: 10px;
+  margin: 8px;
+}
+
+/*edit*/
+#settingBt:hover {
+  cursor: pointer;
+  background-image:url(./pic/gear39_hover.png);
+}
+
+#settingBt.clicked{
+  cursor:pointer;
+  /*background-image:url(./pic/setting_click.png);*/
+  background-image:url(./pic/back.png);
+}
+
+/*edit*/
+#settingBt.clicked:hover{
+  cursor:pointer;
+  /*background-image:url(./pic/setting_click.png);*/
+  /*background-image:url(./pic/back_click.png);*/
+}
+
+/*edit*/
+#container {
+  padding: 20px 0px;
+  padding-top: 45px;
+  /*position: relative;*/
+  border: 0px solid red;
+  display: -webkit-flex;
+  display: flex;
+  height: calc(100% - 76px + 17px);
+  height: -moz-calc(100% - 76px + 17px);
+  height: -webkit-calc(100% - 76px + 17px);
+  width: 100vw;
+}
+
+/*edit*/
 #partnerMsgContainer {
   width: 50%;
   border-right: 2px dashed #2c9076;
   overflow: auto;
   background-color: transparent;
-  /*-webkit-flex: 1;*/
-          /*flex: 1;*/
+/*  -webkit-flex: 1;
+          flex: 1;*/
+  padding: 5px 10px 5px 20px;
 }
 
+/*edit*/
 #userMsgContainer {
   width: 50%;
   border-left: 2px dashed #2c9076;
   overflow: auto;
-  background-color: transparent;
-  /*-webkit-flex: 1;*/
-          /*flex: 1;*/
+  background-color: rgba(100, 100, 100, 0.2);
+/*  -webkit-flex: 1;
+          flex: 1;
+*/  padding: 5px 20px 5px 10px;
 }
 
-/* insert by Allie */
 .partnerIcon {
   border-radius: 100%;
   height: 20px;
@@ -85,39 +230,42 @@ body {
   background: #8a2be2;
 }
 
+/*edit*/
 .partnerMessage {
   position: relative;
-  padding: 25px 35px 15px 35px;
+  padding: 12px 18px 5px 18px;
   border: 0px solid #2c9076;
   background: white;
-  width: 85%;
+  width: 88%;
   float: left;
-  margin: 8px;
+  margin: 5px;
   margin-left: 40px;
-  word-wrap: break-word; word-break: normal;
+  word-wrap: break-word; 
+  word-break: normal;
 
-  -webkit-border-radius: 35px;
+  -webkit-border-radius: 20px;
   -webkit-border-bottom-left-radius: 5px;
-  -moz-border-radius: 35px;
+  -moz-border-radius: 20px;
   -moz-border-radius-bottomleft: 5px;
-  border-radius: 35px;
+  border-radius: 20px;
   border-bottom-left-radius: 5px;
 }
 
+/*edit*/
 .userMessage {
-  padding: 25px 35px 15px 35px;
+  padding: 12px 18px 5px 18px;
   border: 0px solid #2c9076;
   background: white;
-  width: 85%;
+  width: 90%;
   float: right;
-  margin: 8px;
+  margin: 5px;
   word-wrap: break-word; word-break: normal;
 
-  -webkit-border-radius: 35px;
+  -webkit-border-radius: 20px;
   -webkit-border-bottom-right-radius: 5px;
-  -moz-border-radius: 35px;
+  -moz-border-radius: 20px;
   -moz-border-radius-bottomright: 5px;
-  border-radius: 35px;
+  border-radius: 20px;
   border-bottom-right-radius: 5px;
 }
 
@@ -126,7 +274,7 @@ body {
 }
 
 .highlight.warn {
-  background-color: #F3DF2C
+  background-color: #F3DF2C;
 }
 
 .block {
@@ -137,20 +285,28 @@ body {
   border: 3px solid #2c9076;
 }
 
+/*insert*/
+.systemMessage {
+  background: transparent;
+  color: #5a5a5a;
+}
+
+/*edit*/
 .shareBt {
   float: right;
-  width: 22px;
-  height: 22px;
+  width: 15px;
+  height: 15px;
   border: 0px solid blue;
   border-radius: 0;
   background-image:url(./pic/share.png); /*#75736B*/
-  background-size: 22px;
+  background-size: 15px;
   background-color: transparent;
   outline: none;
   box-shadow: none;
   -webkit-box-shadow: none;
-  padding: 10px;
-  margin: 8px 5px 2px 8px;
+  padding: 0px;
+  margin: 5px 3px 0px 5px;
+  display: inline-block;
 }
 
 .shareBt:hover {
@@ -161,43 +317,122 @@ body {
   background-image:url(./pic/share_click.png);
 }
 
+/*eidt
 .translateBt {
   float: right;
-  width: 21px;
-  height: 21px;
+  width: 20px;
+  height: 20px;
   border: 0px solid blue;
   border-radius: 0;
   background-image:url(./pic/translate.png);
-  background-size: 22px;
-  background-color: transparent;
-  outline: none;
-  box-shadow: none;
-  -webkit-box-shadow: none;
-  padding: 10;
-  margin: 6px 5px 2px 3px;
-}
-
-.translateBt:hover {
-  cursor: pointer;
-  background-image:url(./pic/translate_hover.png);
-  /*color: #2c9076;*/
-  /*text-decoration: underline;*/
-}
-
-.likeBt {
-  float: right;
-  width: 22px;
-  height: 22px;
-  border: 0px solid blue;
-  border-radius: 0;
-  background-image:url(./pic/like.png); /*#75736B*/
-  background-size: 22px;
+  background-size:20px;
   background-color: transparent;
   outline: none;
   box-shadow: none;
   -webkit-box-shadow: none;
   padding: 10px;
-  margin: 8px 5px 2px 3px;
+  margin: 8px 5px 2px 7px;
+
+}
+
+.translateBt:hover {
+  cursor: pointer;
+  background-image:url(./pic/translate_hover.png);
+  /*color: #2c9076;
+  /*text-decoration: underline;
+}
+*/
+
+.translateBt {
+  float: right;
+  height: 20px;
+  border: 0px solid blue;
+  border-radius: 0;
+  background-color: transparent;
+  outline: none;
+  box-shadow: none;
+  -webkit-box-shadow: none;
+  color: #2c9076;
+  font-family: 微軟正黑體;
+  font-size: 0.8em;
+  text-decoration: underline;
+  padding: 0px;
+  margin: 3px 3px 0px 3px;
+}
+
+.translateBt.working {
+  cursor: progress;
+  color: #75736B;
+
+}
+
+.translateBt:hover {
+  cursor: pointer;
+  color: #75736B;
+  text-decoration: underline;
+}
+
+/*edit
+.revertBt {
+  float: right;
+  width: 20px;
+  height: 19px;
+  border: 0px solid blue;
+  border-radius: 0;
+  background-image:url(./pic/revert.png); /*#75736B
+  background-size: 20px;
+  background-color: transparent;
+  outline: none;
+  box-shadow: none;
+  -webkit-box-shadow: none;
+  padding: 10px;
+  margin: 8px 5px 2px 5px;
+}
+
+.revertBt:hover {
+  cursor: pointer;
+  background-image: url(./pic/revert_hover.png);
+}*/
+
+.revertBt {
+  float: right;
+  height: 20px;
+  border: 0px solid blue;
+  border-radius: 0;
+  background-color: transparent;
+  outline: none;
+  box-shadow: none;
+  -webkit-box-shadow: none;
+  color: #2c9076;
+  font-family: 微軟正黑體;
+  font-size: 0.8em;
+  text-decoration: underline;
+  padding: 0px;
+  margin: 3px 3px 0px 3px;
+}
+
+.revertBt:hover {
+  cursor: pointer;
+  color: #75736B;
+  text-decoration: underline;
+}
+
+/*edit*/
+.likeBt {
+  float: right;
+  width: 15px;
+  height: 15px;
+  border: 0px solid blue;
+  border-radius: 0;
+  background-image:url(./pic/like.png); /*#75736B*/
+  background-size: 15px;
+  background-color: transparent;
+  outline: none;
+  box-shadow: none;
+  -webkit-box-shadow: none;
+  padding-top: 0px;
+  margin: 5px 3px 0px 3px;
+  display: inline-block;
 }
 
 .likeBt:hover {
@@ -206,90 +441,94 @@ body {
 .likeBt.clicked {
   background-image:url(./pic/like_click.png);
 }
-
+/*insert*/
 .likeNum {
+  font-size: 0.7em;
   color: #2c9076;
   float: right;
-  font-size: 0.8em;
+  margin: 7px 0px 0px -2px;
 }
-
-.revertBt {
-  float: right;
-  width: 21px;
-  height: 21px;
-  border: 0px solid blue;
-  border-radius: 0;
-  background-image: url(./pic/revert.png);
-  background-size: 22px;
-  background-color: transparent;
-  outline: none;
-  box-shadow: none;
-  -webkit-box-shadow: none;
-  padding: 10px;
-  margin: 8px 5px 2px 3px;
-}
-
-.revertBt:hover {
-  cursor: pointer;
-  background-image: url(./pic/revert_hover.png);
-}
-
+/*edit*/
 .timeStamp {
   color: #b2b2b2;
   font-size: 0.8em;
   float: left;
-  margin: 15px 5px 0px 3px;
+  margin: 4px 5px 0px 3px;
 }
+/*edit*/
 .name {
   color: #b2b2b2;
   font-size: 0.8em;
   float: left;
-  margin: 15px 5px 0px 3px;
+  margin: 4px 5px 0px 3px;
 }
 
+/*edit*/
 #controlPanel {
   position: fixed;
   bottom: 0;
   width: 100%;
-  max-height: 202px;
-  min-height: 202px;
+  max-height: calc(10px + 65px + 8px);
+  min-height: calc(10px + 65px + 8px);
   border: 0px solid red;
   background: white;
   box-shadow: 0 -3px 2px transparent, 0 -3px 3px rgba(0, 0, 0, 0.09);
-  visibility: hidden;
 }
 
 #controlPanel form { 
   border: 0px solid black;  
-  padding: 10px 20px; 
+  padding: 8px 20px;
+  padding-bottom: 0px; 
 }
 
-/* edit by Allie */
+/*edit*/
 #textInput { 
-  width: 100% ;
+  width: calc(100% - 75px);
   border-radius: 0px;
   color: #37342d;
   font-family: 'Open Sans', 'Archivo Narrow', 微軟正黑體;
-  font-size: 0.8em;
-  padding: 10px;
+  font-size: 1em;
+  padding: 0px;
   margin-left: 0px;
-  margin-top: 6px;
+  margin-top: 2px;
   text-decoration:none;
-  border : 1px solid #37342d;
+  border : 0px solid #37342d;
+  font-size: 1em;
+  display: inline-block;
+  float: left;
+  resize: none;
 }
 
+/*edit*/
 #textInput:focus {
-  outline-color: #837b6b;
+  /*outline-color: #837b6b;*/
+  outline: none;
 }
 
-.toolBar {
+/*delete
+ .toolBar {
   width: 100%;
   height: 45px;
-  border: 0px solid red;
+  border: 1px solid red;
   min-width: 100px;
+  position: relative;
+}*/
+/*edit*/
+#settingPanel {
+  /*border-top: 1px solid #acaba6;*/
+  border: 0px solid blue;
+  top: 45px;
+  z-index: 2;
+  display: block;
+  width: 100vw;
+  padding: 10px 5px;
+  background: #FFF;
+  position: fixed;
+  box-shadow: 0 3px 2px transparent, 0 3px 3px rgba(0, 0, 0, 0.15);
 }
 
-.toolBar select{
+/*edit */
+#settingPanel select{
   width:100px;
   height: 35px;
   font-family: 'Open Sans', 微軟正黑體, sans-serif;
@@ -299,19 +538,11 @@ body {
   border-radius : 5px;
   padding: 0px; 
 }
-
-.toolBar select:focus {
+/*edit */
+#settingPanel select:focus {
   outline-color: #837b6b;
 } 
 
-/* inert by Allie */
-#settingPanel {
-  border-top: 1px solid #acaba6;
-  padding-top: 5px;
-  margin-top: 4px;
-}
-
-/* edit by Allie */
 .listRow {
   border: 0px solid blue;
   width: 100%;
@@ -329,7 +560,6 @@ body {
   float: left;
 }
 
-/* edit by Allie */
 #arrow {
   float: left;
   width: 30px;
@@ -346,73 +576,108 @@ body {
   margin: 3px 8px 4px 10px;
 }
 
-/* edit by Allie */
+/*edit*/
+#enterCheck {
+  display: none;
+}
+
+#checkLabel {
+  text-align: center;
+  float: right;
+  display: inline-block;
+  padding: 0px 6px;
+  margin: 0 0 0 8px;
+  max-width: 75px;
+  border-radius: 5px;
+  background-color: #75736B;
+  box-shadow: none;
+  color: white;
+  font-family: 'Open Sans', 微軟正黑體, sans-serif;
+  font-size: 0.5em;
+  text-decoration:none;
+  border: 0px; 
+  position: absolute;
+}
+
+#checkLabel:hover{
+  cursor:pointer;
+  background-color: #f0cb1a;
+}
+
+#checkLabel.clicked {
+  cursor:pointer;
+  background-color: #2c9076;
+}
+
+#checkLabel:focus{
+  cursor:pointer;
+  outline-color: #837b6b;
+}
+
 #sendButton {
   float: right;
+  display: inline;
   padding: 6px 12px;
-  margin: 8px;
+  margin: 0 0 0 8px;
   height: 30px;
+  min-width: 75px;
   border-radius: 5px;
   background-color: #2c9076;
   box-shadow: none;
   color: white;
-  font-family: 'sans-serif';
+  /*font-family: 'Open Sans', 微軟正黑體, sans-serif;*/
   font-size: 1em;
   text-decoration:none;
   border: 0px; 
-  margin-right: 0px;
+  position: absolute;
+  top: 47px;
 }
 
 #sendButton:hover{
   cursor:pointer;
   background-color: #f0cb1a;
 }
+
 #sendButton:focus{
   cursor:pointer;
   outline-color: #837b6b;
 }
 
-#sendFncWrap {
+#sendButton:disabled {
+  cursor: default;
+  background-color: #75736B;
+  opacity: 0.3;
+}
+
+/*insert*/
+#colButton {
   float: right;
-}
-
-/* edit by Allie */
-#settingBt {
-  float: left;
-  width: 30px;
+  display: inline;
+  padding: 6px 12px;
+  margin: 0 0 0 8px;
   height: 30px;
-  border: 0px solid blue;
-  border-radius: 0;
-  background-image:url(./pic/setting.png); /*#75736B*/
-  background-size: 30px;
-  background-color: transparent;
-  outline: none;
+  border-radius: 5px;
+  background-color: #2c9076;
   box-shadow: none;
-  -webkit-box-shadow: none;
-  padding: 10px;
-  margin: 7px;
+  color: white;
+  font-family: 'Open Sans', 微軟正黑體, sans-serif;
+  font-size: 0.8em;
+  text-decoration:none;
+  border: 0px; 
+  position: absolute;
+  top: 10px;
 }
 
-#settingBt:hover {
-  cursor: pointer;
-  background-image:url(./pic/setting_click.png);
-}
-
-#settingBt.clicked{
+#colButton:hover{
   cursor:pointer;
-  /*background-image:url(./pic/setting_click.png);*/
-  background-image:url(./pic/back.png);
+  background-color: #f0cb1a;
 }
-
-#settingBt.clicked:hover{
+#colButton:focus{
   cursor:pointer;
-  /*background-image:url(./pic/setting_click.png);*/
-  background-image:url(./pic/back_click.png);
+  outline-color: #837b6b;
 }
-
-
-/* edit by Allie */
-#blockAll {
+/* block is replaced */
+#blockAll { 
   float: left;
   height: 35px;
   border: 0px solid red;
@@ -436,7 +701,6 @@ body {
   color: #2c9076;
 }
 
-/* insert by Allie */
 #showLiked {
   float: left;
   height: 35px;

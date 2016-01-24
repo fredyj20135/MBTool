@@ -1,6 +1,7 @@
 var socket = io.connect('http://localhost:5092');
 var username;
 var twoCol = true;
+var blockMode = 'unblock';
 var highlightWord = '';
 			
 socket.on('ping', function(data) { socket.emit('pong', {beat: 1 }); });
@@ -18,8 +19,8 @@ socket.on('connect_error', function(err) {
 	$('#container').off('click', 'input.revertBt');
 	$('#container').off('click', 'input.translateBt');
 
-	var serverMsg = $('<div>').text('[SERVER] You are disconnected! Please check all the content is preserved!')
-		.addClass('userMessage serverMessage');
+	var serverMsg = $('<div>').text('[SERVER] You are disconnected! Please be sure that all the record is preserved!')
+		.addClass('userMessage');
 
 	addUserMsgByColMode(serverMsg);
 
@@ -40,21 +41,29 @@ socket.on('userConfirm', function(packet) {
 	$("#loginBody").animate({opacity: 0, hight: 0}, 600, 'swing', function() {
 		$("#loginBody").hide();
 		$('#controlPanel').css('visibility', 'visible');
-		$('#BSTBody').css('visibility', 'visible').fadeIn('fast');
+		$('#BSTBody').css('visibility', 'visible').fadeIn('slow');
 		$('#textInput').focus();
 	});
 
 	username = packet.uID;
 
+	$('#roomInfo').text(packet.room[0] + 'roup ' + packet.room[1]); // how bad...
+
 	$('#settingBt').on('click', settingBtHandler);
-	$('#windowCtrlBt').on('click', windowCtrlBtHandler);
+	// $('#windowCtrlBt').on('click', windowCtrlBtHandler);
 	$('#sendButton').on('click', sendBtHandler);
 	$('#textInput').on('keyup keydown', inputCountHandler);
 	$('#textInput').on('keypress', sendBtEnterHandler);
-	$('#blockAll').on('click', blockCtrlHandler);
+	$('input[name=view]').on('click', blockMsgHandler);
+
+	$('input[name=colMode]').on('click', windowCtrlBtHandler);
+	
 	$('#showLiked').on('click', bubbleLikedCtrlHandler);
 
-	$('#emitAll').prop('disabled', true);
+	// $('#emitAll').prop('disabled', true);
+	$('#unblock').attr('checked', true);
+	$('#twoCol').attr('checked', true);
+
 	$("#enterCheck").click();
 
 	$(window).on('beforeunload', function() {
@@ -64,12 +73,12 @@ socket.on('userConfirm', function(packet) {
 
 /* distribute System Msg */ 
 socket.on('serverSelfMsg', function(msg) { /* server msg related to user */
-	var serverMsg = $('<div>').text(msg).addClass('userMessage serverMessage');
+	var serverMsg = $('<div>').text(msg).addClass('userMessage');
 	addUserMsgByColMode(serverMsg);
 });
 
 socket.on('serverOthersMsg', function(msg) { /* server msg related to others */
-	$('#partnerMsgContainer').append($('<div>').text(msg).addClass('partnerMessage serverMessage'))
+	$('#partnerMsgContainer').append($('<div>').text(msg).addClass('partnerMessage systemMessage'))
 		.scrollTop($('#partnerMsgContainer').prop("scrollHeight"));
 });
 
@@ -97,15 +106,15 @@ socket.on('chat', function(packet) {
 	var shareBt 	= $('<input>').addClass('shareBt').prop({type: 'button', value: ''}).hide();
 	var likeBt 		= $('<input>').addClass('likeBt').prop({type: 'button', value: ''});
 	var likeNum		= $('<span>').addClass('likeNum').text('0');
-	var translateBt = $('<input>').addClass('translateBt').prop({type: 'button', value: ''});
-	var revertBt 	= $('<input>').addClass('revertBt').prop({type: 'button', value: 'revert'}).hide();
+	var translateBt = $('<input>').addClass('translateBt').prop({type: 'button', value: 'Translate'});
+	var revertBt 	= $('<input>').addClass('revertBt').prop({type: 'button', value: 'Revert'}).hide();
 	var timeStamp 	= $('<span>').addClass('timeStamp').html(postTime);
 	var postID 		= $('<span>').addClass('postID').html(packet.pID).hide();
 	var nameSpace 	= $('<span>').addClass('name').text(uID);
 	var icon 		= $('<div>').addClass('partnerIcon').addClass(packet.uColor);
 	
 	content.html(content.html().replace(/\n/g, '<br>'));
-	content = $('<span>').addClass('msgCntnt').append(content).append('<br>').append(likeBt).append(likeNum);
+	content = $('<span>').addClass('msgCntnt').append(content).append('<br>').append(likeNum).append(likeBt);
 
 	if (uID == username) {
 		content = content.append(shareBt).append(timeStamp);
@@ -115,7 +124,7 @@ socket.on('chat', function(packet) {
 
 		addUserMsgByColMode(content);
 	} else {
-		content = content.append(nameSpace).append(timeStamp).append(translateBt).append(revertBt);
+		content = content.append(nameSpace).append(timeStamp).append(revertBt).append(translateBt);
 		content = $('<div>').addClass('partnerMessage').append(icon).append(postID).append(content);
 
 		if (packet.block == true) content.find('.msgCntnt').addClass('block');
@@ -174,8 +183,7 @@ socket.on('is BINDED', function(packet) { /* Get translated data and add to mess
 		if (transMsg.hasClass('partnerMessage')) {
 			if (packet.uID == username) {
 				transMsg.find('.revertBt').show();
-				transMsg.find('.translateBt').prop('disabled', false).val('Translate').show();
-				// transMsg.find('.translateBt').prop('disabled', false).show();
+				transMsg.find('.translateBt').prop('disabled', false).val('Translate').removeClass('working');
 			}
 			result.addClass('note');
 		}
@@ -261,36 +269,31 @@ function loginBtEnterHandler(event) {
 
 /* Buttons in controlPanel. Concept by Allie. Start */
 function settingBtHandler() {
-	if ($('#settingPanel').is(':visible')){
-		$('#settingPanel').toggle();
-		$('#sendFncWrap').toggle('slow');
-		$('#textInput').toggle('slow');
-	} else {
-		$('#settingPanel').toggle('slow');
-		$('#sendFncWrap').toggle('slow');
-		$('#textInput').toggle();
-	}
+	$('#settingPanel').slideToggle(500);
 }
 
 function windowCtrlBtHandler() {
 	var delay = 0;
 	var stretch, shrink, uWidth, pWidth;
 	twoCol == true? twoCol = false : twoCol = true;
+	var mode = $('input[name=colMode]:checked').val();
 
-	clickControl($('#windowCtrlBt'));
-	$('#windowCtrlBt').prop('disabled', true);
+	// clickControl($('#windowCtrlBt'));
+	// $('#windowCtrlBt').prop('disabled', true);
+	$('input[name=colMode]').prop('disabled', true);
 
-	if ($('#windowCtrlBt').hasClass('clicked')) {
-		$('#windowCtrlBt').text('To two columns');
+	if (mode == 'oneCol') {
+		// $('#windowCtrlBt').text('To two columns');
 		pWidth = '100%';	uWidth = '0%';
 		shrink = '#userMsgContainer';
 		stretch = '#partnerMsgContainer';
-	} else {
-		$('#windowCtrlBt').text('To one column');
+	} else if (mode == 'twoCol'){
+		// $('#windowCtrlBt').text('To one column');
 		pWidth = '50%';		uWidth = '50%';
 		stretch = '#userMsgContainer';
 		shrink = '#partnerMsgContainer';
 	}
+	$('#' + mode).attr('checked', true);
 
 	if ($('#showLiked').hasClass('clicked')) $('#showLiked').click();
 
@@ -306,7 +309,7 @@ function windowCtrlBtHandler() {
 			delay += 100;
 		});
 	}});
-	$(shrink).animate({scrollTop: $(this).offset().top}, 100, function() { $('#windowCtrlBt').prop('disabled', false); });
+	$(shrink).animate({scrollTop: $(this).offset().top}, 100, function() { $('input[name=colMode]').prop('disabled', false); });
 	$(stretch).animate({scrollTop: $(this).offset().top}, 100);	
 }
 
@@ -325,20 +328,20 @@ function sendBtEnterHandler(event) {
 	}
 }
 
-function blockCtrlHandler() {
-	clickControl($('#blockAll'));
-	var blocked = $('#blockAll').hasClass('clicked');
+function blockMsgHandler() {
+	var newMode = $('input[name=view]:checked').val();
+	var blockInfo;
 
-	if ($('#blockAll').hasClass('clicked')) {
-		$('#emitAll').prop('disabled', false);
-		$('#blockAll').val('Unblock all my messages');
-	} else {
-		$('#emitAll').prop('disabled', true);
-		$('#blockAll').val('Block all my messages');
+	if (newMode != blockMode) {
+		newMode == 'block'? blockInfo = true : blockInfo = false;
+		$('#' + newMode).attr('checked', true);
+
+		if (blockInfo) $('.shareBt').each(function() {$(this).show(); });
+		else $('.shareBt').each(function() {$(this).hide(); });
+		
+		socket.emit('blockMsg', blockInfo);
+		blockMode = newMode;
 	}
-	$('.shareBt').each(function() { $(this).toggle(); });
-
-	socket.emit('blockMsg', blocked);
 }
 
 function bubbleLikedCtrlHandler() {
@@ -353,7 +356,7 @@ function bubbleLikedCtrlHandler() {
 				userMsg.addClass('vote');
 			}
 		});
-		$('.serverMessage').each(function() { 
+		$('.systemMessage').each(function() { 
 			if (!$(this).hasClass('lie')) $(this).hide('fast');
 			$(this).addClass('vote');
 		});
@@ -396,11 +399,9 @@ $('#emitAll').click(function() {
 	});
 });
 
-/* Enter to send or Enter to next line */
-$('#checkWrap').click(function() { $('#enterCheck').click(); });
-
 $('#enterCheck').click(function() {
-	$('#sendButton').toggle('fast');
+	clickControl($('#checkLabel'));
+	$('#sendButton').prop('disabled', $('#enterCheck').prop('checked'));
 
 	if($(this).prop('checked')) $(document).on('keypress', sendBtEnterHandler);
 	else $(document).off('keypress', sendBtEnterHandler);
@@ -472,8 +473,7 @@ $('#container').on('click', 'input.translateBt', function() {
 		};
 		socket.emit('translate', transElement);
 
-		// $(this).prop('disabled', true).val('Wait...');
-		$(this).prop('disabled', true).hide();
+		$(this).prop('disabled', true).val('WAIT...').addClass('working');
 	}
 });
 
@@ -488,6 +488,5 @@ $('#container').on('click', 'input.revertBt', function() {
 
 /* initial page setting */		
 $(document).ready(function() {
-	$('#BSTBody').hide();
 	$('#settingPanel').hide();
 });

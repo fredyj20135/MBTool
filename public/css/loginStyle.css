@@ -28,13 +28,16 @@
 
 #loginBody h1 {
   text-align: center;
-  padding: 30px 0px 35px 0px;
-  margin-bottom: 20px;
+  padding: 30px 0px 25px 0px;
+  margin-bottom: 15px;
   border-bottom: 1px solid #6e6e6e; 
 }
 
 #loginMsg {
-
+  margin: 0px auto;
+  text-align: center;
+  border: 0px solid red;
+  margin-bottom: 10px;
 }
 
 #loginBody p {
@@ -46,25 +49,26 @@
 #loginBody label {
   line-height: 50px;
 }
-
+/*edit*/
 #loginBody input {
   margin: 5px 20px;
   width:370px;
   height:60px;
-  font-size : 1.2em;
-  font-weight: 300;
+  font-size : 1.05em;
+  font-weight: normal;
   letter-spacing: 1px;
   box-shadow: inset;
   border : 1px solid #6e6e6e;
   border-radius : 5px;
-  padding: 15px; 
+  padding: 0px 15px; 
+  font-family: 'Open Sans', 微軟正黑體, sans-serif;
 }
 
 #loginBody input:focus {
   border: 1px solid #2c9076;
   outline: none;
 }
-
+/*edit*/
 ::-webkit-input-placeholder { color:#737373; font-weight: lighter; letter-spacing:1px;}
 ::-moz-placeholder { color:#737373; font-weight: lighter;letter-spacing:1px;} /* firefox 19+ */
 :-ms-input-placeholder { color:#737373; font-weight: lighter;letter-spacing:1px;} /* ie */
@@ -93,3 +97,23 @@ input:-moz-placeholder { color:#737373;  font-weight: lighter; letter-spacing:1p
   outline: none;  
 }
 
+/* insert */
+#login select {
+  margin: 5px 20px;
+  width:370px;
+  height:60px;
+  font-size : 1.05em;
+  line-height: 1.05em;
+  font-weight: normal;
+  letter-spacing: 1px;
+  box-shadow: inset;
+  border : 1px solid #6e6e6e;
+  border-radius : 5px;
+  padding: 0px 15px; 
+  font-family: 'Open Sans', 微軟正黑體, sans-serif;
+}
+/* insert */
+#login select:focus {
+  border: 1px solid #2c9076;
+  outline: none;
+} 

@@ -1,6 +1,6 @@
 Multilingual Brainstorming Tool: NBrain
 
-Testing system prototype v2.0
+Testing system prototype v2.5
 
 Use Microsoft 'Bing' translator as part of the function. Please check your own id and secret key to access.
 Use 'postgresql' as database to save messages and control history
