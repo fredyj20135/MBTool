@@ -74,7 +74,7 @@
 		});
 
 		socket.on('regSuccess', function(msg) {
-			$('#regMsg').html(msg);
+			$('#loginMsg').html(msg);
 
 			$('#uID').val('').hide('slow');
 			$('#pwd').val('').hide('slow');
@@ -89,7 +89,7 @@
 			if ($('#pwd').val() == $('#pwdConfirm').val()) 
 				socket.emit('reg', {usr: $('#uID').val(), pwd: $('#pwd').val(), group: $('#groupID').val()});
 			else 
-				$('#regMsg').text('Please check your password!');
+				$('#loginMsg').text('Please check your password!');
 		}
 		function regBtEnterHandler(event) {
 			if (event.which == 13) $('#regInput').click();
