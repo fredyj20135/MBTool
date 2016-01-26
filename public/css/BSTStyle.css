@@ -12,7 +12,7 @@ html {
 
 /*edit*/
 body { 
-  height:100%;
+  height: 100%;
   margin: 0;
   padding: 0;
   background: #e6e6e6; /*#c9e1ce;*/
@@ -44,7 +44,7 @@ body {
   display: inline-block;
   border: 0px solid red;
   /*width: calc(100vw - 280px - 60px - 16px);*/
-  margin: 10px 5px;
+  margin: 10px 15px;
   font-size: 1.1em;
   color: white;
   font-weight: bold;
@@ -61,7 +61,7 @@ body {
 .switch {
   display: inline-block;  
   position: relative;
-  margin: 10px 0px;
+  margin: 5px 0px;
   height: 26px;
   width: 140px;
   background: rgba(0, 0, 0, 0.25);
@@ -99,7 +99,7 @@ body {
 }
 .switch-input:checked + .switch-label {
   font-weight: bold;
-  color: rgba(0, 0, 0, 0.65);
+  color: rgba(44, 144, 118, 0.85);
   text-shadow: 0 1px rgba(255, 255, 255, 0.25);
   -webkit-transition: 0.15s ease-out;
   -moz-transition: 0.15s ease-out;
@@ -131,37 +131,35 @@ body {
 
 /*edit*/
 #settingBt {
+  float: right;
   width: 30px;
   height: 30px;
   border: 0px solid blue;
   border-radius: 0;
-  background-image:url(./pic/gear39.png); /*#75736B*/
+  background-image:url(./pic/direction.png); /*#75736B*/
   background-size: 30px;
   background-color: transparent;
   outline: none;
   box-shadow: none;
   -webkit-box-shadow: none;
   padding: 10px;
-  margin: 8px;
+  margin: 8px 5px;
 }
 
 /*edit*/
 #settingBt:hover {
   cursor: pointer;
-  background-image:url(./pic/gear39_hover.png);
+  background-image:url(./pic/direction_hover.png);
 }
 
 #settingBt.clicked{
   cursor:pointer;
-  /*background-image:url(./pic/setting_click.png);*/
-  background-image:url(./pic/back.png);
+  background-image:url(./pic/direction_clicked.png);
 }
 
-/*edit*/
 #settingBt.clicked:hover{
   cursor:pointer;
-  /*background-image:url(./pic/setting_click.png);*/
-  /*background-image:url(./pic/back_click.png);*/
+  background-image:url(./pic/direction_clicked_hover.png);
 }
 
 /*edit*/
@@ -286,7 +284,7 @@ body {
 }
 
 /*insert*/
-.systemMessage {
+.partnerMessage.systemMessage {
   background: transparent;
   color: #5a5a5a;
 }
@@ -483,7 +481,7 @@ body {
 
 /*edit*/
 #textInput { 
-  width: calc(100% - 75px);
+  width: calc(100% - 55px);
   border-radius: 0px;
   color: #37342d;
   font-family: 'Open Sans', 'Archivo Narrow', 微軟正黑體;
@@ -505,26 +503,39 @@ body {
   outline: none;
 }
 
-/*delete
- .toolBar {
-  width: 100%;
-  height: 45px;
-  border: 1px solid red;
-  min-width: 100px;
+#textLimit {
+  float: right;
+  display: none;
+  position: absolute;
+  top: -15px;
+  right: 20px;
+  background: white; 
+  padding: 3px 20px;
+  border-radius: 5px;
+  color: #37342d;
+  font-family: 'Open Sans', 微軟正黑體, sans-serif;
+  font-size: 0.5em;
+  box-shadow: 0 -3px 2px transparent, 0 -3px 3px rgba(0, 0, 0, 0.09);
+}
+
+
+#settingWrap {
+  float: right;
+  max-width: 100%;
   position: relative;
-}*/
+  height: 45px;
+}
+
 /*edit*/
 #settingPanel {
-  /*border-top: 1px solid #acaba6;*/
+  overflow: hidden;
+  float: right;
   border: 0px solid blue;
-  top: 45px;
-  z-index: 2;
+  z-index: 4;
   display: block;
-  width: 100vw;
-  padding: 10px 5px;
-  background: #FFF;
-  position: fixed;
-  box-shadow: 0 3px 2px transparent, 0 3px 3px rgba(0, 0, 0, 0.15);
+  background: rgba(0, 0, 0, 0.55);
+  box-shadow: 0 5px 5px rgba(0, 0, 0, 0.15), 0 5px 5px rgba(0, 0, 0, 0.35);
+  border-bottom-left-radius: 5px;
 }
 
 /*edit */
@@ -535,20 +546,52 @@ body {
   font-size : 1em;
   line-height: 1em;
   border : 1px solid #37342d;
-  border-radius : 5px;
+  border-radius : 10px;
   padding: 0px; 
+  display: inline;
 }
 /*edit */
 #settingPanel select:focus {
   outline-color: #837b6b;
-} 
+}
+
+.settingText {
+  display: inline-block;
+  padding: 6px 10px;
+  color: white;
+  font-size : 1em;
+}
+
+.settingText.title {
+  font-size : 1.5em;
+  padding: 2px 10px;
+  font-family: 'Archivo Narrow';
+}
 
 .listRow {
   border: 0px solid blue;
-  width: 100%;
-  height: 40px;
-  margin: 3px 5px;
+  /*max-width: 100%;*/
+  height: 45px;
+  padding: 5px 5px 5px 0px;
+  margin: 0px 5px;
+  overflow: hidden;
+}
+
+.listRow.press {
+  height: 30px;
+  padding: 1px 1px 1px 0px;
+}
+
+.listRow.complement {
+  height: 20px;
   padding: 0px;
+}
+
+.listRow > .title{
+  text-align: center;
+  color: #f0cb1a;
+  width: 100%;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.85);
 }
 
 #oriLang {
@@ -574,42 +617,31 @@ body {
   -webkit-box-shadow: none;
   padding: 10px;
   margin: 3px 8px 4px 10px;
+  display: inline;
 }
 
 /*edit*/
 #enterCheck {
-  display: none;
+  /*display: none;*/
+  position: absolute;
+  top: 56px;
 }
 
 #checkLabel {
+  padding: 0px 2px 0px 8px;
+  display: inline-block;
   text-align: center;
   float: right;
-  display: inline-block;
-  padding: 2px 6px;
-  margin: 0px 8px 0px 8px;
-  max-width: 75px;
-  min-width: 75px;
-  max-height: 35px;
-  min-height: 35px;
-  border-radius: 5px;
-  background-color: #75736B;
-  box-shadow: none;
-  color: white;
+  color: #837b6b;
   font-family: 'Open Sans', 微軟正黑體, sans-serif;
   font-size: 0.7em;
-  text-decoration:none;
-  border: 0px; 
   position: absolute;
+  top: 44px;
 }
 
 #checkLabel:hover{
+  color: #37342d;
   cursor:pointer;
-  background-color: #f0cb1a;
-}
-
-#checkLabel.clicked {
-  cursor:pointer;
-  background-color: #2c9076;
 }
 
 #checkLabel:focus{
@@ -621,10 +653,7 @@ body {
   float: right;
   display: inline;
   padding: 6px 12px;
-  margin: 0 0 0 8px;
-  height: 30px;
-  min-width: 75px;
-  min-height: 30px;
+  min-width: 70px;
   border-radius: 5px;
   background-color: #2c9076;
   box-shadow: none;
@@ -634,7 +663,7 @@ body {
   text-decoration:none;
   border: 0px; 
   position: absolute;
-  top: 47px;
+  top: 10px;
 }
 
 #sendButton:hover{
@@ -705,31 +734,44 @@ body {
   color: #2c9076;
 }
 
-#showLiked {
+#emitAll {
+  float: right;
+  font-size: 0.7em;
+  margin-right: 15px;
+  padding-top: 2px;
+  text-align: right;
+}
+
+.linkButton {
   float: left;
-  height: 35px;
+  text-align: left;
   border: 0px solid red;
   border-radius: 0;
   background-color: transparent;
   outline: none;
   box-shadow: none;
   -webkit-box-shadow: none;
-  color: #75736B;
+  color: white;
   font-family: 'Open Sans', 微軟正黑體, sans-serif;
-  font-size: 1.05em;
-  margin-bottom: 0px;
+  font-size: 1em;
+  padding: 5px 0px 0px 10px;
 }
 
-#showLiked:hover {
+.linkButton:hover {
   cursor: pointer;
+  color: #f0cb1a;
   text-decoration: underline;
 }
 
-#showLiked.clicked {
-  color: #2c9076;
+.linkButton.clicked {
+  color: #38b796;
 }
 
-.langSelector{
-  float: left;
+.langSelectorWrap {
+  position: relative;
+  float: right;
+  display: inline;
+  padding-left: 10px;
 }
+
 

@@ -30,49 +30,70 @@
 		</div>
 		<div id="BSTBody">
 			<div id="topMenu">
-				<input id="settingBt" type="button" value="">
-				<div id="switchBt">
-					<div class="switch">
-						<input type="radio" class="switch-input" name="view" value="block" id="block">
-						<label for="block" class="switch-label switch-label-off">Block</label>
-						<input type="radio" class="switch-input" name="view" value="unblock" id="unblock">
-						<label for="unblock" class="switch-label switch-label-on">Unblock</label>
-						<span class="switch-selection"></span>
-					</div>
-				</div>
-				<div id="switchBt">
-					<div class="switch">
-						<input type="radio" class="switch-input" name="colMode" value="twoCol" id="twoCol">
-						<label for="twoCol" class="switch-label switch-label-off">TwoCols</label>
-						<input type="radio" class="switch-input" name="colMode" value="oneCol" id="oneCol">
-						<label for="oneCol" class="switch-label switch-label-on">OneCol</label>
-						<span class="switch-selection"></span>
-					</div>
-				</div>
 				<div id="roomInfo"></div>
-			</div>
-			<div id="settingPanel">
-				<div class="listRow">
-					<select id="oriLang" class="langSelector">
-						<option value="en" selected="selected">English</option>
-						<option value="zh-CHT">中文</option>
-						<option value="ja">日本語</option>
-						<option value="ko">한국의</option>
-						<option value="fr">Franch</option>
-						<option value="de">Deutsch</option>
-					</select>
-					<div id="arrow"></div>
-					<select id="transLang" class="langSelector">
-						<option value="en">English</option>
-						<option value="zh-CHT" selected="selected">中文</option>
-						<option value="ja">日本語</option>
-						<option value="ko">한국의</option>
-						<option value="fr">Franch</option>
-						<option value="de">Deutsch</option>
-					</select>
-				</div>
-				<div class="listRow">
-					<input id="showLiked" type="button" value="Show liked messages">
+				<div id="settingWrap">
+					<div id="settingPanel">
+						<div class="listRow">
+							<div class="settingText title"> MENU </div>
+						</div>
+						<div class="listRow press">
+							<div class="settingText">Translation Setting</div>
+						</div>
+						<div class="listRow">
+							<div class="langSelectorWrap">
+								<select id="oriLang" class="langSelector">
+									<option value="en" selected="selected">English</option>
+									<option value="zh-CHT">中文</option>
+									<option value="ja">日本語</option>
+									<option value="ko">한국의</option>
+									<option value="fr">Franch</option>
+									<option value="de">Deutsch</option>
+								</select>
+								<div id="arrow"></div>
+								<select id="transLang" class="langSelector">
+									<option value="en">English</option>
+									<option value="zh-CHT" selected="selected">中文</option>
+									<option value="ja">日本語</option>
+									<option value="ko">한국의</option>
+									<option value="fr">Franch</option>
+									<option value="de">Deutsch</option>
+								</select>
+							</div>
+						</div>
+						<div class="listRow complement"></div>
+						<div class="listRow">
+							<div class="settingText">Message: </div>
+							<div id="switchBt">
+								<div class="switch">
+									<input type="radio" class="switch-input" name="view" value="unblock" id="unblock">
+									<label for="unblock" class="switch-label switch-label-off">Unblock</label>
+									<input type="radio" class="switch-input" name="view" value="block" id="block">
+									<label for="block" class="switch-label switch-label-on">Block</label>
+									<span class="switch-selection"></span>
+								</div>
+							</div>
+						</div>
+						<div class="listRow complement">
+							<input class="linkButton" id="emitAll" type="button" value="Emit all bubbles">
+						</div>
+						<div class="listRow">
+							<div class="settingText">Window: </div>
+							<div id="switchBt">
+								<div class="switch">
+									<input type="radio" class="switch-input" name="colMode" value="twoCol" id="twoCol">
+									<label for="twoCol" class="switch-label switch-label-off">TwoCols</label>
+									<input type="radio" class="switch-input" name="colMode" value="oneCol" id="oneCol">
+									<label for="oneCol" class="switch-label switch-label-on">OneCol</label>
+									<span class="switch-selection"></span>
+								</div>
+							</div>
+						</div>
+						<div class="listRow complement"></div>
+						<div class="listRow">
+							<input class="linkButton" id="showLiked" type="button" value="Show liked bubbles: Off">
+						</div>
+					</div>
+					<input id="settingBt" type="button" value="">
 				</div>
 			</div>
 			<div id="container">
@@ -82,17 +103,18 @@
 			<div id="controlPanel">
 				<form>
 					<textarea id="textInput" rows="3" cols="30" placeholder="Your message here"></textarea>
-					<!-- <button id="colButton" type="button">colunm</button> -->
+					<div id='textLimit'>Limit exceeded!</div>
+					<button id="sendButton" type="button">Send</button>
 					<span>
 						<input type="checkbox" id="enterCheck">
-						<label for="enterCheck" id="checkLabel">Enter to send</label>
+						<label for="enterCheck" id="checkLabel">Send by button</label>
 					</span>
-					<button id="sendButton" type="button">Send</button>
 				</form>
 			</div>
 		</div>
 		<script src="js/socket.io-1.2.0.js"></script>
-		<script src="js/jquery.js"></script>
+		<script src="js/jquery-1.12.0.min.js"></script>
+		<script src="js/jquery-ui.min.js"></script>
 		<script src="js/clientFunc.js"></script>
 	</body>
 </html>

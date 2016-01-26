@@ -50,20 +50,16 @@ socket.on('userConfirm', function(packet) {
 	$('#roomInfo').text(packet.room[0] + 'roup ' + packet.room[1]); // how bad...
 
 	$('#settingBt').on('click', settingBtHandler);
-	// $('#windowCtrlBt').on('click', windowCtrlBtHandler);
-	$('#sendButton').on('click', sendBtHandler);
+	$('#showLiked').on('click', bubbleLikedCtrlHandler);
+	$('input[name=colMode]').on('click', windowCtrlBtHandler);
+	$('input[name=view]').on('click', blockMsgHandler);
 	$('#textInput').on('keyup keydown', inputCountHandler);
 	$('#textInput').on('keypress', sendBtEnterHandler);
-	$('input[name=view]').on('click', blockMsgHandler);
+	$('#sendButton').on('click', sendBtHandler);
 
-	$('input[name=colMode]').on('click', windowCtrlBtHandler);
-	
-	$('#showLiked').on('click', bubbleLikedCtrlHandler);
-
-	// $('#emitAll').prop('disabled', true);
+	$('#emitAll').prop('disabled', true).hide();
 	$('#unblock').attr('checked', true);
 	$('#twoCol').attr('checked', true);
-
 	$("#enterCheck").click();
 
 	$(window).on('beforeunload', function() {
@@ -73,7 +69,7 @@ socket.on('userConfirm', function(packet) {
 
 /* distribute System Msg */ 
 socket.on('serverSelfMsg', function(msg) { /* server msg related to user */
-	var serverMsg = $('<div>').text(msg).addClass('userMessage');
+	var serverMsg = $('<div>').text(msg).addClass('userMessage systemMessage');
 	addUserMsgByColMode(serverMsg);
 });
 
@@ -269,7 +265,8 @@ function loginBtEnterHandler(event) {
 
 /* Buttons in controlPanel. Concept by Allie. Start */
 function settingBtHandler() {
-	$('#settingPanel').slideToggle(500);
+	clickControl($('#settingBt'));
+	$('#settingPanel').toggle('blind', {direction: 'right'}, 500);
 }
 
 function windowCtrlBtHandler() {
@@ -278,23 +275,19 @@ function windowCtrlBtHandler() {
 	twoCol == true? twoCol = false : twoCol = true;
 	var mode = $('input[name=colMode]:checked').val();
 
-	// clickControl($('#windowCtrlBt'));
-	// $('#windowCtrlBt').prop('disabled', true);
 	$('input[name=colMode]').prop('disabled', true);
 
 	if (mode == 'oneCol') {
-		// $('#windowCtrlBt').text('To two columns');
 		pWidth = '100%';	uWidth = '0%';
 		shrink = '#userMsgContainer';
 		stretch = '#partnerMsgContainer';
 	} else if (mode == 'twoCol'){
-		// $('#windowCtrlBt').text('To one column');
 		pWidth = '50%';		uWidth = '50%';
 		stretch = '#userMsgContainer';
 		shrink = '#partnerMsgContainer';
 	}
-	$('#' + mode).attr('checked', true);
 
+	$('#' + mode).attr('checked', true);
 	if ($('#showLiked').hasClass('clicked')) $('#showLiked').click();
 
 	$(shrink + ' .userMessage').each(function() { $(this).hide().addClass('lie'); });
@@ -317,7 +310,7 @@ function sendBtHandler() {
 	if ($.trim($('#textInput').val()) !== "") {
 		socket.emit('chat message', $('#textInput').val());
 		$('#textInput').val('').focus();
-		$('#textLimit').text('');
+		$('#textLimit').hide();
 	}
 }
 
@@ -335,9 +328,11 @@ function blockMsgHandler() {
 	if (newMode != blockMode) {
 		newMode == 'block'? blockInfo = true : blockInfo = false;
 		$('#' + newMode).attr('checked', true);
-
-		if (blockInfo) $('.shareBt').each(function() {$(this).show(); });
-		else $('.shareBt').each(function() {$(this).hide(); });
+		
+		$('#emitAll').prop('disabled', !blockInfo);
+		$('.shareBt').each(function() {$(this).toggle(); });
+		$('#emitAll').toggle('blind', { direction: 'right' }, 300);
+		
 		
 		socket.emit('blockMsg', blockInfo);
 		blockMode = newMode;
@@ -350,10 +345,10 @@ function bubbleLikedCtrlHandler() {
 	if ($('#showLiked').hasClass('clicked')) {
 		$('.msgCntnt').each(function() {
 			var likeNum = parseInt($(this).find('.likeNum').text());
-			var userMsg = $(this).parent();
+			var msg = $(this).parent();
 			if (likeNum == 0) {
-				if (!userMsg.hasClass('lie')) userMsg.hide('fast');
-				userMsg.addClass('vote');
+				if (!msg.hasClass('lie')) msg.hide('fast');
+				msg.addClass('vote');
 			}
 		});
 		$('.systemMessage').each(function() { 
@@ -361,26 +356,25 @@ function bubbleLikedCtrlHandler() {
 			$(this).addClass('vote');
 		});
 
-		$('#showLiked').val('Return')
+		$('#showLiked').val('Show liked bubbles: On')
 	} else {
 		$('.vote').each(function() { 
 			if (!$(this).hasClass('lie')) $(this).show('fast');
 			$(this).removeClass('vote');
 		});
 
-		$('#showLiked').val('Show liked bubbles')
+		$('#showLiked').val('Show liked bubbles: Off')
 	}
-	// [TBD] system message process may change
 }
 
 function inputCountHandler() {
 	var limit = 500;
 	if ($('#textInput').val().length < limit) {
-		$('#textLimit').text('');
+		$('#textLimit').hide();
 		$('#textInput').off('keypress').on('keypress');
 	} else {
 		$('#textInput').on('keypress', function() { return false });
-		$('#textLimit').text('You have exceeded the maximum input');
+		$('#textLimit').show();
 		$('#textInput').val($('#textInput').val().substring(0, limit));
 	}
 }
@@ -393,7 +387,6 @@ function clickControl(elmt) {
 }
 
 $('#emitAll').click(function() {
-	// clickControl($(this));
 	$('input.shareBt').each(function() {
 		if (!$(this).hasClass('clicked')) $(this).click();
 	});
@@ -409,11 +402,11 @@ $('#enterCheck').click(function() {
 
 /* Like "partner's" message button */
 $('#container').on('click', 'input.likeBt', function() { 
-	var postID = $(this).parent().prev().text(); // relatively unsave
-	var userMsg = $('.postID:contains("' + postID + '")').parent();
+	var postID = $(this).parent().siblings('.postID').text(); // relatively unsave, because knowing structure
+	var msg = $('.postID:contains("' + postID + '")').parent();
 
-	for (var i = 0; i < userMsg.length; i++) {
-		var likeBt = $(userMsg[i]).find('input.likeBt');
+	for (var i = 0; i < msg.length; i++) {
+		var likeBt = $(msg[i]).find('input.likeBt');
 		clickControl(likeBt);
 	}
 	if (likeBt.hasClass('clicked')) socket.emit('likeMsg', postID);
@@ -422,15 +415,15 @@ $('#container').on('click', 'input.likeBt', function() {
 
 /* Share "user's" message button*/
 $('#container').on('click', 'input.shareBt', function() { 
-	var postID = $(this).parent().prev().text(); // relatively unsave
-	var userMsg = $('.postID:contains("' + postID + '")').parent();
+	var postID = $(this).parent().siblings('.postID').text(); // relatively unsave
+	var msg = $('.postID:contains("' + postID + '")').parent();
 
-	for (var i = 0; i < userMsg.length; i++) {
-		var shareBt = $(userMsg[i]).find('input.shareBt');
+	for (var i = 0; i < msg.length; i++) {
+		var shareBt = $(msg[i]).find('input.shareBt');
 		clickControl(shareBt);
 
-		if (shareBt.hasClass('clicked')) $(userMsg[i]).addClass('share');
-		else $(userMsg[i]).removeClass('share');
+		if (shareBt.hasClass('clicked')) $(msg[i]).addClass('share');
+		else $(msg[i]).removeClass('share');
 	}
 	if (shareBt.hasClass('clicked')) socket.emit('shareMsg', postID);
 	else socket.emit('unshareMsg', postID);
@@ -489,4 +482,5 @@ $('#container').on('click', 'input.revertBt', function() {
 /* initial page setting */		
 $(document).ready(function() {
 	$('#settingPanel').hide();
+	$('#textLimit').hide();
 });
