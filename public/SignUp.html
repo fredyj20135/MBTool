@@ -48,11 +48,11 @@
 		</div>
 	</body>
 	<script src="js/socket.io-1.2.0.js"></script>
-	<script src="js/jquery.js"></script>
+	<script src="js/jquery-1.12.0.min.js"></script>
 	<script>
 	var socket = io.connect('http://localhost:5092');
 
-	$( document ).ready(function() {
+	$(document).ready(function() {
 		socket.on('connect_error', function(err) { 
 			$('#regInput').off('click', regBtHandler);
 			$(this).off('keypress', regBtEnterHandler);
