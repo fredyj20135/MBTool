@@ -315,32 +315,6 @@ body {
   background-image:url(./pic/share_click.png);
 }
 
-/*eidt
-.translateBt {
-  float: right;
-  width: 20px;
-  height: 20px;
-  border: 0px solid blue;
-  border-radius: 0;
-  background-image:url(./pic/translate.png);
-  background-size:20px;
-  background-color: transparent;
-  outline: none;
-  box-shadow: none;
-  -webkit-box-shadow: none;
-  padding: 10px;
-  margin: 8px 5px 2px 7px;
-
-}
-
-.translateBt:hover {
-  cursor: pointer;
-  background-image:url(./pic/translate_hover.png);
-  /*color: #2c9076;
-  /*text-decoration: underline;
-}
-*/
-
 .translateBt {
   float: right;
   height: 20px;
@@ -369,28 +343,6 @@ body {
   color: #75736B;
   text-decoration: underline;
 }
-
-/*edit
-.revertBt {
-  float: right;
-  width: 20px;
-  height: 19px;
-  border: 0px solid blue;
-  border-radius: 0;
-  background-image:url(./pic/revert.png); /*#75736B
-  background-size: 20px;
-  background-color: transparent;
-  outline: none;
-  box-shadow: none;
-  -webkit-box-shadow: none;
-  padding: 10px;
-  margin: 8px 5px 2px 5px;
-}
-
-.revertBt:hover {
-  cursor: pointer;
-  background-image: url(./pic/revert_hover.png);
-}*/
 
 .revertBt {
   float: right;
