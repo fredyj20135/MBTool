@@ -3,10 +3,10 @@ var username;
 var twoCol = true;
 var blockMode = 'unblock';
 var highlightWord = '';
-			
-socket.on('ping', function(data) { socket.emit('pong', {beat: 1 }); });
 
 /* Socket.io function, start */
+socket.on('ping', function(data) { socket.emit('pong', {beat: 1 }); });
+
 socket.on('connect', function() {
 	$('#loginInput').on('click', loginBtHandler);
 	$(document).on('keypress', loginBtEnterHandler);
@@ -92,6 +92,21 @@ socket.on('partnerMsgDislike', function(pID) { /* Disliked */
 	for (var i = 0; i < post.length; i++) $(post[i]).find('.likeNum').text(a - 1);
 });
 
+socket.on('memberLogin', function(packet) {
+	var icon = $('<span>').addClass('icon').addClass(packet.uColor);
+	var nameSpace = $('<span>').addClass('memberName').text(packet.uID);
+	var newMember = $('<div>').addClass('memberElement').append(icon).append(nameSpace);
+
+	$('#memberWrap').append(newMember);
+});
+
+socket.on('memberLogout', function(uID) {
+	$('.memberName').each(function() {
+		if ($(this).text() == uID) $(this).parent().remove();
+	});
+});
+
+
 /* Manipulate chat message, distribute user's and partner's messages
  * packet : uID: USERNAME, pID: POST ID, msg: MESSAGE, sysTime: SYSTEM TIME, block: MSG HIDE, uColor: COLOR*/
 socket.on('chat', function(packet) {
@@ -104,10 +119,11 @@ socket.on('chat', function(packet) {
 	var likeNum		= $('<span>').addClass('likeNum').text('0');
 	var translateBt = $('<input>').addClass('translateBt').prop({type: 'button', value: 'Translate'});
 	var revertBt 	= $('<input>').addClass('revertBt').prop({type: 'button', value: 'Revert'}).hide();
-	var timeStamp 	= $('<span>').addClass('timeStamp').html(postTime);
+	var sysTime 	= $('<span>').addClass('sysTime').text(postTime).hide();
+	var timeStamp	= $('<span>').addClass('timeStamp').html('@ ' + localTime()).append(sysTime);
 	var postID 		= $('<span>').addClass('postID').html(packet.pID).hide();
-	var nameSpace 	= $('<span>').addClass('name').text(uID);
-	var icon 		= $('<div>').addClass('partnerIcon').addClass(packet.uColor);
+	var nameSpace 	= $('<span>').addClass('nameSpace').text(uID);
+	var icon 		= $('<span>').addClass('partnerIcon').addClass(packet.uColor);
 	
 	content.html(content.html().replace(/\n/g, '<br>'));
 	content = $('<span>').addClass('msgCntnt').append(content).append('<br>').append(likeNum).append(likeBt);
@@ -129,20 +145,9 @@ socket.on('chat', function(packet) {
 	}
 });
 
-function addUserMsgByColMode(content) {
-	var hidden = content.clone().hide().addClass('lie');
-	if (twoCol) {
-		$('#partnerMsgContainer').append(hidden);
-		$('#userMsgContainer').append(content).scrollTop($('#userMsgContainer').prop('scrollHeight'));
-	} else {
-		$('#userMsgContainer').append(hidden);
-		$('#partnerMsgContainer').append(content).scrollTop($('#partnerMsgContainer').prop('scrollHeight'));
-	}
-}
-
 socket.on('partnerMsgBlock', function(packet){
 	$('.partnerMessage').each(function(){
-		if (!$(this).hasClass('share') && $(this).find('.name').text() == packet.uID) {
+		if (!$(this).hasClass('share') && $(this).find('.nameSpace').text() == packet.uID) {
 			if (packet.blockInfo == true) $(this).find('.msgCntnt').addClass('block');
 			else $(this).find('.msgCntnt').removeClass('block');
 		}
@@ -189,7 +194,50 @@ socket.on('is BINDED', function(packet) { /* Get translated data and add to mess
 	
 	if (packet.uID == username) socket.emit('ctrlUnlock', packet.pID);
 });
-/* end */
+
+socket.on('revertMsg', function(packet) { /* Erase translation in specific bubbles, improvable! */
+	var msgPool = $('.postID:contains("' + packet.pID + '")').parent();
+
+	for (var i = 0; i < msgPool.length; i++) {
+		var msgText = $(msgPool[i]).find('.msgTxt');
+		var highlight = msgText.find('.highlight');
+		var elmt, temp;
+		var revertHTML = msgText.html();
+	
+		for (var j = highlight.length; j > 0; j--) { 
+			elmt = $(highlight[j - 1]);
+
+			if (elmt != null && elmt.prop('title').slice(3, elmt.prop('title').length) == packet.uID) {
+				temp = elmt.clone();
+				elmt.find('.trans:last').detach();
+				revertHTML = revertHTML.replace(temp.prop('outerHTML'), elmt.html());
+			}
+			msgText.html(revertHTML);
+			highlight = msgText.find('.highlight');
+		}
+	}
+
+	if (packet.uID == username) {
+		socket.emit('ctrlUnlock', packet.pID);
+		$(msgPool).each(function() {
+			$(this).find('.revertBt').hide();
+		});
+	}
+});
+/* Socket.io function, end */
+
+/* Support function, start */
+/* ADD, and SHOW or Hide Msg by column mode */
+function addUserMsgByColMode(content) {
+	var hidden = content.clone().hide().addClass('lie');
+	if (twoCol) {
+		$('#partnerMsgContainer').append(hidden);
+		$('#userMsgContainer').append(content).scrollTop($('#userMsgContainer').prop('scrollHeight'));
+	} else {
+		$('#userMsgContainer').append(hidden);
+		$('#partnerMsgContainer').append(content).scrollTop($('#partnerMsgContainer').prop('scrollHeight'));
+	}
+}
 
 /* Prevent translation in tag */
 function powerReplace(oriHTML, fromWord, transResult) { // the most important is that don't replace tag
@@ -227,32 +275,34 @@ function powerReplace(oriHTML, fromWord, transResult) { // the most important is
 	return outHTML.toString().replace(/%br%/g, '<br>');
 }
 
-socket.on('revertMsg', function(packet) { /* Erase translation in specific bubbles, improvable! */
-	var msgPool = $('.postID:contains("' + packet.pID + '")').parent();
+/* "VIEW" setting on some button */
+function clickControl(elmt) {
+	if (elmt.hasClass('clicked')) elmt.removeClass('clicked');
+	else elmt.addClass('clicked');
+}
 
-	for (var i = 0; i < msgPool.length; i++) {
-		var msgText = $(msgPool[i]).find('.msgTxt');
-		var highlight = msgText.find('.highlight');
-		var elmt, temp;
-		var revertHTML = msgText.html();
+function localTime() {
+	var date = new Date();
+	var hour = date.getHours();			hour = (hour < 10 ? "0" : "") + hour;    
+	var min  = date.getMinutes();		min = (min < 10 ? "0" : "") + min;
+	var sec  = date.getSeconds();		sec = (sec < 10 ? "0" : "") + sec;
 	
-		for (var j = highlight.length; j > 0; j--) { 
-			elmt = $(highlight[j - 1]);
+	return hour + ':' + min + ':' + sec;
+}
 
-			if (elmt != null && elmt.prop('title').slice(3, elmt.prop('title').length) == packet.user) {
-				temp = elmt.clone();
-				elmt.find('.trans:last').detach();
-				revertHTML = revertHTML.replace(temp.prop('outerHTML'), elmt.html());
-			}
-			msgText.html(revertHTML);
-			highlight = msgText.find('.highlight');
-		}
-		if ($(msgPool[i]).find('.revertBt').length != 0) $(msgPool[i]).find('.revertBt').hide();
+/* Catch user highlighted word (for translate)*/
+$('#container').on('mouseup', '.partnerMessage', function() {
+	if (window.getSelection) {
+		highlightWord = window.getSelection().toString();
+	}else if (document.getSelection){
+		highlightWord = document.getSelection().toString();
+	}else if (document.selection) {
+		highlightWord = document.selection.createRange().text.toString();
 	}
-
-	if (packet.uID == username) socket.emit('ctrlUnlock', packet.pID);
 });
+/* Support function, end */
 
+/* "CONTROL", handler for buttons, Concept by Allie and Seraphina. Start */
 function loginBtHandler() {
 	socket.emit('login', {usr: $('#username').val(), pwd: $('#pwd').val()});
 	$('#username').val('');
@@ -263,62 +313,10 @@ function loginBtEnterHandler(event) {
 	if (event.which == 13) $('#loginInput').click();
 }
 
-/* Buttons in controlPanel. Concept by Allie. Start */
+/* Buttons in setting menu. Concept by Allie */
 function settingBtHandler() {
 	clickControl($('#settingBt'));
 	$('#settingPanel').toggle('blind', {direction: 'right'}, 500);
-}
-
-function windowCtrlBtHandler() {
-	var delay = 0;
-	var stretch, shrink, uWidth, pWidth;
-	twoCol == true? twoCol = false : twoCol = true;
-	var mode = $('input[name=colMode]:checked').val();
-
-	$('input[name=colMode]').prop('disabled', true);
-
-	if (mode == 'oneCol') {
-		pWidth = '100%';	uWidth = '0%';
-		shrink = '#userMsgContainer';
-		stretch = '#partnerMsgContainer';
-	} else if (mode == 'twoCol'){
-		pWidth = '50%';		uWidth = '50%';
-		stretch = '#userMsgContainer';
-		shrink = '#partnerMsgContainer';
-	}
-
-	$('#' + mode).attr('checked', true);
-	if ($('#showLiked').hasClass('clicked')) $('#showLiked').click();
-
-	$(shrink + ' .userMessage').each(function() { $(this).hide().addClass('lie'); });
-	$('#userMsgContainer').animate({ width: uWidth }, { duration: 300, queue: true });
-	$('#partnerMsgContainer').animate({ width: pWidth}, { duration: 300, queue: true, complete: function() {
-		$(stretch + ' .userMessage').each(function() { 
-			$(this).delay(delay).show(500, function() {
-				if ($(this).is(":visible")) 
-					$(stretch).animate({scrollTop: $(stretch).prop('scrollHeight') }, 150);
-			});
-			$(this).removeClass('lie');
-			delay += 100;
-		});
-	}});
-	$(shrink).animate({scrollTop: $(this).offset().top}, 100, function() { $('input[name=colMode]').prop('disabled', false); });
-	$(stretch).animate({scrollTop: $(this).offset().top}, 100);	
-}
-
-function sendBtHandler() {
-	if ($.trim($('#textInput').val()) !== "") {
-		socket.emit('chat message', $('#textInput').val());
-		$('#textInput').val('').focus();
-		$('#textLimit').hide();
-	}
-}
-
-function sendBtEnterHandler(event) {
-	if (event.which == 13 && !event.shiftKey) {
-		event.preventDefault();
-		$('#sendButton').click();
-	}
 }
 
 function blockMsgHandler() {
@@ -339,6 +337,43 @@ function blockMsgHandler() {
 	}
 }
 
+$('#emitAll').click(function() {
+	$('input.shareBt').each(function() {
+		if (!$(this).hasClass('clicked')) $(this).click();
+	});
+});
+
+function windowCtrlBtHandler() {
+	var stretch, shrink, uWidth, pWidth;
+	twoCol == true? twoCol = false : twoCol = true;
+	var mode = $('input[name=colMode]:checked').val();
+
+	$('input[name=colMode]').prop('disabled', true);
+	$('#' + mode).attr('checked', true);
+	if ($('#showLiked').hasClass('clicked')) $('#showLiked').click();
+
+	if (mode == 'oneCol') windowViewAnimate('100%', '0%', '#userMsgContainer', '#partnerMsgContainer');
+	else if (mode == 'twoCol') windowViewAnimate('50%', '50%', '#partnerMsgContainer', '#userMsgContainer');
+}
+
+function windowViewAnimate(pWidth, uWidth, shrink, stretch) {
+	var delay = 0;
+	$(shrink + ' .userMessage').each(function() { $(this).hide().addClass('lie'); });
+	$('#userMsgContainer').animate({ width: uWidth }, { duration: 300, queue: true });
+	$('#partnerMsgContainer').animate({ width: pWidth}, { duration: 300, queue: true, complete: function() {
+		$(stretch + ' .userMessage').each(function() { 
+			$(this).delay(delay).show(500, function() {
+				if ($(this).is(":visible")) 
+					$(stretch).animate({scrollTop: $(stretch).prop('scrollHeight') }, 150);
+			});
+			$(this).removeClass('lie');
+			delay += 100;
+		});
+	}});
+	$(shrink).animate({scrollTop: $(shrink).offset().top}, 100, function() { $('input[name=colMode]').prop('disabled', false); });
+	$(stretch).animate({scrollTop: $(stretch).offset().top}, 100);	
+}
+
 function bubbleLikedCtrlHandler() {
 	clickControl($('#showLiked'));
 
@@ -346,11 +381,12 @@ function bubbleLikedCtrlHandler() {
 		$('.msgCntnt').each(function() {
 			var likeNum = parseInt($(this).find('.likeNum').text());
 			var msg = $(this).parent();
-			if (likeNum == 0) {
+			if (likeNum == 0 || $(this).hasClass('block')) {
 				if (!msg.hasClass('lie')) msg.hide('fast');
 				msg.addClass('vote');
 			}
 		});
+
 		$('.systemMessage').each(function() { 
 			if (!$(this).hasClass('lie')) $(this).hide('fast');
 			$(this).addClass('vote');
@@ -367,6 +403,22 @@ function bubbleLikedCtrlHandler() {
 	}
 }
 
+/* Buttons in inputWrap*/
+function sendBtHandler() {
+	if ($.trim($('#textInput').val()) !== "") {
+		socket.emit('chat message', $('#textInput').val());
+		$('#textInput').val('').focus();
+		$('#textLimit').hide();
+	}
+}
+
+function sendBtEnterHandler(event) {
+	if (event.which == 13 && !event.shiftKey) {
+		event.preventDefault();
+		$('#sendButton').click();
+	}
+}
+
 function inputCountHandler() {
 	var limit = 500;
 	if ($('#textInput').val().length < limit) {
@@ -378,19 +430,6 @@ function inputCountHandler() {
 		$('#textInput').val($('#textInput').val().substring(0, limit));
 	}
 }
-/* end */
-
-/* Buttons controling bubbles. Concept by Allie and Seraphina. Start */
-function clickControl(elmt) {
-	if (elmt.hasClass('clicked')) elmt.removeClass('clicked');
-	else elmt.addClass('clicked');
-}
-
-$('#emitAll').click(function() {
-	$('input.shareBt').each(function() {
-		if (!$(this).hasClass('clicked')) $(this).click();
-	});
-});
 
 $('#enterCheck').click(function() {
 	clickControl($('#checkLabel'));
@@ -400,7 +439,7 @@ $('#enterCheck').click(function() {
 	else $(document).off('keypress', sendBtEnterHandler);
 });
 
-/* Like "partner's" message button */
+/* Like "one's" message */
 $('#container').on('click', 'input.likeBt', function() { 
 	var postID = $(this).parent().siblings('.postID').text(); // relatively unsave, because knowing structure
 	var msg = $('.postID:contains("' + postID + '")').parent();
@@ -413,7 +452,7 @@ $('#container').on('click', 'input.likeBt', function() {
 	else socket.emit('dislikeMsg', postID);
 });
 
-/* Share "user's" message button*/
+/* Share own message button*/
 $('#container').on('click', 'input.shareBt', function() { 
 	var postID = $(this).parent().siblings('.postID').text(); // relatively unsave
 	var msg = $('.postID:contains("' + postID + '")').parent();
@@ -427,18 +466,6 @@ $('#container').on('click', 'input.shareBt', function() {
 	}
 	if (shareBt.hasClass('clicked')) socket.emit('shareMsg', postID);
 	else socket.emit('unshareMsg', postID);
-});
-/* end */ 
-
-/* Catch user highlighted word (for translate)*/
-$('#container').on('mouseup', '.partnerMessage', function() {
-	if (window.getSelection) {
-		highlightWord = window.getSelection().toString();
-	}else if (document.getSelection){
-		highlightWord = document.getSelection().toString();
-	}else if (document.selection) {
-		highlightWord = document.selection.createRange().text.toString();
-	}
 });
 
 /* Send translate request */
@@ -470,17 +497,18 @@ $('#container').on('click', 'input.translateBt', function() {
 	}
 });
 
-/* Send revert request */
+/* Send revert translation request */
 $('#container').on('click', 'input.revertBt', function() {
 	var partnerMsg = $(this).closest('.partnerMessage');
 	var postID = partnerMsg.find('.postID').text();
 
 	socket.emit('ctrlLock', postID);
-	socket.emit('revert', {pID: postID, user: username});
+	socket.emit('revert', {pID: postID, uID: username});
 });
 
 /* initial page setting */		
 $(document).ready(function() {
+	$('#BSTBody').hide();
 	$('#settingPanel').hide();
 	$('#textLimit').hide();
 });

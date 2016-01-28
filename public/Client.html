@@ -31,6 +31,10 @@
 		<div id="BSTBody">
 			<div id="topMenu">
 				<div id="roomInfo"></div>
+				<div id="memberPanel">
+					<div id="memberInfo">Online member: </div>
+					<div id="memberWrap"></div>
+				</div>
 				<div id="settingWrap">
 					<div id="settingPanel">
 						<div class="listRow">
@@ -100,14 +104,14 @@
 				<div id="partnerMsgContainer"></div>
 				<div id="userMsgContainer"></div>
 			</div>
-			<div id="controlPanel">
+			<div id="inputWrap">
 				<form>
 					<textarea id="textInput" rows="3" cols="30" placeholder="Your message here"></textarea>
 					<div id='textLimit'>Limit exceeded!</div>
 					<button id="sendButton" type="button">Send</button>
-					<span>
-						<input type="checkbox" id="enterCheck">
-						<label for="enterCheck" id="checkLabel">Send by enter</label>
+					<span id="enterCheckWrap">
+						<input id="enterCheck" type="checkbox">
+						<label id="checkLabel" for="enterCheck">Send by enter</label>
 					</span>
 				</form>
 			</div>

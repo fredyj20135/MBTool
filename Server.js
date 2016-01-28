@@ -6,10 +6,22 @@ var io = require('socket.io')(server);
 var fs = require('fs');
 var hash = require('./pass').hash;
 var IP = '127.0.0.1';
-var DBON = true;
 
 /* System attribute initialization */
-var config = JSON.parse(fs.readFileSync('./config', 'utf8'));
+var config;
+var DBON;
+
+try {
+	config = JSON.parse(fs.readFileSync('./config', 'utf8'));
+} catch (e) {
+	if (e.code === 'ENOENT') {
+		console.log('Start in "Demo mode", limited function in database and translation, login without ID.\n');
+		DBON = false;
+	} 
+}
+
+console.log('Start in "Full mode".\n');
+DBON = true;
 
 /* Postgres database initialization */
 var pg = require('pg');
@@ -50,11 +62,14 @@ function getDateTime() {
 	var month = date.getMonth() + 1;	month = (month < 10 ? "0" : "") + month;
 	var day  = date.getDate();			day = (day < 10 ? "0" : "") + day;
 
-    return year + month + day + '-' + hour + '-' + min + '-' + sec;
+    return year + month + day + '-' + hour + ':' + min + ':' + sec;
 }
 
-function authenticate(name, pass, fn) { // add a condition check for "room" or "team"
+function authenticate(name, pass, fn) {
 	if (loginUsers[name] != null) return fn(new Error('Multiple loggin'));
+
+	if (!DBON) return fn(null, {usr: name, room: null});
+
 	db.query("SELECT * FROM userInfo WHERE uid = $1", [name], function(err, result) {
 		if(err) fn(new Error('Query Problem!'));
 
@@ -93,7 +108,11 @@ function dbLogInsert(user, room, action, pID, sysTime, content) {
 io.on('connection', function(socket) {
 	socket.on('login', function(packet) { // there is a room name in packet now!
 		authenticate(packet.usr, packet.pwd, function(err, user) {
-			if (user) {
+			var useMode;
+			if (DBON) useMode = user;
+			else useMode = true;
+
+			if (useMode) {
 			// if (true) { //  any users are allowed!
 				socket.room = user.room;
 				socket.join(user.room);
@@ -106,14 +125,17 @@ io.on('connection', function(socket) {
 				}
 				
 				socket.username = temp.userID;
-				socket.emit('userConfirm', {uID: socket.username, msg: 'Success!', room: socket.room}, socket.room);
-				socket.emit('serverSelfMsg', '[SERVER] Hello ' + socket.username + '!', socket.room);
-				socket.broadcast.to(socket.room).emit('serverOthersMsg', '[SERVER] ' + packet.usr + ' has login');
+				socket.emit('userConfirm', {uID: temp.userID, msg: 'Success!', room: socket.room}, socket.room);
+
+				socket.emit('serverSelfMsg', 'NBrain: Welcome ' + temp.userID + '!', socket.room);
+				socket.broadcast.to(socket.room).emit('serverOthersMsg', 'NBrain: ' + packet.usr + ' has login');
+
+				io.sockets.in(socket.room).emit('memberLogin', {uID: temp.userID, uColor: colorName[temp.userColor]});
 
 				var i = 0;
 				for (e in loginUsers) {
 					if (loginUsers[e].room == socket.room) {
-						socket.emit('serverSelfMsg', '[SERVER] ' + loginUsers[e].userID + ' is now in room!', socket.room);
+						socket.emit('memberLogin', {uID: loginUsers[e].userID, uColor: colorName[loginUsers[e].userColor]}, socket.room);
 						i++;
 					}
 				}
@@ -132,7 +154,8 @@ io.on('connection', function(socket) {
 	// when someone is disconnect, print server information
 	socket.on('disconnect', function() {
 		if (socket.username != null){
-			socket.broadcast.to(socket.room).emit('serverOthersMsg', '[SERVER] ' + socket.username + ' has left');
+			socket.broadcast.to(socket.room).emit('serverOthersMsg', 'NBrain: ' + socket.username + ' has left');
+			io.sockets.in(socket.room).emit('memberLogout', socket.username);
 			delete loginUsers[socket.username];
 
 			userNumber = userNumber - 1;
@@ -170,13 +193,14 @@ io.on('connection', function(socket) {
 			var result = { uID: packet.uID, fromWord: packet.word.replace(/\n/g, '<br>'), toWord: null, pID: packet.pID };
 
 			translateWizard.translate(params, function(err, data) {
-				// if(err) console.log(err);
-				result.toWord = data;
-				// console.log(result);
-				io.sockets.in(socket.room).emit('is BINDED', result);
-			});
+				if(err) return console.error('error in translator', err);
+				else {
+					result.toWord = data;
+					io.sockets.in(socket.room).emit('is BINDED', result);
 
-			dbLogInsert(socket.username, socket.room, 'T', postID, getDateTime(), packet.word);
+					dbLogInsert(socket.username, socket.room, 'T', postID, getDateTime(), packet.word);
+				}
+			});
 		}
 	});
 
@@ -194,8 +218,8 @@ io.on('connection', function(socket) {
 		loginUsers[socket.username].block = input;
 
 		socket.broadcast.to(socket.room).emit('partnerMsgBlock', {blockInfo: input, uID: socket.username});
-		// socket.emit('serverSelfMsg', '[SERVER] You are in' + msg + 'block mode!', socket.room);
-		// socket.broadcast.to(socket.room).emit('serverOthersMsg', '[SERVER] ' + socket.username + ' is in' + msg + 'block mode!');
+		socket.emit('serverSelfMsg', 'NBrain:  You are in' + msg + 'block mode!', socket.room);
+		socket.broadcast.to(socket.room).emit('serverOthersMsg', 'NBrain: ' + socket.username + ' is in' + msg + 'block mode!');
 
 		dbLogInsert(socket.username, socket.room, 'B', -1, getDateTime(), input);
 	});
@@ -230,7 +254,6 @@ io.on('connection', function(socket) {
 		dbLogInsert(socket.username, socket.room, 'R', packet.pID, getDateTime(), '-');
 	});
 
-
 	// bad design...
 	socket.on('pong', function(data) {});
 
@@ -239,37 +262,41 @@ io.on('connection', function(socket) {
 		else if (packet.pwd == '' || packet.pwd == null || packet.pwd.length > 20) socket.emit('regError', 'Invalid password!');
 		else if (packet.usr.indexOf('/0x00') > 0 || packet.pwd.indexOf('/0x00') > 0) socket.emit('regError', 'Invalid input');
 		else {
-			console.log('user string: ' + packet.usr);
-			packet.usr.replace(/[\\$'"]/g, "\\$&").replace(/\u0000/g, '\\0');
-			console.log('user sign up: ' + packet.usr);
-			db.query("SELECT * FROM userInfo WHERE uid = ($1)" ,[packet.usr],  function(err, result) {
-				if(err) return console.error('error running query', err); 
+			if (DBON) {
+				console.log('user string: ' + packet.usr);
+				packet.usr.replace(/[\\$'"]/g, "\\$&").replace(/\u0000/g, '\\0');
+				console.log('user sign up: ' + packet.usr);
+				db.query("SELECT * FROM userInfo WHERE uid = ($1)" ,[packet.usr],  function(err, result) {
+					if(err) return console.error('error running query', err); 
 
-				if (result.rows[0] != null) {
-					console.log(result.rows)
-					socket.emit('regError', 'This userID is registered!');
-				} else {
-					var msg = 'Success! Back to <a href="/">Login Page</a> !';
-					hash(packet.pwd, function(err, salt, cipher) {
-						if (err) throw err;
-						db.query("INSERT INTO userInfo VALUES ($1, $2, $3, $4)", 
-							[packet.usr, cipher.toString(), salt, packet.group], 
-							function(err) {
-								if(err) {
-									return console.error('error running query', err);
-									socket.emit('regError', 'Please recheck your information');
+					if (result.rows[0] != null) {
+						console.log(result.rows)
+						socket.emit('regError', 'This userID is registered!');
+					} else {
+						var msg = 'Success! Back to <a href="/">Login Page</a> !';
+						hash(packet.pwd, function(err, salt, cipher) {
+							if (err) throw err;
+							db.query("INSERT INTO userInfo VALUES ($1, $2, $3, $4)", 
+								[packet.usr, cipher.toString(), salt, packet.group], 
+								function(err) {
+									if(err) {
+										return console.error('error running query', err);
+										socket.emit('regError', 'Please recheck your information');
+									}
+									else socket.emit('regSuccess', msg);
 								}
-								else socket.emit('regSuccess', msg);
-							}
-						);
-					});
-				}
-			});
+							);
+						});
+					}
+				});
+			} else {
+				socket.emit('regError', 'Database shut down');
+			}
 		}
 	});
 });
 
-//
+// bad design...
 function sendHeartbeat(){
     setTimeout(sendHeartbeat, 300000);
     io.sockets.emit('ping', { beat : 1 });
