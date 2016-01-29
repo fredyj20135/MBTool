@@ -453,7 +453,7 @@ $('#enterCheck').click(function() {
 
 /* Like "one's" message */
 $('#container').on('click', 'input.likeBt', function() { 
-	var postID = $(this).parent().siblings('.postID').text(); // relatively unsave, because knowing structure
+	var postID = $(this).parent().siblings('.postID').text();
 	var msg = $('.postID:contains("' + postID + '")').parent();
 
 	for (var i = 0; i < msg.length; i++) {
@@ -466,7 +466,7 @@ $('#container').on('click', 'input.likeBt', function() {
 
 /* Share own message button*/
 $('#container').on('click', 'input.shareBt', function() { 
-	var postID = $(this).parent().siblings('.postID').text(); // relatively unsave
+	var postID = $(this).parent().siblings('.postID').text();
 	var msg = $('.postID:contains("' + postID + '")').parent();
 
 	for (var i = 0; i < msg.length; i++) {
