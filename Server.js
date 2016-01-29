@@ -4,40 +4,35 @@ var app = express();
 var server = require('http').createServer(app);
 var io = require('socket.io')(server);
 var fs = require('fs');
+var pg = require('pg');
+var mstranslator = require('mstranslator');
 var hash = require('./pass').hash;
-var IP = '127.0.0.1';
-
-/* System attribute initialization */
-var config;
-var DBON;
-
-try {
-	config = JSON.parse(fs.readFileSync('./config', 'utf8'));
-} catch (e) {
-	if (e.code === 'ENOENT') {
-		console.log('Start in "Demo mode", limited function in database and translation, login without ID.\n');
-		DBON = false;
-	} 
-}
-
-console.log('Start in "Full mode".\n');
-DBON = true;
+var ipAddr = '127.0.0.1';
 
 /* Postgres database initialization */
-var pg = require('pg');
-var db = new pg.Client(config.DB);
+var db = new pg.Client('postgres://BSTOwner:@localhost/BSTool');
 db.connect();
+var dbSetting = true;
 
 /* Bing Translator initialization */
-var mstranslator = require('mstranslator');
-var translateWizard = new mstranslator({ client_id: config.MT.cID, client_secret: config.MT.secret}, true);
+try {
+	var config = JSON.parse(fs.readFileSync('./config', 'utf8'));
+	console.log('Config file exist');
+	
+	var bingID = {client_id: config.cID, client_secret: config.secret};
+} catch (e) {
+	if (e.code === 'ENOENT') {
+		console.log('Missing config file, Please recheck your parameter for MStranslator.');
+		var bingID = {client_id: 'YOUR_ID', client_secret: 'YOUR_SECRET'};
+	} 
+}
+var translateWizard = new mstranslator(bingID, true);
 
 /* System tracking initialization */ 
 var userNumber = 0;
 var postID = 0;
 var loginUsers = {};
 var ctrlLock = {};
-var colorName = ['partnerA', 'partnerB', 'partnerC', 'partnerD', 'partnerE', 'partnerF'];
 
 /* express ignite */
 app.use(express.static(__dirname + '/public'));
@@ -51,7 +46,7 @@ app.get('/signUp', function(req, res) {
 });
 
 /* Server ignite */
-server.listen(5092, IP, function() { console.log('Server Start! Listening on #: 5092'); });
+server.listen(5092, ipAddr, function() { console.log('Server Start! Listening on #: 5092'); });
 
 function getDateTime() {
 	var date = new Date();
@@ -68,7 +63,7 @@ function getDateTime() {
 function authenticate(name, pass, fn) {
 	if (loginUsers[name] != null) return fn(new Error('Multiple loggin'));
 
-	if (!DBON) return fn(null, {usr: name, room: null});
+	if (!dbSetting) return fn(null, {usr: name, room: null});
 
 	db.query("SELECT * FROM userInfo WHERE uid = $1", [name], function(err, result) {
 		if(err) fn(new Error('Query Problem!'));
@@ -86,15 +81,17 @@ function authenticate(name, pass, fn) {
 }
 
 function colorCode(name) {
+	var code = ['A', 'B', 'C', 'D', 'E', 'F'];
 	var j = 0;
 	for (var i = 0; i < name.length; i++) j = j + name.charCodeAt(i);
-	return j % 6;
+
+	return 'partner' + code[j % 6];
 }
 
 // now in DB: uID, room, action:I/M/B/S/L/T, pID, systime, content
 // I: Initial, M: Message, B: Block, S: Share, L: Like, T: Translate
 function dbLogInsert(user, room, action, pID, sysTime, content) {
-	if (DBON) {
+	if (dbSetting) {
 		db.query("INSERT INTO syslog VALUES ($1, $2, $3, $4, $5, $6)", 
 			[user, room, action, pID, sysTime, content],
 			function(err, result) {
@@ -108,20 +105,15 @@ function dbLogInsert(user, room, action, pID, sysTime, content) {
 io.on('connection', function(socket) {
 	socket.on('login', function(packet) { // there is a room name in packet now!
 		authenticate(packet.usr, packet.pwd, function(err, user) {
-			var useMode;
-			if (DBON) useMode = user;
-			else useMode = true;
-
-			if (useMode) {
-			// if (true) { //  any users are allowed!
+			if (!dbSetting || user) {
 				socket.room = user.room;
 				socket.join(user.room);
 				var temp = {userID: packet.usr, userColor: colorCode(packet.usr), blocks: false, room: user.room};
 
-				if (!DBON) {
-					socket.room = 'room1'; 
-					socket.join('room1'); 
-					temp.room = 'room1';
+				if (!dbSetting) {
+					socket.room = 'G1'; 
+					socket.join('G1'); 
+					temp.room = 'G1';
 				}
 				
 				socket.username = temp.userID;
@@ -130,12 +122,12 @@ io.on('connection', function(socket) {
 				socket.emit('serverSelfMsg', 'NBrain: Welcome ' + temp.userID + '!', socket.room);
 				socket.broadcast.to(socket.room).emit('serverOthersMsg', 'NBrain: ' + packet.usr + ' has login');
 
-				io.sockets.in(socket.room).emit('memberLogin', {uID: temp.userID, uColor: colorName[temp.userColor]});
+				io.sockets.in(socket.room).emit('memberLogin', {uID: temp.userID, uColor: temp.userColor});
 
 				var i = 0;
 				for (e in loginUsers) {
 					if (loginUsers[e].room == socket.room) {
-						socket.emit('memberLogin', {uID: loginUsers[e].userID, uColor: colorName[loginUsers[e].userColor]}, socket.room);
+						socket.emit('memberLogin', {uID: loginUsers[e].userID, uColor: loginUsers[e].userColor}, socket.room);
 						i++;
 					}
 				}
@@ -164,7 +156,7 @@ io.on('connection', function(socket) {
 	});
 
 	// when the socket with tag 'chat message' is received, send socket with tag 'chat' to all the user
-	socket.on('chat message', function(input) {
+	socket.on('chatMsg', function(input) {
 		if (input.length > 500) input = input.substring(0, 500);
 
 		var content = {
@@ -173,7 +165,7 @@ io.on('connection', function(socket) {
 			msg: input,
 			sysTime: getDateTime(),
 			block: loginUsers[socket.username].block,
-			uColor: colorName[loginUsers[socket.username].userColor]
+			uColor: loginUsers[socket.username].userColor
 		};
 
 		dbLogInsert(content.uID, socket.room, 'M', postID, content.sysTime, input);
@@ -193,10 +185,13 @@ io.on('connection', function(socket) {
 			var result = { uID: packet.uID, fromWord: packet.word.replace(/\n/g, '<br>'), toWord: null, pID: packet.pID };
 
 			translateWizard.translate(params, function(err, data) {
-				if(err) return console.error('error in translator', err);
+				if (err) {
+					socket.emit('badBIND', packet.pID, socket.room);
+					return console.error('Translator error\n', err);
+				}
 				else {
 					result.toWord = data;
-					io.sockets.in(socket.room).emit('is BINDED', result);
+					io.sockets.in(socket.room).emit('isBINDED', result);
 
 					dbLogInsert(socket.username, socket.room, 'T', postID, getDateTime(), packet.word);
 				}
@@ -262,7 +257,7 @@ io.on('connection', function(socket) {
 		else if (packet.pwd == '' || packet.pwd == null || packet.pwd.length > 20) socket.emit('regError', 'Invalid password!');
 		else if (packet.usr.indexOf('/0x00') > 0 || packet.pwd.indexOf('/0x00') > 0) socket.emit('regError', 'Invalid input');
 		else {
-			if (DBON) {
+			if (dbSetting) {
 				console.log('user string: ' + packet.usr);
 				packet.usr.replace(/[\\$'"]/g, "\\$&").replace(/\u0000/g, '\\0');
 				console.log('user sign up: ' + packet.usr);

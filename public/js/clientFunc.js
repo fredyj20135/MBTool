@@ -172,7 +172,7 @@ socket.on('partnerMsgUnshare', function(packet) {
 	}
 });
 
-socket.on('is BINDED', function(packet) { /* Get translated data and add to message */
+socket.on('isBINDED', function(packet) { /* Get translated data and add to message */
 	var result = $('<span>').addClass('trans').html(' (' + packet.toWord + ')');
 	var transMsg = $(".postID:contains('" + packet.pID + "')").parent();
 
@@ -193,6 +193,19 @@ socket.on('is BINDED', function(packet) { /* Get translated data and add to mess
 	}
 	
 	if (packet.uID == username) socket.emit('ctrlUnlock', packet.pID);
+});
+
+socket.on('badBIND', function(pID) {
+	var transMsg = $(".postID:contains('" + pID + "')").parent();
+	$(transMsg).each(function() {
+		$(this).find('.translateBt').prop('disabled', false).val('Translate').removeClass('working');
+	});
+
+	var serverMsg = $('<div>').text('Translator problem, Please try it later')
+		.addClass('userMessage systemMessage');
+	addUserMsgByColMode(serverMsg);
+	
+	socket.emit('ctrlUnlock', pID);
 });
 
 socket.on('revertMsg', function(packet) { /* Erase translation in specific bubbles, improvable! */
@@ -331,7 +344,6 @@ function blockMsgHandler() {
 		$('.shareBt').each(function() {$(this).toggle(); });
 		$('#emitAll').toggle('blind', { direction: 'right' }, 300);
 		
-		
 		socket.emit('blockMsg', blockInfo);
 		blockMode = newMode;
 	}
@@ -406,7 +418,7 @@ function bubbleLikedCtrlHandler() {
 /* Buttons in inputWrap*/
 function sendBtHandler() {
 	if ($.trim($('#textInput').val()) !== "") {
-		socket.emit('chat message', $('#textInput').val());
+		socket.emit('chatMsg', $('#textInput').val());
 		$('#textInput').val('').focus();
 		$('#textLimit').hide();
 	}

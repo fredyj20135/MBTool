@@ -1,0 +1,4 @@
+{ 
+	"cID":"YOUR_CONNECTION_ID" ,
+	"secret": "YOUR_MSTRANSLATOR_SECRET_KEY" 
+}
