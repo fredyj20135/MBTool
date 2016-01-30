@@ -120,7 +120,7 @@ io.on('connection', function(socket) {
 				socket.emit('userConfirm', {uID: temp.userID, msg: 'Success!', room: socket.room}, socket.room);
 
 				socket.emit('serverSelfMsg', 'NBrain: Welcome ' + temp.userID + '!', socket.room);
-				socket.broadcast.to(socket.room).emit('serverOthersMsg', 'NBrain: ' + packet.usr + ' has login');
+				socket.broadcast.to(socket.room).emit('serverOthersMsg', 'NBrain: ' + packet.usr + ' has just login');
 
 				io.sockets.in(socket.room).emit('memberLogin', {uID: temp.userID, uColor: temp.userColor});
 
