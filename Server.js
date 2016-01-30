@@ -121,9 +121,6 @@ io.on('connection', function(socket) {
 
 				socket.emit('serverSelfMsg', 'NBrain: Welcome ' + temp.userID + '!', socket.room);
 				socket.broadcast.to(socket.room).emit('serverOthersMsg', 'NBrain: ' + packet.usr + ' has just login');
-
-				io.sockets.in(socket.room).emit('memberLogin', {uID: temp.userID, uColor: temp.userColor});
-
 				var i = 0;
 				for (e in loginUsers) {
 					if (loginUsers[e].room == socket.room) {
@@ -131,6 +128,7 @@ io.on('connection', function(socket) {
 						i++;
 					}
 				}
+				io.sockets.in(socket.room).emit('memberLogin', {uID: temp.userID, uColor: temp.userColor});
 				if (i == 0) dbLogInsert('SYSTEM', socket.room, 'I', -1, getDateTime(), 'START ' + socket.room);
 				
 				loginUsers[temp.userID] = temp;
