@@ -66,7 +66,6 @@ body {
 
 #memberInfo {
   white-space:nowrap;
-  /*height: 24px;*/
   padding-top: 2px;
 }
 
@@ -88,7 +87,7 @@ body {
 }
 
 /*switch button insert by Allie*/
-#switchBt {
+.switchBt {
   margin-right: 10px; 
   margin-left: 5px;
   float: right;
@@ -172,13 +171,10 @@ body {
   height: 30px;
   border: 0px solid blue;
   border-radius: 0;
-  z-index: 10;
+  z-index: 5;
   background-image:url(./pic/direction.png); /*#75736B*/
   background-size: 30px;
   background-color: transparent;
-  outline: none;
-  box-shadow: none;
-  -webkit-box-shadow: none;
   padding: 10px;
   margin: 8px 5px;
 }
@@ -199,29 +195,30 @@ body {
   background-image:url(./pic/direction_clicked_hover.png);
 }
 
-#settingWrap {
+#settingBt select:focus {
+  outline-color: #837b6b;
+}
+
+#settingPanel {
   float: right;
   max-width: 100%;
   position: relative;
   height: 45px;
-  z-index: 10;
+  z-index: 5;
 }
 
 /*edit*/
-#settingPanel {
-  /*position: relative;*/
+#settingWrap {
   overflow: hidden;
   float: right;
   border: 0px solid blue;
-  /*z-index: 4;*/
-  display: block;
   background: rgba(0, 0, 0, 0.55);
   box-shadow: 0 5px 5px rgba(0, 0, 0, 0.15), 0 5px 5px rgba(0, 0, 0, 0.35);
   border-bottom-left-radius: 5px;
 }
 
 /*edit */
-#settingPanel select{
+#settingWrap select{
   width: 100px;
   height: 35px;
   font-family: 'Open Sans', 微軟正黑體, sans-serif;
@@ -233,14 +230,8 @@ body {
   display: inline;
 }
 
-/*edit */
-#settingPanel select:focus {
-  outline-color: #837b6b;
-}
-
 .listRow {
   border: 0px solid blue;
-  /*max-width: 100%;*/
   height: 45px;
   padding: 5px 5px 5px 0px;
   margin: 0px 5px;
@@ -257,21 +248,18 @@ body {
   padding: 0px;
 }
 
-.listRow > .title {
-  text-align: center;
-  color: #f0cb1a;
-  width: 100%;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.85);
-}
-
 .settingText {
   display: inline-block;
-  padding: 6px 10px;
+  padding: 7px 10px 6px 10px;
   color: white;
   font-size : 1em;
 }
 
 .settingText.title {
+  text-align: center;
+  color: #f0cb1a;
+  width: 100%;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.85);
   font-size : 1.5em;
   padding: 2px 10px;
   font-family: 'Archivo Narrow';
@@ -286,8 +274,7 @@ body {
 
 /*edit*/
 #container {
-  padding: 20px 0px;
-  padding-top: 45px;
+  padding: 45px 0px 20px 0px;
   /*position: relative;*/
   border: 0px solid red;
   display: -webkit-flex;
@@ -563,18 +550,18 @@ body {
 }
 
 /*edit*/
-#inputWrap {
+#inputPanel {
   position: fixed;
   bottom: 0;
   width: 100%;
-  max-height: calc(10px + 65px + 8px);
-  min-height: calc(10px + 65px + 8px);
+  /*max-height: calc(10px + 65px + 8px);*/
+  min-height: 83px;
   border: 0px solid red;
   background: white;
   box-shadow: 0 -3px 2px transparent, 0 -3px 3px rgba(0, 0, 0, 0.09);
 }
 
-#inputWrap form { 
+#inputPanel form { 
   border: 0px solid black;  
   padding: 8px 20px;
   padding-bottom: 0px; 
@@ -583,16 +570,13 @@ body {
 /*edit*/
 #textInput { 
   width: calc(100% - 55px);
-  border-radius: 0px;
   color: #37342d;
   font-family: 'Open Sans', 微軟正黑體, sans-serif;
   font-size: 1em;
   padding: 0px;
-  margin-left: 0px;
-  margin-top: 2px;
+  margin: 2px 6px 0px -6px;
   text-decoration:none;
   border : 0px solid #37342d;
-  font-size: 1em;
   display: inline-block;
   float: left;
   resize: none;
@@ -605,7 +589,6 @@ body {
 
 #textLimit {
   float: right;
-  display: none;
   position: absolute;
   top: -15px;
   right: 20px;
@@ -653,9 +636,7 @@ body {
   background-color: #2c9076;
   box-shadow: none;
   color: white;
-  /*font-family: 'Open Sans', 微軟正黑體, sans-serif;*/
   font-size: 1em;
-  text-decoration:none;
   border: 0px; 
   position: absolute;
   top: 10px;

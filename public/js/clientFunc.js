@@ -82,14 +82,14 @@ socket.on('partnerMsgLike', function(pID) { /* set like */
 	var post = $('.postID:contains("' + pID + '")').parent();
 	var a = parseInt($(post[0]).find('.likeNum').text());
 
-	for (var i = 0; i < post.length; i++) $(post[i]).find('.likeNum').text(a + 1);
+	$(post).each(function() { $(this).find('.likeNum').text(a + 1); });
 });
 
 socket.on('partnerMsgDislike', function(pID) { /* Disliked */
 	var post = $('.postID:contains("' + pID + '")').parent();
 	var a = parseInt($(post[0]).find('.likeNum').text());
 
-	for (var i = 0; i < post.length; i++) $(post[i]).find('.likeNum').text(a - 1);
+	$(post).each(function() { $(this).find('.likeNum').text(a - 1); });
 });
 
 socket.on('memberLogin', function(packet) {
@@ -113,17 +113,17 @@ socket.on('chat', function(packet) {
 	var uID = packet.uID;
 	var postTime = packet.sysTime;
 
+	var postID 		= $('<span>').addClass('postID').html(packet.pID).hide();
 	var content 	= $('<span>').addClass('msgTxt').text(packet.msg);
-	var shareBt 	= $('<input>').addClass('shareBt').prop({type: 'button', value: ''}).hide();
-	var likeBt 		= $('<input>').addClass('likeBt').prop({type: 'button', value: ''});
-	var likeNum		= $('<span>').addClass('likeNum').text('0');
-	var translateBt = $('<input>').addClass('translateBt').prop({type: 'button', value: 'Translate'});
-	var revertBt 	= $('<input>').addClass('revertBt').prop({type: 'button', value: 'Revert'}).hide();
+	var icon 		= $('<span>').addClass('partnerIcon').addClass(packet.uColor);
+	var nameSpace 	= $('<span>').addClass('nameSpace').text(uID);
 	var sysTime 	= $('<span>').addClass('sysTime').text(postTime).hide();
 	var timeStamp	= $('<span>').addClass('timeStamp').html('@ ' + localTime()).append(sysTime);
-	var postID 		= $('<span>').addClass('postID').html(packet.pID).hide();
-	var nameSpace 	= $('<span>').addClass('nameSpace').text(uID);
-	var icon 		= $('<span>').addClass('partnerIcon').addClass(packet.uColor);
+	var likeBt 		= $('<input>').addClass('likeBt').prop({type: 'button', value: ''});
+	var likeNum		= $('<span>').addClass('likeNum').text('0');
+	var shareBt 	= $('<input>').addClass('shareBt').prop({type: 'button', value: ''}).hide();
+	var translateBt = $('<input>').addClass('translateBt').prop({type: 'button', value: 'Translate'});
+	var revertBt 	= $('<input>').addClass('revertBt').prop({type: 'button', value: 'Revert'}).hide();
 	
 	content.html(content.html().replace(/\n/g, '<br>'));
 	content = $('<span>').addClass('msgCntnt').append(content).append('<br>').append(likeNum).append(likeBt);
@@ -157,19 +157,19 @@ socket.on('partnerMsgBlock', function(packet){
 socket.on('partnerMsgShare', function(packet) { /* Share on the specific message */
 	var partnerMsg = $('.postID:contains("' + packet.pID + '")').parent();
 
-	for (var i = 0; i < partnerMsg.length; i++) {
-		$(partnerMsg[i]).addClass('share');
-		$(partnerMsg[i]).find('.msgCntnt').removeClass('block');	
-	}
+	$(partnerMsg).each(function() {
+		$(this).addClass('share');
+		$(this).find('.msgCntnt').removeClass('block');
+	});
 });
 
 socket.on('partnerMsgUnshare', function(packet) {
 	var partnerMsg = $('.postID:contains("' + packet.pID + '")').parent();
 
-	for (var i = 0; i < partnerMsg.length; i++) {
-		$(partnerMsg[i]).removeClass('share');
-		if (packet.blockInfo == true) $(partnerMsg[i]).find('.msgCntnt').addClass('block');
-	}
+	$(partnerMsg).each(function() {
+		$(this).removeClass('share');
+		if (packet.blockInfo == true) $(this).find('.msgCntnt').addClass('block');
+	});
 });
 
 socket.on('isBINDED', function(packet) { /* Get translated data and add to message */
@@ -178,19 +178,19 @@ socket.on('isBINDED', function(packet) { /* Get translated data and add to messa
 
 	result = $('<span>').addClass('highlight').prop('title', 'By ' + packet.uID).html(packet.fromWord).append(result);
 
-	for (var i = 0; i < transMsg.length; i++) {
-		var transMsgTxt = $(transMsg[i]).find('.msgTxt');
+	$(transMsg).each(function() {
+		var transMsgTxt = $(this).find('.msgTxt');
 
 		if (transMsg.hasClass('partnerMessage')) {
 			if (packet.uID == username) {
-				transMsg.find('.revertBt').show();
-				transMsg.find('.translateBt').prop('disabled', false).val('Translate').removeClass('working');
+				$(this).find('.revertBt').show();
+				$(this).find('.translateBt').prop('disabled', false).val('Translate').removeClass('working');
 			}
 			result.addClass('note');
 		}
-		else if (transMsg.hasClass('userMessage')) result.addClass('warn');
+		else if ($(this).hasClass('userMessage')) result.addClass('warn');
 		transMsgTxt.html(powerReplace(transMsgTxt.html(), packet.fromWord, result.prop('outerHTML')));
-	}
+	});
 	
 	if (packet.uID == username) socket.emit('ctrlUnlock', packet.pID);
 });
@@ -211,13 +211,13 @@ socket.on('badBIND', function(pID) {
 socket.on('revertMsg', function(packet) { /* Erase translation in specific bubbles, improvable! */
 	var msgPool = $('.postID:contains("' + packet.pID + '")').parent();
 
-	for (var i = 0; i < msgPool.length; i++) {
-		var msgText = $(msgPool[i]).find('.msgTxt');
+	$(msgPool).each(function() {
+		var msgText = $(this).find('.msgTxt');
 		var highlight = msgText.find('.highlight');
 		var elmt, temp;
 		var revertHTML = msgText.html();
 	
-		for (var j = highlight.length; j > 0; j--) { 
+		for (var j = highlight.length; j > 0; j--) { // special use, so no each
 			elmt = $(highlight[j - 1]);
 
 			if (elmt != null && elmt.prop('title').slice(3, elmt.prop('title').length) == packet.uID) {
@@ -228,7 +228,7 @@ socket.on('revertMsg', function(packet) { /* Erase translation in specific bubbl
 			msgText.html(revertHTML);
 			highlight = msgText.find('.highlight');
 		}
-	}
+	});
 
 	if (packet.uID == username) {
 		socket.emit('ctrlUnlock', packet.pID);
@@ -240,7 +240,7 @@ socket.on('revertMsg', function(packet) { /* Erase translation in specific bubbl
 /* Socket.io function, end */
 
 /* Support function, start */
-/* ADD, and SHOW or Hide Msg by column mode */
+/* SHOW or HIDE Msg by column mode */
 function addUserMsgByColMode(content) {
 	var hidden = content.clone().hide().addClass('lie');
 	if (twoCol) {
@@ -253,7 +253,7 @@ function addUserMsgByColMode(content) {
 }
 
 /* Prevent translation in tag */
-function powerReplace(oriHTML, fromWord, transResult) { // the most important is that don't replace tag
+function powerReplace(oriHTML, fromWord, transResult) {
 	var temp = '', outHTML = '';
 	var inTag = false;
 	var i = 0, j = 0;
@@ -288,12 +288,7 @@ function powerReplace(oriHTML, fromWord, transResult) { // the most important is
 	return outHTML.toString().replace(/%br%/g, '<br>');
 }
 
-/* "VIEW" setting on some button */
-function clickControl(elmt) {
-	if (elmt.hasClass('clicked')) elmt.removeClass('clicked');
-	else elmt.addClass('clicked');
-}
-
+/* Put local time function */
 function localTime() {
 	var date = new Date();
 	var hour = date.getHours();			hour = (hour < 10 ? "0" : "") + hour;    
@@ -301,6 +296,12 @@ function localTime() {
 	var sec  = date.getSeconds();		sec = (sec < 10 ? "0" : "") + sec;
 	
 	return hour + ':' + min + ':' + sec;
+}
+
+/* "VIEW" setting on some button */
+function clickControl(elmt) {
+	if (elmt.hasClass('clicked')) elmt.removeClass('clicked');
+	else elmt.addClass('clicked');
 }
 
 /* Catch user highlighted word (for translate)*/
@@ -321,7 +322,6 @@ function loginBtHandler() {
 	$('#username').val('');
 	$('#pwd').val('');
 }
-
 function loginBtEnterHandler(event) {
 	if (event.which == 13) $('#loginInput').click();
 }
@@ -329,7 +329,7 @@ function loginBtEnterHandler(event) {
 /* Buttons in setting menu. Concept by Allie */
 function settingBtHandler() {
 	clickControl($('#settingBt'));
-	$('#settingPanel').toggle('blind', {direction: 'right'}, 500);
+	$('#settingWrap').toggle('blind', {direction: 'right'}, 500);
 }
 
 function blockMsgHandler() {
@@ -364,11 +364,11 @@ function windowCtrlBtHandler() {
 	$('#' + mode).attr('checked', true);
 	if ($('#showLiked').hasClass('clicked')) $('#showLiked').click();
 
-	if (mode == 'oneCol') windowViewAnimate('100%', '0%', '#userMsgContainer', '#partnerMsgContainer');
-	else if (mode == 'twoCol') windowViewAnimate('50%', '50%', '#partnerMsgContainer', '#userMsgContainer');
+	if (mode == 'oneCol') windowViewHandler('100%', '0%', '#userMsgContainer', '#partnerMsgContainer');
+	else if (mode == 'twoCol') windowViewHandler('50%', '50%', '#partnerMsgContainer', '#userMsgContainer');
 }
 
-function windowViewAnimate(pWidth, uWidth, shrink, stretch) {
+function windowViewHandler(pWidth, uWidth, shrink, stretch) {
 	var delay = 0;
 	$(shrink + ' .userMessage').each(function() { $(this).hide().addClass('lie'); });
 	$('#userMsgContainer').animate({ width: uWidth }, { duration: 300, queue: true });
@@ -456,11 +456,11 @@ $('#container').on('click', 'input.likeBt', function() {
 	var postID = $(this).parent().siblings('.postID').text();
 	var msg = $('.postID:contains("' + postID + '")').parent();
 
-	for (var i = 0; i < msg.length; i++) {
-		var likeBt = $(msg[i]).find('input.likeBt');
-		clickControl(likeBt);
-	}
-	if (likeBt.hasClass('clicked')) socket.emit('likeMsg', postID);
+	$(msg).each(function() { 
+		clickControl($(this).find('input.likeBt'));
+	});
+
+	if ($(this).hasClass('clicked')) socket.emit('likeMsg', postID);
 	else socket.emit('dislikeMsg', postID);
 });
 
@@ -469,14 +469,14 @@ $('#container').on('click', 'input.shareBt', function() {
 	var postID = $(this).parent().siblings('.postID').text();
 	var msg = $('.postID:contains("' + postID + '")').parent();
 
-	for (var i = 0; i < msg.length; i++) {
-		var shareBt = $(msg[i]).find('input.shareBt');
+	$(msg).each(function() {
+		var shareBt = $(this).find('input.shareBt');
 		clickControl(shareBt);
 
-		if (shareBt.hasClass('clicked')) $(msg[i]).addClass('share');
-		else $(msg[i]).removeClass('share');
-	}
-	if (shareBt.hasClass('clicked')) socket.emit('shareMsg', postID);
+		if (shareBt.hasClass('clicked')) $(this).addClass('share');
+		else $(this).removeClass('share');
+	});
+	if ($(this).hasClass('clicked')) socket.emit('shareMsg', postID);
 	else socket.emit('unshareMsg', postID);
 });
 
@@ -521,6 +521,6 @@ $('#container').on('click', 'input.revertBt', function() {
 /* initial page setting */		
 $(document).ready(function() {
 	$('#BSTBody').hide();
-	$('#settingPanel').hide();
+	$('#settingWrap').hide();
 	$('#textLimit').hide();
 });
