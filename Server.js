@@ -18,7 +18,7 @@ var dbSetting = true;
 try {
 	var config = JSON.parse(fs.readFileSync('./config', 'utf8'));
 	console.log('Config file exist');
-	
+
 	var bingID = {client_id: config.cID, client_secret: config.secret};
 } catch (e) {
 	if (e.code === 'ENOENT') {
@@ -83,7 +83,7 @@ function authenticate(name, pass, fn) {
 function colorCode(name) {
 	var code = ['A', 'B', 'C', 'D', 'E', 'F'];
 	var j = 0;
-	for (var i = 0; i < name.length; i++) j = j + name.charCodeAt(i);
+	for (var i = 0; i < name.length; i++) j = j + name.charCodeAt(i) * name.charCodeAt(i);
 
 	return 'partner' + code[j % 6];
 }

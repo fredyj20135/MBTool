@@ -317,6 +317,7 @@ body {
   padding: 3px 0px 1px 26px;
   height: 20px;
   top: 2px;
+  white-space: nowrap;
 }
 
 .icon {
@@ -525,7 +526,6 @@ body {
   background-image:url(./pic/like_click.png);
 }
 
-/*insert*/
 .likeNum {
   font-size: 0.7em;
   color: #2c9076;
@@ -533,7 +533,6 @@ body {
   margin: 7px 0px 0px -2px;
 }
 
-/*edit*/
 .timeStamp {
   color: #b2b2b2;
   font-size: 0.8em;
@@ -541,7 +540,6 @@ body {
   margin: 4px 5px 0px 3px;
 }
 
-/*edit*/
 .nameSpace {
   color: #b2b2b2;
   font-size: 0.8em;
@@ -554,7 +552,6 @@ body {
   position: fixed;
   bottom: 0;
   width: 100%;
-  /*max-height: calc(10px + 65px + 8px);*/
   min-height: 83px;
   border: 0px solid red;
   background: white;
