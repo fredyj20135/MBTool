@@ -171,11 +171,11 @@ body {
   background-image:url(./pic/direction.png); /*#75736B*/
   background-size: 30px;
   background-color: transparent;
+  outline: none;
   padding: 10px;
   margin: 8px 5px;
 }
 
-/*edit*/
 #settingBt:hover {
   cursor: pointer;
   background-image:url(./pic/direction_hover.png);
@@ -203,7 +203,6 @@ body {
   z-index: 5;
 }
 
-/*edit*/
 #settingWrap {
   overflow: hidden;
   float: right;
@@ -213,7 +212,6 @@ body {
   border-bottom-left-radius: 5px;
 }
 
-/*edit */
 .langSelector {
   width: 100px;
   height: 35px;
@@ -224,6 +222,8 @@ body {
   border-radius : 10px;
   padding: 0px; 
   display: inline;
+  float: left;
+  outline: none;
 }
 
 .listRow {
@@ -268,7 +268,6 @@ body {
   padding-left: 10px;
 }
 
-/*edit*/
 #container {
   padding: 45px 0px 20px 0px;
   border: 0px solid red;
@@ -280,7 +279,6 @@ body {
   width: 100vw;
 }
 
-/*edit*/
 #partnerMsgContainer {
   width: 50%;
   border-right: 2px dashed #2c9076;
@@ -291,7 +289,6 @@ body {
   padding: 5px 10px 5px 20px;
 }
 
-/*edit*/
 #userMsgContainer {
   width: 50%;
   border-left: 2px dashed #2c9076;
@@ -563,6 +560,7 @@ body {
   border : 0px solid #37342d;
   display: inline-block;
   float: left;
+  outline: none;
   resize: none;
 }
 
@@ -668,6 +666,7 @@ body {
   border: 0px solid red;
   border-radius: 0;
   background-color: transparent;
+  outline: none;
   box-shadow: none;
   -webkit-box-shadow: none;
   color: white;

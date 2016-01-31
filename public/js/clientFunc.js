@@ -2,6 +2,7 @@ var socket = io.connect('http://localhost:5092');
 var username;
 var twoCol = true;
 var blockMode = 'unblock';
+var colMode = 'twoCol';
 var highlightWord = '';
 
 /* Socket.io function, start */
@@ -51,8 +52,8 @@ socket.on('userConfirm', function(packet) {
 
 	$('#settingBt').on('click', settingBtHandler);
 	$('#showLiked').on('click', bubbleLikedCtrlHandler);
-	$('input[name=colMode]').on('click', windowCtrlBtHandler);
 	$('input[name=view]').on('click', blockMsgHandler);
+	$('input[name=colMode]').on('click', windowCtrlBtHandler);
 	$('#textInput').on('keyup keydown', inputCountHandler);
 	$('#textInput').on('keypress', sendBtEnterHandler);
 	$('#sendButton').on('click', sendBtHandler);
@@ -359,13 +360,17 @@ function windowCtrlBtHandler() {
 	var stretch, shrink, uWidth, pWidth;
 	twoCol == true? twoCol = false : twoCol = true;
 	var mode = $('input[name=colMode]:checked').val();
+	
+	if (mode != colMode) {
+		$('#' + mode).attr('checked', true);
+		if ($('#showLiked').hasClass('clicked')) $('#showLiked').click();
 
-	$('input[name=colMode]').prop('disabled', true);
-	$('#' + mode).attr('checked', true);
-	if ($('#showLiked').hasClass('clicked')) $('#showLiked').click();
+		if (mode == 'oneCol') windowViewHandler('100%', '0%', '#userMsgContainer', '#partnerMsgContainer');
+		else if (mode == 'twoCol') windowViewHandler('50%', '50%', '#partnerMsgContainer', '#userMsgContainer');
 
-	if (mode == 'oneCol') windowViewHandler('100%', '0%', '#userMsgContainer', '#partnerMsgContainer');
-	else if (mode == 'twoCol') windowViewHandler('50%', '50%', '#partnerMsgContainer', '#userMsgContainer');
+		$('input[name=colMode]').prop('disabled', true);
+		colMode = mode;
+	}
 }
 
 function windowViewHandler(pWidth, uWidth, shrink, stretch) {
