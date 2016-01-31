@@ -10,7 +10,6 @@ html {
   height: 100%;
 }
 
-/*edit*/
 body { 
   height: 100%;
   margin: 0;
@@ -26,7 +25,6 @@ body {
   visibility: hidden;
 }
 
-/*insert*/
 #topMenu {
   position: fixed;
   top: 0;
@@ -39,7 +37,6 @@ body {
   box-shadow: 0 3px 2px transparent, 0 3px 3px rgba(0, 0, 0, 0.15);
 }
 
-/*insert*/
 #roomInfo {
   position: fixed;
   display: inline-block;
@@ -164,7 +161,6 @@ body {
 }
 /*end -------------- switch button insert by Allie*/
 
-/*edit*/
 #settingBt {
   float: right;
   width: 30px;
@@ -275,7 +271,6 @@ body {
 /*edit*/
 #container {
   padding: 45px 0px 20px 0px;
-  /*position: relative;*/
   border: 0px solid red;
   display: -webkit-flex;
   display: flex;
@@ -357,7 +352,6 @@ body {
   background: #8a2be2;
 }
 
-/*edit*/
 .partnerMessage {
   position: relative;
   padding: 12px 18px 5px 18px;
@@ -378,7 +372,6 @@ body {
   border-bottom-left-radius: 5px;
 }
 
-/*insert*/
 .systemMessage {
   color: #5a5a5a;
 }
@@ -387,7 +380,6 @@ body {
   background: transparent;
 }
 
-/*edit*/
 .userMessage {
   padding: 12px 18px 5px 18px;
   border: 0px solid #2c9076;
@@ -422,7 +414,6 @@ body {
   border: 3px solid #2c9076;
 }
 
-/*edit*/
 .shareBt {
   float: right;
   width: 15px;
@@ -500,7 +491,6 @@ body {
   text-decoration: underline;
 }
 
-/*edit*/
 .likeBt {
   float: right;
   width: 15px;
@@ -547,7 +537,6 @@ body {
   margin: 4px 0px 0px 3px;
 }
 
-/*edit*/
 #inputPanel {
   position: fixed;
   bottom: 0;
@@ -564,7 +553,6 @@ body {
   padding-bottom: 0px; 
 }
 
-/*edit*/
 #textInput { 
   width: calc(100% - 55px);
   color: #37342d;
@@ -641,8 +629,6 @@ body {
   background-color: #75736B;
   opacity: 0.3;
 }
-
-/*edit*/
 
 #enterCheckWrap {
   position: absolute;
