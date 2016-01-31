@@ -218,7 +218,7 @@ body {
 }
 
 /*edit */
-#settingWrap select{
+.langSelector {
   width: 100px;
   height: 35px;
   font-family: 'Open Sans', 微軟正黑體, sans-serif;
@@ -572,16 +572,10 @@ body {
   font-size: 1em;
   padding: 0px;
   margin: 2px 6px 0px -6px;
-  text-decoration:none;
   border : 0px solid #37342d;
   display: inline-block;
   float: left;
   resize: none;
-}
-
-/*edit*/
-#textInput:focus {
-  outline: none;
 }
 
 #textLimit {
@@ -596,15 +590,6 @@ body {
   font-family: 'Open Sans', 微軟正黑體, sans-serif;
   font-size: 0.5em;
   box-shadow: 0 -3px 2px transparent, 0 -3px 3px rgba(0, 0, 0, 0.09);
-}
-
-#oriLang {
-  float: left;
-  margin-left: 0px;
-}
-
-#transLang {
-  float: left;
 }
 
 #arrow {
@@ -631,7 +616,9 @@ body {
   min-width: 70px;
   border-radius: 5px;
   background-color: #2c9076;
+  outline: none;
   box-shadow: none;
+  -webkit-box-shadow: none;
   color: white;
   font-size: 1em;
   border: 0px; 
@@ -689,42 +676,12 @@ body {
   outline-color: #837b6b;
 }
 
-/*insert*/
-#colButton {
-  float: right;
-  display: inline;
-  padding: 6px 12px;
-  margin: 0 0 0 8px;
-  height: 30px;
-  border-radius: 5px;
-  background-color: #2c9076;
-  box-shadow: none;
-  color: white;
-  font-family: 'Open Sans', 微軟正黑體, sans-serif;
-  font-size: 0.8em;
-  text-decoration:none;
-  border: 0px; 
-  position: absolute;
-  top: 10px;
-}
-
-#colButton:hover{
-  cursor:pointer;
-  background-color: #f0cb1a;
-}
-
-#colButton:focus{
-  cursor:pointer;
-  outline-color: #837b6b;
-}
-
 .linkButton {
   float: left;
   text-align: left;
   border: 0px solid red;
   border-radius: 0;
   background-color: transparent;
-  outline: none;
   box-shadow: none;
   -webkit-box-shadow: none;
   color: white;
