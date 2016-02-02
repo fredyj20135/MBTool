@@ -136,7 +136,7 @@ io.on('connection', function(socket) {
 				userNumber = userNumber + 1;
 
 				roomInfo[parseInt(temp.room[5] - 1)] ++;
-				console.log('user #: ' + userNumber + ' ,' + temp.userID + ' in ' + temp.room + 
+				console.log('user #: ' + userNumber + ', ' + temp.userID + ' in ' + temp.room + 
 				'(' + roomInfo[parseInt(socket.room[5] - 1)] + ')');
 				
 			} else {
@@ -154,7 +154,7 @@ io.on('connection', function(socket) {
 
 			userNumber = userNumber - 1;
 			roomInfo[parseInt(socket.room[5] - 1)] --;
-			console.log('user #: ' + userNumber + ' ,' + socket.username + ' leave ' + socket.room + 
+			console.log('user #: ' + userNumber + ', ' + socket.username + ' leave ' + socket.room + 
 				'(' + roomInfo[parseInt(socket.room[5] - 1)] + ')');
 			
 		}
