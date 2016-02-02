@@ -11,6 +11,16 @@ socket.on('ping', function(data) { socket.emit('pong', {beat: 1 }); });
 socket.on('connect', function() {
 	$('#loginInput').on('click', loginBtHandler);
 	$(document).on('keypress', loginBtEnterHandler);
+	socket.emit('roomInfoReq');
+
+});
+
+socket.on('roomInfoRes', function(roomInfo) {
+	var length = $('#roomName').children('option').length;
+	for (var i = 0; i < length; i++) {
+		var room = $('#roomName option').eq(i).text();
+		$('#roomName option').eq(i).text(room + ' (' + roomInfo[i] +')');
+	}
 });
 
 socket.on('connect_error', function(err) { 
@@ -48,7 +58,7 @@ socket.on('userConfirm', function(packet) {
 
 	username = packet.uID;
 
-	$('#roomInfo').text(packet.room[0] + 'roup ' + packet.room[1]); // how bad...
+	$('#roomInfo').text(packet.room);
 
 	$('#settingBt').on('click', settingBtHandler);
 	$('#showLiked').on('click', bubbleLikedCtrlHandler);
@@ -318,7 +328,7 @@ $('#container').on('mouseup', '.partnerMessage', function() {
 
 /* "CONTROL", handler for buttons, Concept by Allie and Seraphina. Start */
 function loginBtHandler() {
-	socket.emit('login', {usr: $('#username').val(), pwd: $('#pwd').val()});
+	socket.emit('login', {usr: $('#username').val(), pwd: $('#pwd').val(), room: $('#roomName').val()});
 	$('#username').val('');
 	$('#pwd').val('');
 }

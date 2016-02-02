@@ -33,6 +33,7 @@ var userNumber = 0;
 var postID = 0;
 var loginUsers = {};
 var ctrlLock = {};
+var roomInfo = [0, 0, 0, 0, 0, 0, 0, 0, 0];
 
 /* express ignite */
 app.use(express.static(__dirname + '/public'));
@@ -106,9 +107,9 @@ io.on('connection', function(socket) {
 	socket.on('login', function(packet) { // there is a room name in packet now!
 		authenticate(packet.usr, packet.pwd, function(err, user) {
 			if (!dbSetting || user) {
-				socket.room = user.room;
-				socket.join(user.room);
-				var temp = {userID: packet.usr, userColor: colorCode(packet.usr), blocks: false, room: user.room};
+				socket.room = packet.room;
+				socket.join(packet.room);
+				var temp = {userID: packet.usr, userColor: colorCode(packet.usr), blocks: false, room: packet.room};
 
 				if (!dbSetting) {
 					socket.room = 'G1'; 
@@ -134,7 +135,10 @@ io.on('connection', function(socket) {
 				loginUsers[temp.userID] = temp;
 				userNumber = userNumber + 1;
 
-				console.log('user #: ' + userNumber);
+				roomInfo[parseInt(temp.room[5] - 1)] ++;
+				console.log('user #: ' + userNumber + ' ,' + temp.userID + ' in ' + temp.room + 
+				'(' + roomInfo[parseInt(socket.room[5] - 1)] + ')');
+				
 			} else {
 				socket.emit('loginError', err.toString());
 			}
@@ -149,8 +153,15 @@ io.on('connection', function(socket) {
 			delete loginUsers[socket.username];
 
 			userNumber = userNumber - 1;
-			console.log('user #: ' + userNumber);
+			roomInfo[parseInt(socket.room[5] - 1)] --;
+			console.log('user #: ' + userNumber + ' ,' + socket.username + ' leave ' + socket.room + 
+				'(' + roomInfo[parseInt(socket.room[5] - 1)] + ')');
+			
 		}
+	});
+
+	socket.on('roomInfoReq', function() {
+		socket.emit('roomInfoRes', roomInfo);
 	});
 
 	// when the socket with tag 'chat message' is received, send socket with tag 'chat' to all the user
@@ -176,7 +187,8 @@ io.on('connection', function(socket) {
 	// Pass translate result from server
 	socket.on('translate', function(packet) {
 		if (ctrlLock.hasOwnProperty(packet.pID)) {
-			if (packet.word.length > 500) socket.emit('badBIND', {pID: packet.pID, msg: 'The length of translate text exceed limit! (500 char only!)'}, socket.room);
+			if (packet.word.length > 500) 
+				socket.emit('badBIND', {pID: packet.pID, msg: 'The length of translate text exceed limit! (500 char only!)'}, socket.room);
 			
 			var result = {uID: packet.uID, fromWord: packet.word.replace(/\n/g, '<br>'), toWord: null, pID: packet.pID};
 			var params = {text: packet.word, from: packet.fromLanguage, to: packet.toLanguage};
