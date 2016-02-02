@@ -21,7 +21,7 @@ socket.on('connect_error', function(err) {
 	$('#container').off('click', 'input.translateBt');
 
 	var serverMsg = $('<div>').text('[SERVER] You are disconnected! Please be sure that all the record is preserved!')
-		.addClass('userMessage');
+		.addClass('userMessage systemMessage');
 
 	addUserMsgByColMode(serverMsg);
 
@@ -196,17 +196,16 @@ socket.on('isBINDED', function(packet) { /* Get translated data and add to messa
 	if (packet.uID == username) socket.emit('ctrlUnlock', packet.pID);
 });
 
-socket.on('badBIND', function(pID) {
-	var transMsg = $(".postID:contains('" + pID + "')").parent();
+socket.on('badBIND', function(packet) {
+	var transMsg = $(".postID:contains('" + packet.pID + "')").parent();
 	$(transMsg).each(function() {
 		$(this).find('.translateBt').prop('disabled', false).val('Translate').removeClass('working');
 	});
 
-	var serverMsg = $('<div>').text('Translator problem, Please try it later')
-		.addClass('userMessage systemMessage');
+	var serverMsg = $('<div>').text(packet.msg).addClass('userMessage systemMessage');
 	addUserMsgByColMode(serverMsg);
 	
-	socket.emit('ctrlUnlock', pID);
+	socket.emit('ctrlUnlock', packet.pID);
 });
 
 socket.on('revertMsg', function(packet) { /* Erase translation in specific bubbles, improvable! */

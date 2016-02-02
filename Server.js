@@ -142,7 +142,7 @@ io.on('connection', function(socket) {
 	});
 
 	// when someone is disconnect, print server information
-	socket.on('disconnect', function() {
+	socket.on('disconnect', function() { // may have some bug...
 		if (socket.username != null){
 			socket.broadcast.to(socket.room).emit('serverOthersMsg', 'NBrain: ' + socket.username + ' has left');
 			io.sockets.in(socket.room).emit('memberLogout', socket.username);
@@ -176,22 +176,21 @@ io.on('connection', function(socket) {
 	// Pass translate result from server
 	socket.on('translate', function(packet) {
 		if (ctrlLock.hasOwnProperty(packet.pID)) {
-
-			if (packet.word.length > 500) packet.word.substring(0, 500);
-
-			var params = { text: packet.word, from: packet.fromLanguage, to: packet.toLanguage };
-			var result = { uID: packet.uID, fromWord: packet.word.replace(/\n/g, '<br>'), toWord: null, pID: packet.pID };
+			if (packet.word.length > 500) socket.emit('badBIND', {pID: packet.pID, msg: 'The length of translate text exceed limit! (500 char only!)'}, socket.room);
+			
+			var result = {uID: packet.uID, fromWord: packet.word.replace(/\n/g, '<br>'), toWord: null, pID: packet.pID};
+			var params = {text: packet.word, from: packet.fromLanguage, to: packet.toLanguage};
 
 			translateWizard.translate(params, function(err, data) {
 				if (err) {
-					socket.emit('badBIND', packet.pID, socket.room);
+					socket.emit('badBIND', {pID: packet.pID, msg: 'Network translator problem, Please try it later'}, socket.room);
 					return console.error('Translator error\n', err);
 				}
 				else {
 					result.toWord = data;
 					io.sockets.in(socket.room).emit('isBINDED', result);
 
-					dbLogInsert(socket.username, socket.room, 'T', postID, getDateTime(), packet.word);
+					dbLogInsert(socket.username, socket.room, 'T', postID, getDateTime(), packet.word.substring(0, 500));
 				}
 			});
 		}
