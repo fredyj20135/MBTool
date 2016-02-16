@@ -117,7 +117,7 @@ socket.on('chat', function(packet) {
 	var postID 		= $('<span>').addClass('postID').html(packet.pID).hide();
 	var content 	= $('<span>').addClass('msgTxt').text(packet.msg);
 	var icon 		= $('<span>').addClass('partnerIcon').addClass(packet.uColor);
-	var nameSpace 	= $('<span>').addClass('nameSpace').text(uID);
+	var nameSpace 	= $('<span>').addClass('nameSpace').text('By ' + uID);
 	var sysTime 	= $('<span>').addClass('sysTime').text(postTime).hide();
 	var timeStamp	= $('<span>').addClass('timeStamp').html('@ ' + localTime()).append(sysTime);
 	var likeBt 		= $('<input>').addClass('likeBt').prop({type: 'button', value: ''});

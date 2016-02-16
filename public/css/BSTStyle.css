@@ -524,14 +524,14 @@ body {
   color: #b2b2b2;
   font-size: 0.8em;
   float: left;
-  margin: 4px 5px 0px 3px;
+  margin-top: 4px;
 }
 
 .nameSpace {
   color: #b2b2b2;
   font-size: 0.8em;
   float: left;
-  margin: 4px 0px 0px 3px;
+  margin: 4px 6px 0px 0px;
 }
 
 #inputPanel {
