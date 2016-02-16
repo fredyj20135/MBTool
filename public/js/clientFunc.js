@@ -48,7 +48,7 @@ socket.on('userConfirm', function(packet) {
 
 	username = packet.uID;
 
-	$('#roomInfo').text(packet.room[0] + 'roup ' + packet.room[1]); // how bad...
+	$('#roomInfo').text('Big Room'); // how bad...
 
 	$('#settingBt').on('click', settingBtHandler);
 	$('#showLiked').on('click', bubbleLikedCtrlHandler);
