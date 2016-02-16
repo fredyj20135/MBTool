@@ -106,7 +106,7 @@ io.on('connection', function(socket) {
 	socket.on('login', function(packet) { // there is a room name in packet now!
 		authenticate(packet.usr, packet.pwd, function(err, user) {
 			if (!dbSetting || user) {
-				socket.room = user.room;
+				socket.room = 'G1';
 				socket.join(user.room);
 				var temp = {userID: packet.usr, userColor: colorCode(packet.usr), blocks: false, room: user.room};
 

@@ -33,14 +33,6 @@
 						<input id="pwdConfirm" type="password" placeholder="PASSWORD RECHECK" name="pwdConfirm">
 					</p>
 					<p>
-						<select id="groupID">
-							<option value="G1" selected = "selected">ROOM 1</option>
-							<option value="G2" >ROOM 2</option>
-							<option value="G3" >ROOM 3</option>
-							<option value="G4" >ROOM 4</option>
-						</select>
-					</p>
-					<p>
 						<button id="regInput" type="button">REGISTER</button>
 					</p>
 				</form>
@@ -80,7 +72,6 @@
 			$('#pwd').val('').hide('slow');
 			$('#pwdConfirm').val('').hide('slow');
 			$('#regInput').hide('slow');
-			$('#groupID').hide('slow');
 			
 			$('#regInput').off('click', regBtHandler);
 			$(document).off('keypress', regBtEnterHandler);
@@ -88,7 +79,7 @@
 
 		function regBtHandler() {
 			if ($('#pwd').val() == $('#pwdConfirm').val()) 
-				socket.emit('reg', {usr: $('#uID').val(), pwd: $('#pwd').val(), group: $('#groupID').val()});
+				socket.emit('reg', {usr: $('#uID').val(), pwd: $('#pwd').val(), group: 'G1'});
 			else 
 				$('#loginMsg').text('Please check your password!');
 		}
