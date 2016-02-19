@@ -1,6 +1,5 @@
 var socket = io.connect('http://localhost:5092');
 var username;
-var twoCol = true;
 var blockMode = 'unblock';
 var colMode = 'twoCol';
 var highlightWord = '';
@@ -243,10 +242,10 @@ socket.on('revertMsg', function(packet) { /* Erase translation in specific bubbl
 /* SHOW or HIDE Msg by column mode */
 function addUserMsgByColMode(content) {
 	var hidden = content.clone().hide().addClass('lie');
-	if (twoCol) {
+	if (colMode == 'twoCol') {
 		$('#partnerMsgContainer').append(hidden);
 		$('#userMsgContainer').append(content).scrollTop($('#userMsgContainer').prop('scrollHeight'));
-	} else {
+	} else if (colMode == 'oneCol'){
 		$('#userMsgContainer').append(hidden);
 		$('#partnerMsgContainer').append(content).scrollTop($('#partnerMsgContainer').prop('scrollHeight'));
 	}
@@ -357,7 +356,6 @@ $('#emitAll').click(function() {
 
 function windowCtrlBtHandler() {
 	var stretch, shrink, uWidth, pWidth;
-	twoCol == true? twoCol = false : twoCol = true;
 	var mode = $('input[name=colMode]:checked').val();
 	
 	if (mode != colMode) {
