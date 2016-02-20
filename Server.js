@@ -74,7 +74,7 @@ function authenticate(name, pass, fn) {
 			hash(pass, result.rows[0].salt, function(err, cipher) {
 				if (err) return fn(err);
 
-				if (cipher.toString() == result.rows[0].pwd) return fn(null, {usr: name, room: result.rows[0].groupname});
+				if (cipher.toString() == result.rows[0].pwd) return fn(null, {usr: name, room: 'Group1'});
 				else return fn(new Error('Invalid password'));
 			});
 		}
@@ -107,7 +107,7 @@ io.on('connection', function(socket) {
 	socket.on('login', function(packet) { // there is a room name in packet now!
 		authenticate(packet.usr, packet.pwd, function(err, user) {
 			if (!dbSetting || user) {
-				socket.room = 'G1';
+				socket.room = user.room;
 				socket.join(user.room);
 				var temp = {userID: packet.usr, userColor: colorCode(packet.usr), blocks: false, room: user.room};
 
@@ -135,9 +135,8 @@ io.on('connection', function(socket) {
 				loginUsers[temp.userID] = temp;
 				userNumber = userNumber + 1;
 
-				roomInfo[parseInt(temp.room[5] - 1)] ++;
-				console.log(getDateTime() + ' user #: ' + userNumber + ', ' + temp.userID + ' in ' + temp.room + 
-				'(' + roomInfo[parseInt(socket.room[5] - 1)] + ')');
+				// roomInfo[parseInt(temp.room[5] - 1)] ++;
+				console.log(getDateTime() + ' user #: ' + userNumber + ', ' + temp.userID + ' in ' + temp.room);
 				
 			} else {
 				socket.emit('loginError', err.toString());
@@ -153,9 +152,8 @@ io.on('connection', function(socket) {
 			delete loginUsers[socket.username];
 
 			userNumber = userNumber - 1;
-			roomInfo[parseInt(socket.room[5] - 1)] --;
-			console.log(getDateTime() + ' user #: ' + userNumber + ', ' + socket.username + ' leave ' + socket.room + 
-				'(' + roomInfo[parseInt(socket.room[5] - 1)] + ')');
+			// roomInfo[parseInt(socket.room[5] - 1)] --;
+			console.log(getDateTime() + ' user #: ' + userNumber + ', ' + socket.username + ' leave ' + socket.room);
 			
 		}
 	});

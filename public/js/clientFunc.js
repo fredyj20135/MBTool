@@ -333,7 +333,7 @@ $('#container').on('mouseup', '.partnerMessage', function() {
 
 /* "CONTROL", handler for buttons, Concept by Allie and Seraphina. Start */
 function loginBtHandler() {
-	socket.emit('login', {usr: $('#username').val(), pwd: $('#pwd').val(), room: $('#roomName').val()});
+	socket.emit('login', {usr: $('#username').val(), pwd: $('#pwd').val()});
 	$('#username').val('');
 	$('#pwd').val('');
 }
