@@ -11,7 +11,6 @@ socket.on('connect', function() {
 	$('#loginInput').on('click', loginBtHandler);
 	$(document).on('keypress', loginBtEnterHandler);
 	socket.emit('roomInfoReq');
-
 });
 
 socket.on('roomInfoRes', function(roomInfo) {
@@ -36,6 +35,13 @@ socket.on('connect_error', function(err) {
 
 	socket.io.close();
 });
+
+socket.on('disconnect', function(err) {
+	var serverMsg = $('<div>').text('[SERVER] You are disconnected! Please be sure that all the record is preserved!')
+	.addClass('userMessage systemMessage');
+
+	addUserMsgByColMode(serverMsg);
+}); 
 
 socket.on('loginError', function(msg) { 
 	$('#loginMsg').text(msg); 
