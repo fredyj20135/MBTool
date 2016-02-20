@@ -10,6 +10,15 @@ socket.on('ping', function(data) { socket.emit('pong', {beat: 1 }); });
 socket.on('connect', function() {
 	$('#loginInput').on('click', loginBtHandler);
 	$(document).on('keypress', loginBtEnterHandler);
+	socket.emit('roomInfoReq');
+});
+
+socket.on('roomInfoRes', function(roomInfo) {
+	var length = $('#roomName').children('option').length;
+	for (var i = 0; i < length; i++) {
+		var room = $('#roomName option').eq(i).text();
+		$('#roomName option').eq(i).text(room + ' (' + roomInfo[i] +')');
+	}
 });
 
 socket.on('connect_error', function(err) { 
@@ -26,6 +35,13 @@ socket.on('connect_error', function(err) {
 
 	socket.io.close();
 });
+
+socket.on('disconnect', function(err) {
+	var serverMsg = $('<div>').text('[SERVER] You are disconnected! Please be sure that all the record is preserved!')
+	.addClass('userMessage systemMessage');
+
+	addUserMsgByColMode(serverMsg);
+}); 
 
 socket.on('loginError', function(msg) { 
 	$('#loginMsg').text(msg); 
@@ -147,7 +163,7 @@ socket.on('chat', function(packet) {
 
 socket.on('partnerMsgBlock', function(packet){
 	$('.partnerMessage').each(function(){
-		if (!$(this).hasClass('share') && $(this).find('.nameSpace').text() == packet.uID) {
+		if (!$(this).hasClass('share') && $(this).find('.nameSpace').text() == 'By '+ packet.uID) {
 			if (packet.blockInfo == true) $(this).find('.msgCntnt').addClass('block');
 			else $(this).find('.msgCntnt').removeClass('block');
 		}
@@ -317,7 +333,7 @@ $('#container').on('mouseup', '.partnerMessage', function() {
 
 /* "CONTROL", handler for buttons, Concept by Allie and Seraphina. Start */
 function loginBtHandler() {
-	socket.emit('login', {usr: $('#username').val(), pwd: $('#pwd').val()});
+	socket.emit('login', {usr: $('#username').val(), pwd: $('#pwd').val(), room: $('#roomName').val()});
 	$('#username').val('');
 	$('#pwd').val('');
 }
