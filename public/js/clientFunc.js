@@ -163,7 +163,7 @@ socket.on('chat', function(packet) {
 
 socket.on('partnerMsgBlock', function(packet){
 	$('.partnerMessage').each(function(){
-		if (!$(this).hasClass('share') && $(this).find('.nameSpace').text() == packet.uID) {
+		if (!$(this).hasClass('share') && $(this).find('.nameSpace').text() == 'By '+ packet.uID) {
 			if (packet.blockInfo == true) $(this).find('.msgCntnt').addClass('block');
 			else $(this).find('.msgCntnt').removeClass('block');
 		}

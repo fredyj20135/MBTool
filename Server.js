@@ -136,7 +136,7 @@ io.on('connection', function(socket) {
 				userNumber = userNumber + 1;
 
 				roomInfo[parseInt(temp.room[5] - 1)] ++;
-				console.log('user #: ' + userNumber + ', ' + temp.userID + ' in ' + temp.room + 
+				console.log(getDateTime() + ' user #: ' + userNumber + ', ' + temp.userID + ' in ' + temp.room + 
 				'(' + roomInfo[parseInt(socket.room[5] - 1)] + ')');
 				
 			} else {
@@ -154,7 +154,7 @@ io.on('connection', function(socket) {
 
 			userNumber = userNumber - 1;
 			roomInfo[parseInt(socket.room[5] - 1)] --;
-			console.log('user #: ' + userNumber + ', ' + socket.username + ' leave ' + socket.room + 
+			console.log(getDateTime() + ' user #: ' + userNumber + ', ' + socket.username + ' leave ' + socket.room + 
 				'(' + roomInfo[parseInt(socket.room[5] - 1)] + ')');
 			
 		}
@@ -302,7 +302,7 @@ io.on('connection', function(socket) {
 
 // bad design...
 function sendHeartbeat(){
-    setTimeout(sendHeartbeat, 300000);
+    setTimeout(sendHeartbeat, 60000);
     io.sockets.emit('ping', { beat : 1 });
 }
-setTimeout(sendHeartbeat, 300000);
+setTimeout(sendHeartbeat, 60000);
