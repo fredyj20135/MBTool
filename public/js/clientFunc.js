@@ -452,11 +452,9 @@ function sendBtEnterHandler(event) {
 function inputCountHandler() {
 	var limit = 500;
 	if ($('#textInput').val().length < limit) {
-		$('#textLimit').hide();
 		$('#textInput').off('keypress').on('keypress');
 	} else {
 		$('#textInput').on('keypress', function() { return false });
-		$('#textLimit').show();
 		$('#textInput').val($('#textInput').val().substring(0, limit));
 	}
 }
@@ -540,5 +538,5 @@ $('#container').on('click', 'input.revertBt', function() {
 $(document).ready(function() {
 	$('#BSTBody').hide();
 	$('#settingWrap').hide();
-	$('#textLimit').hide();
+	// $('#textLimit').hide();
 });
