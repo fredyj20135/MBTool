@@ -33,7 +33,7 @@ var userNumber = 0;
 var postID = 0;
 var loginUsers = {};
 var ctrlLock = {};
-var roomInfo = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+var roomInfo = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
 /* express ignite */
 app.use(express.static(__dirname + '/public'));
@@ -74,7 +74,7 @@ function authenticate(name, pass, fn) {
 			hash(pass, result.rows[0].salt, function(err, cipher) {
 				if (err) return fn(err);
 
-				if (cipher.toString() == result.rows[0].pwd) return fn(null, {usr: name, room: 'Group1'});
+				if (cipher.toString() == result.rows[0].pwd) return fn(null, {usr: name, room: result.rows[0].groupname.replace('G', 'Room ')});
 				else return fn(new Error('Invalid password'));
 			});
 		}
@@ -135,9 +135,9 @@ io.on('connection', function(socket) {
 				loginUsers[temp.userID] = temp;
 				userNumber = userNumber + 1;
 
-				// roomInfo[parseInt(temp.room[5] - 1)] ++;
-				console.log(getDateTime() + ' user #: ' + userNumber + ', ' + temp.userID + ' in ' + temp.room);
-				
+				roomInfo[(parseInt(socket.room[5]) * 10) +  parseInt(socket.room[6]) - 1] ++;
+				console.log(getDateTime() + ' user #: ' + userNumber + ', ' + temp.userID + ' in ' + temp.room + 
+				'(' + roomInfo[(parseInt(socket.room[5]) * 10) +  parseInt(socket.room[6]) - 1] + ')');
 			} else {
 				socket.emit('loginError', err.toString());
 			}
@@ -152,14 +152,11 @@ io.on('connection', function(socket) {
 			delete loginUsers[socket.username];
 
 			userNumber = userNumber - 1;
-			// roomInfo[parseInt(socket.room[5] - 1)] --;
-			console.log(getDateTime() + ' user #: ' + userNumber + ', ' + socket.username + ' leave ' + socket.room);
-			
-		}
-	});
 
-	socket.on('roomInfoReq', function() {
-		socket.emit('roomInfoRes', roomInfo);
+			roomInfo[(parseInt(socket.room[5]) * 10) +  parseInt(socket.room[6]) - 1] --;
+			console.log(getDateTime() + ' user #: ' + userNumber + ', ' + socket.username + ' leave ' + socket.room + 
+				'(' + roomInfo[(parseInt(socket.room[5]) * 10) +  parseInt(socket.room[6]) - 1] + ')');
+		}
 	});
 
 	// when the socket with tag 'chat message' is received, send socket with tag 'chat' to all the user

@@ -10,15 +10,6 @@ socket.on('ping', function(data) { socket.emit('pong', {beat: 1 }); });
 socket.on('connect', function() {
 	$('#loginInput').on('click', loginBtHandler);
 	$(document).on('keypress', loginBtEnterHandler);
-	socket.emit('roomInfoReq');
-});
-
-socket.on('roomInfoRes', function(roomInfo) {
-	var length = $('#roomName').children('option').length;
-	for (var i = 0; i < length; i++) {
-		var room = $('#roomName option').eq(i).text();
-		$('#roomName option').eq(i).text(room + ' (' + roomInfo[i] +')');
-	}
 });
 
 socket.on('connect_error', function(err) { 
@@ -63,7 +54,7 @@ socket.on('userConfirm', function(packet) {
 
 	username = packet.uID;
 
-	$('#roomInfo').text('Big Room'); // how bad...
+	$('#roomInfo').text(packet.room); // how bad...
 
 	$('#settingBt').on('click', settingBtHandler);
 	$('#showLiked').on('click', bubbleLikedCtrlHandler);
@@ -537,4 +528,5 @@ $('#container').on('click', 'input.revertBt', function() {
 /* initial page setting */		
 $(document).ready(function() {
 	$('#BSTBody').hide();
-	$('#settingWrap').hide();});
+	$('#settingWrap').hide();
+});

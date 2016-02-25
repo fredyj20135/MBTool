@@ -33,6 +33,20 @@
 						<input id="pwdConfirm" type="password" placeholder="PASSWORD RECHECK" name="pwdConfirm">
 					</p>
 					<p>
+						<select id="groupID">
+							<option value="G01" selected = "selected">GROUP 1</option>
+							<option value="G02" >GROUP 2</option>
+							<option value="G03" >GROUP 3</option>
+							<option value="G04" >GROUP 4</option>
+							<option value="G05" >GROUP 5</option>
+							<option value="G06" >GROUP 6</option>
+							<option value="G07" >GROUP 7</option>
+							<option value="G08" >GROUP 8</option>
+							<option value="G09" >GROUP 9</option>
+							<option value="G10" >GROUP 10</option>
+						</select>
+					</p>
+					<p>
 						<button id="regInput" type="button">REGISTER</button>
 					</p>
 				</form>
@@ -56,6 +70,7 @@
 			$(document).on('keypress', regBtEnterHandler);
 			$('#uID').val('');
 			$('#pwd').val('');
+			$('#pwdConfirm').val('');
 		});
 		
 		socket.on('regError', function(msg) { 
@@ -79,7 +94,7 @@
 
 		function regBtHandler() {
 			if ($('#pwd').val() == $('#pwdConfirm').val()) 
-				socket.emit('reg', {usr: $('#uID').val(), pwd: $('#pwd').val(), group: 'G1'});
+				socket.emit('reg', {usr: $('#uID').val(), pwd: $('#pwd').val(), group: $('#groupID').val()});
 			else 
 				$('#loginMsg').text('Please check your password!');
 		}
