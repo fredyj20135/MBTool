@@ -27,17 +27,14 @@ socket.on('connect_error', function(err) {
 	socket.io.close();
 });
 
-socket.on('disconnect', function(err) {
-	var serverMsg = $('<div>').text('[SERVER] You are disconnected! Please be sure that all the record is preserved!')
-	.addClass('userMessage systemMessage');
-
-	addUserMsgByColMode(serverMsg);
-}); 
-
 socket.on('loginError', function(msg) { 
 	$('#loginMsg').text(msg); 
 	$('#username').focus();
 });
+
+// socket.on('resRoomInfo', function(packet) {
+
+// });
 
 socket.on('userConfirm', function(packet) {
 	$('#loginMsg').text(packet.msg);
@@ -54,7 +51,8 @@ socket.on('userConfirm', function(packet) {
 
 	username = packet.uID;
 
-	$('#roomInfo').text(packet.room); // how bad...
+	if (parseInt(packet.room.substring(5, 7)) == 0) $('#roomInfo').text('Big Room');
+	else $('#roomInfo').text(packet.room);
 
 	$('#settingBt').on('click', settingBtHandler);
 	$('#showLiked').on('click', bubbleLikedCtrlHandler);
@@ -324,7 +322,7 @@ $('#container').on('mouseup', '.partnerMessage', function() {
 
 /* "CONTROL", handler for buttons, Concept by Allie and Seraphina. Start */
 function loginBtHandler() {
-	socket.emit('login', {usr: $('#username').val(), pwd: $('#pwd').val()});
+	socket.emit('login', {usr: $('#username').val(), pwd: $('#pwd').val(), room: $('#roomName').val()});
 	$('#username').val('');
 	$('#pwd').val('');
 }
@@ -530,3 +528,4 @@ $(document).ready(function() {
 	$('#BSTBody').hide();
 	$('#settingWrap').hide();
 });
+
