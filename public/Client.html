@@ -63,20 +63,20 @@
 							<div class="langSelectorWrap">
 								<select id="oriLang" class="langSelector">
 									<option value="en" selected="selected">English</option>
-									<option value="zh-CHT">中文</option>
-									<option value="ja">日本語</option>
-									<option value="ko">한국의</option>
-									<option value="fr">Franch</option>
-									<option value="de">Deutsch</option>
+									<option value="zh-CHT">繁中</option>
+									<option value="zh-CHS">简中</option>
+									<option value="fa">فارسی</option>
+									<option value="ar">العربية</option>
+									<option value="es">español</option>
 								</select>
 								<div id="arrow"></div>
 								<select id="transLang" class="langSelector">
 									<option value="en">English</option>
-									<option value="zh-CHT" selected="selected">中文</option>
-									<option value="ja">日本語</option>
-									<option value="ko">한국의</option>
-									<option value="fr">Franch</option>
-									<option value="de">Deutsch</option>
+									<option value="zh-CHT" selected="selected">繁中</option>
+									<option value="zh-CHS">简中</option>
+									<option value="fa">فارسی</option>
+									<option value="ar">العربية</option>
+									<option value="es">español</option>
 								</select>
 							</div>
 						</div>
@@ -110,7 +110,16 @@
 						</div>
 						<div class="listRow complement"></div>
 						<div class="listRow">
-							<input class="linkButton" id="showLiked" type="button" value="Show liked bubbles: Off">
+							<div class="settingText">Liked bubbles: </div>
+							<div class="switchBt">
+								<div class="switch">
+									<input type="radio" class="switch-input" name="bubbleMode" value="bOff" id="bOff">
+									<label for="bOff" class="switch-label switch-label-off">Off</label>
+									<input type="radio" class="switch-input" name="bubbleMode" value="bOn" id="bOn">
+									<label for="bOn" class="switch-label switch-label-on">On</label>
+									<span class="switch-selection"></span>
+								</div>
+							</div>
 						</div>
 						<div class="listRow complement"></div>
 						<div class="listRow">

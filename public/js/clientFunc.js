@@ -32,9 +32,12 @@ socket.on('loginError', function(msg) {
 	$('#username').focus();
 });
 
-// socket.on('resRoomInfo', function(packet) {
-
-// });
+socket.on('resRoomInfo', function(packet) {
+	for (var i = 0; i < packet.length; i++) {
+		var count = $('#roomName option[value= "' + i + '"]').text() + ' (' + packet[i] + ')';
+		$('#roomName option[value= "' + i + '"]').text(count)
+	}
+});
 
 socket.on('userConfirm', function(packet) {
 	$('#loginMsg').text(packet.msg);
@@ -55,9 +58,10 @@ socket.on('userConfirm', function(packet) {
 	else $('#roomInfo').text(packet.room);
 
 	$('#settingBt').on('click', settingBtHandler);
-	$('#showLiked').on('click', bubbleLikedCtrlHandler);
+
 	$('input[name=view]').on('click', blockMsgHandler);
 	$('input[name=colMode]').on('click', windowCtrlBtHandler);
+	$('input[name=bubbleMode]').on('click', bubbleLikedCtrlHandler);
 	$('#textInput').on('keyup keydown', inputCountHandler);
 	$('#textInput').on('keypress', sendBtEnterHandler);
 	$('#sendButton').on('click', sendBtHandler);
@@ -65,6 +69,8 @@ socket.on('userConfirm', function(packet) {
 	$('#emitAll').prop('disabled', true).hide();
 	$('#unblock').attr('checked', true);
 	$('#twoCol').attr('checked', true);
+	$('#bOff').attr('checked', true);
+
 	$("#enterCheck").click();
 
 	$(window).on('beforeunload', function() {
@@ -111,7 +117,6 @@ socket.on('memberLogout', function(uID) {
 	});
 });
 
-
 /* Manipulate chat message, distribute user's and partner's messages
  * packet : uID: USERNAME, pID: POST ID, msg: MESSAGE, sysTime: SYSTEM TIME, block: MSG HIDE, uColor: COLOR*/
 socket.on('chat', function(packet) {
@@ -146,7 +151,10 @@ socket.on('chat', function(packet) {
 
 		if (packet.block == true) content.find('.msgCntnt').addClass('block');
 
-		$('#partnerMsgContainer').append(content).scrollTop($('#partnerMsgContainer').prop('scrollHeight'));
+		if ($('#partnerMsgContainer').scrollTop() + $('#partnerMsgContainer').innerHeight() == $('#partnerMsgContainer').prop('scrollHeight')) {
+			$('#partnerMsgContainer').append(content).scrollTop($('#partnerMsgContainer').prop('scrollHeight'));
+			// can add a hint to announce that there is unread msg
+		} else $('#partnerMsgContainer').append(content);
 	}
 });
 
@@ -308,7 +316,7 @@ function clickControl(elmt) {
 	else elmt.addClass('clicked');
 }
 
-/* Catch user highlighted word (for translate)*/
+/* Catch user highlighted word (for translate) */
 $('#container').on('mouseup', '.partnerMessage', function() {
 	if (window.getSelection) {
 		highlightWord = window.getSelection().toString();
@@ -365,7 +373,7 @@ function windowCtrlBtHandler() {
 	
 	if (mode != colMode) {
 		$('#' + mode).attr('checked', true);
-		if ($('#showLiked').hasClass('clicked')) $('#showLiked').click();
+		if ($('input[name=bubbleMode]:checked').val() == 'bOn') $('#bOff').click();
 
 		if (mode == 'oneCol') windowViewHandler('100%', '0%', '#userMsgContainer', '#partnerMsgContainer');
 		else if (mode == 'twoCol') windowViewHandler('50%', '50%', '#partnerMsgContainer', '#userMsgContainer');
@@ -394,9 +402,8 @@ function windowViewHandler(pWidth, uWidth, shrink, stretch) {
 }
 
 function bubbleLikedCtrlHandler() {
-	clickControl($('#showLiked'));
-
-	if ($('#showLiked').hasClass('clicked')) {
+	var mode = $('input[name=bubbleMode]:checked').val();
+	if (mode == 'bOn') {
 		$('.msgCntnt').each(function() {
 			var likeNum = parseInt($(this).find('.likeNum').text());
 			var msg = $(this).parent();
@@ -410,19 +417,15 @@ function bubbleLikedCtrlHandler() {
 			if (!$(this).hasClass('lie')) $(this).hide('fast');
 			$(this).addClass('vote');
 		});
-
-		$('#showLiked').val('Show liked bubbles: On')
 	} else {
 		$('.vote').each(function() { 
 			if (!$(this).hasClass('lie')) $(this).show('fast');
 			$(this).removeClass('vote');
 		});
-
-		$('#showLiked').val('Show liked bubbles: Off')
 	}
 }
 
-/* Buttons in inputWrap*/
+/* Buttons in inputWrap */
 function sendBtHandler() {
 	if ($.trim($('#textInput').val()) !== "") {
 		socket.emit('chatMsg', $('#textInput').val());
@@ -469,7 +472,7 @@ $('#container').on('click', 'input.likeBt', function() {
 	else socket.emit('dislikeMsg', postID);
 });
 
-/* Share own message button*/
+/* Share own message button */
 $('#container').on('click', 'input.shareBt', function() { 
 	var postID = $(this).parent().siblings('.postID').text();
 	var msg = $('.postID:contains("' + postID + '")').parent();
@@ -523,9 +526,8 @@ $('#container').on('click', 'input.revertBt', function() {
 	socket.emit('revert', {pID: postID, uID: username});
 });
 
-/* initial page setting */		
+/* Initial page setting */		
 $(document).ready(function() {
 	$('#BSTBody').hide();
 	$('#settingWrap').hide();
 });
-
