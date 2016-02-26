@@ -33,7 +33,7 @@ var userNumber = 0;
 var postID = 0;
 var loginUsers = {};
 var ctrlLock = {};
-var roomInfo = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+var roomInfo = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
 /* express ignite */
 app.use(express.static(__dirname + '/public'));
@@ -74,7 +74,7 @@ function authenticate(name, pass, fn) {
 			hash(pass, result.rows[0].salt, function(err, cipher) {
 				if (err) return fn(err);
 
-				if (cipher.toString() == result.rows[0].pwd) return fn(null, {usr: name, room: result.rows[0].groupname.replace('G', 'Room ')});
+				if (cipher.toString() == result.rows[0].pwd) return fn(null, name);
 				else return fn(new Error('Invalid password'));
 			});
 		}
@@ -105,60 +105,69 @@ function dbLogInsert(user, room, action, pID, sysTime, content) {
 
 io.on('connection', function(socket) {
 	socket.on('login', function(packet) { // there is a room name in packet now!
-		authenticate(packet.usr, packet.pwd, function(err, user) {
-			if (!dbSetting || user) {
-				socket.room = user.room;
-				socket.join(user.room);
-				var temp = {userID: packet.usr, userColor: colorCode(packet.usr), blocks: false, room: user.room};
+		if (parseInt(packet.room) >= 0 && parseInt(packet.room) < 11) {
+			authenticate(packet.usr, packet.pwd, function(err, user) {
+				if (!dbSetting || user) {
+					// if (parseInt(packet.room) == 0) var roomName = 'Big Room';
+					if (parseInt(packet.room) == 10) var roomName = 'Room ' + packet.room; 
+					else var roomName = 'Room 0' + packet.room; 
 
-				if (!dbSetting) {
-					socket.room = 'G1'; 
-					socket.join('G1'); 
-					temp.room = 'G1';
-				}
-				
-				socket.username = temp.userID;
-				socket.emit('userConfirm', {uID: temp.userID, msg: 'Success!', room: socket.room}, socket.room);
+					socket.room = roomName;
+					socket.join(roomName);
+					var temp = {userID: packet.usr, userColor: colorCode(packet.usr), blocks: false, room: roomName};
 
-				socket.emit('serverSelfMsg', 'NBrain: Welcome ' + temp.userID + '!', socket.room);
-				socket.broadcast.to(socket.room).emit('serverOthersMsg', 'NBrain: ' + packet.usr + ' has just login');
-				var i = 0;
-				for (e in loginUsers) {
-					if (loginUsers[e].room == socket.room) {
-						socket.emit('memberLogin', {uID: loginUsers[e].userID, uColor: loginUsers[e].userColor}, socket.room);
-						i++;
+					if (!dbSetting) {
+						socket.room = 'G1'; 
+						socket.join('G1'); 
+						temp.room = 'G1';
 					}
-				}
-				io.sockets.in(socket.room).emit('memberLogin', {uID: temp.userID, uColor: temp.userColor});
-				if (i == 0) dbLogInsert('SYSTEM', socket.room, 'I', -1, getDateTime(), 'START ' + socket.room);
 				
-				loginUsers[temp.userID] = temp;
-				userNumber = userNumber + 1;
+					socket.username = temp.userID;
+					socket.emit('userConfirm', {uID: temp.userID, msg: 'Success!', room: socket.room}, socket.room);
 
-				roomInfo[(parseInt(socket.room[5]) * 10) +  parseInt(socket.room[6]) - 1] ++;
-				console.log(getDateTime() + ' user #: ' + userNumber + ', ' + temp.userID + ' in ' + temp.room + 
-				'(' + roomInfo[(parseInt(socket.room[5]) * 10) +  parseInt(socket.room[6]) - 1] + ')');
+					socket.emit('serverSelfMsg', 'NBrain: Welcome ' + temp.userID + '!', socket.room);
+					socket.broadcast.to(socket.room).emit('serverOthersMsg', 'NBrain: ' + packet.usr + ' has just login.');
+					var i = 0;
+					for (e in loginUsers) {
+						if (loginUsers[e].room == socket.room) {
+							socket.emit('memberLogin', {uID: loginUsers[e].userID, uColor: loginUsers[e].userColor}, socket.room);
+							i++;
+						}
+					}
+					io.sockets.in(socket.room).emit('memberLogin', {uID: temp.userID, uColor: temp.userColor});
+					if (i == 0) dbLogInsert('SYSTEM', socket.room, 'I', -1, getDateTime(), 'START ' + socket.room);
+					
+					loginUsers[temp.userID] = temp;
+					userNumber = userNumber + 1;
+
+					roomInfo[(parseInt(socket.room[5]) * 10) +  parseInt(socket.room[6])] ++;
+					console.log(getDateTime() + ' user #: ' + userNumber + ', ' + temp.userID + ' in ' + temp.room + 
+					'(' + roomInfo[(parseInt(socket.room[5]) * 10) +  parseInt(socket.room[6])] + ')');
 				
-			} else {
-				socket.emit('loginError', err.toString());
-			}
-		});
+				} else {
+					socket.emit('loginError', err.toString());
+				}
+			});
+		}
+		else if (parseInt(packet.room) == 11) socket.emit('loginError', 'Please select a room to login!');
+		else socket.emit('loginError', 'Error Login');
 	});
 
 	// when someone is disconnect, print server information
 	socket.on('disconnect', function() { // may have some bug...
 		if (socket.username != null){
-			socket.broadcast.to(socket.room).emit('serverOthersMsg', 'NBrain: ' + socket.username + ' has left');
+			socket.broadcast.to(socket.room).emit('serverOthersMsg', 'NBrain: ' + socket.username + ' has left.');
 			io.sockets.in(socket.room).emit('memberLogout', socket.username);
 			delete loginUsers[socket.username];
 
 			userNumber = userNumber - 1;
-			roomInfo[(parseInt(socket.room[5]) * 10) +  parseInt(socket.room[6]) - 1] --;
+			roomInfo[(parseInt(socket.room[5]) * 10) +  parseInt(socket.room[6])] --;
 			console.log(getDateTime() + ' user #: ' + userNumber + ', ' + socket.username + ' leave ' + socket.room + 
-				'(' + roomInfo[(parseInt(socket.room[5]) * 10) +  parseInt(socket.room[6]) - 1] + ')');
+				'(' + roomInfo[(parseInt(socket.room[5]) * 10) +  parseInt(socket.room[6])] + ')');
 			
 		}
 	});
+	socket.emit('resRoomInfo', roomInfo);
 
 	// when the socket with tag 'chat message' is received, send socket with tag 'chat' to all the user
 	socket.on('chatMsg', function(input) {
@@ -191,7 +200,7 @@ io.on('connection', function(socket) {
 
 			translateWizard.translate(params, function(err, data) {
 				if (err) {
-					socket.emit('badBIND', {pID: packet.pID, msg: 'Network translator problem, Please try it later'}, socket.room);
+					socket.emit('badBIND', {pID: packet.pID, msg: 'Network translator problem, Please try it later.'}, socket.room);
 					return console.error('Translator error\n', err);
 				}
 				else {
@@ -260,7 +269,8 @@ io.on('connection', function(socket) {
 	socket.on('reg', function(packet) {
 		if 		(packet.usr == '' || packet.usr == null || packet.usr.length > 20) socket.emit('regError', 'Invalid username!');
 		else if (packet.pwd == '' || packet.pwd == null || packet.pwd.length > 20) socket.emit('regError', 'Invalid password!');
-		else if (packet.usr.indexOf('/0x00') > 0 || packet.pwd.indexOf('/0x00') > 0) socket.emit('regError', 'Invalid input');
+		else if (packet.usr.indexOf('/0x00') > 0 || packet.pwd.indexOf('/0x00') > 0) socket.emit('regError', 'Invalid input!');
+		else if (parseInt(packet.group.substring(1, 3)) == 0) socket.emit('regError', 'Please select your group!');
 		else {
 			if (dbSetting) {
 				console.log('user string: ' + packet.usr);
@@ -281,7 +291,7 @@ io.on('connection', function(socket) {
 								function(err) {
 									if(err) {
 										return console.error('error running query', err);
-										socket.emit('regError', 'Please recheck your information');
+										socket.emit('regError', 'Please recheck your information.');
 									}
 									else socket.emit('regSuccess', msg);
 								}
@@ -290,7 +300,7 @@ io.on('connection', function(socket) {
 					}
 				});
 			} else {
-				socket.emit('regError', 'Database shut down');
+				socket.emit('regError', 'Database shut down.');
 			}
 		}
 	});
