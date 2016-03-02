@@ -349,7 +349,17 @@ function blockMsgHandler() {
 	var blockInfo;
 
 	if (newMode != blockMode) {
-		newMode == 'block'? blockInfo = true : blockInfo = false;
+		if (newMode == 'block') {
+			$('#topMenu').addClass('blockMode');
+			$('#partnerMsgContainer').addClass('blockMode');
+			$('#userMsgContainer').addClass('blockMode');
+			blockInfo = true;
+		} else if (newMode == 'unblock') {
+			$('#topMenu').removeClass('blockMode');
+			$('#partnerMsgContainer').removeClass('blockMode');
+			$('#userMsgContainer').removeClass('blockMode');
+			blockInfo = false;
+		}
 		$('#' + newMode).attr('checked', true);
 		
 		$('#emitAll').prop('disabled', !blockInfo);

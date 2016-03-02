@@ -37,6 +37,10 @@ body {
   box-shadow: 0 3px 2px transparent, 0 3px 3px rgba(0, 0, 0, 0.15);
 }
 
+#topMenu.blockMode {
+  background: #37342d;
+}
+
 #roomInfo {
   position: fixed;
   display: inline-block;
@@ -268,6 +272,7 @@ body {
 
 #container {
   padding: 45px 0px 20px 0px;
+  background-color: #bbb;
   border: 0px solid red;
   display: -webkit-flex;
   display: flex;
@@ -287,7 +292,11 @@ body {
   padding: 5px 10px 5px 20px;
 }
 
-#userMsgContainer {
+#partnerMsgContainer.blockMode {
+  border-right: 2px dashed #37342d;
+}
+
+#userMsgContainer{
   width: 50%;
   border-left: 2px dashed #2c9076;
   overflow: auto;
@@ -295,6 +304,10 @@ body {
 /*  -webkit-flex: 1;
           flex: 1;
 */  padding: 5px 20px 5px 10px;
+}
+
+#userMsgContainer.blockMode  {
+  border-left: 2px dashed #37342d;
 }
 
 .memberElement {
