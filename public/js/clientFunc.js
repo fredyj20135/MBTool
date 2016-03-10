@@ -320,9 +320,9 @@ function clickControl(elmt) {
 $('#container').on('mouseup', '.partnerMessage', function() {
 	if (window.getSelection) {
 		highlightWord = window.getSelection().toString();
-	}else if (document.getSelection){
+	} else if (document.getSelection){
 		highlightWord = document.getSelection().toString();
-	}else if (document.selection) {
+	} else if (document.selection) {
 		highlightWord = document.selection.createRange().text.toString();
 	}
 });
