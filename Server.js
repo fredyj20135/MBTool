@@ -31,6 +31,7 @@ var translateWizard = new mstranslator(bingID, true);
 /* System tracking initialization */ 
 var userNumber = 0;
 var postID = 0;
+var prepUsers = {};
 var loginUsers = {};
 var ctrlLock = {};
 var roomInfo = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
@@ -104,7 +105,11 @@ function dbLogInsert(user, room, action, pID, sysTime, content) {
 }
 
 io.on('connection', function(socket) {
-	socket.on('login', function(packet) { // there is a room name in packet now!
+	// at login page, show room information
+	socket.emit('resRoomInfo', roomInfo);
+
+	// from login is pressed, before page turns to chatroom;
+	socket.on('login', function(packet) {
 		if (parseInt(packet.room) >= 0 && parseInt(packet.room) < 11) {
 			authenticate(packet.usr, packet.pwd, function(err, user) {
 				if (!dbSetting || user) {
@@ -124,25 +129,7 @@ io.on('connection', function(socket) {
 					socket.username = temp.userID;
 					socket.emit('userConfirm', {uID: temp.userID, msg: 'Success!', room: socket.room}, socket.room);
 
-					socket.emit('serverSelfMsg', 'NBrain: Welcome ' + temp.userID + '!', socket.room);
-					socket.broadcast.to(socket.room).emit('serverOthersMsg', 'NBrain: ' + packet.usr + ' has just login.');
-					var i = 0;
-					for (e in loginUsers) {
-						if (loginUsers[e].room == socket.room) {
-							socket.emit('memberLogin', {uID: loginUsers[e].userID, uColor: loginUsers[e].userColor}, socket.room);
-							i++;
-						}
-					}
-					io.sockets.in(socket.room).emit('memberLogin', {uID: temp.userID, uColor: temp.userColor});
-					if (i == 0) dbLogInsert('SYSTEM', socket.room, 'I', -1, getDateTime(), 'START ' + socket.room);
-					
-					loginUsers[temp.userID] = temp;
-					userNumber = userNumber + 1;
-
-					roomInfo[(parseInt(socket.room[5]) * 10) +  parseInt(socket.room[6])] ++;
-					console.log(getDateTime() + ' user #: ' + userNumber + ', ' + temp.userID + ' in ' + temp.room + 
-					'(' + roomInfo[(parseInt(socket.room[5]) * 10) +  parseInt(socket.room[6])] + ')');
-				
+					prepUsers[temp.userID] = temp;
 				} else {
 					socket.emit('loginError', err.toString());
 				}
@@ -152,8 +139,31 @@ io.on('connection', function(socket) {
 		else socket.emit('loginError', 'Error Login');
 	});
 
+	socket.on('userReady', function() {
+		socket.broadcast.to(socket.room).emit('serverOthersMsg', 'NBrain: ' + socket.username + ' has just login.');
+		var i = 0;
+		for (e in loginUsers) {
+			if (loginUsers[e].room == socket.room) {
+				socket.emit('memberLogin', {uID: loginUsers[e].userID, uColor: loginUsers[e].userColor}, socket.room);
+				i++;
+			}
+		}
+
+		socket.emit('serverSelfMsg', 'NBrain: Welcome ' + socket.username + '!', socket.room);
+		userNumber = userNumber + 1;
+		loginUsers[socket.username] = prepUsers[socket.username];
+		delete prepUsers[socket.username];
+
+		io.sockets.in(socket.room).emit('memberLogin', {uID: socket.username, uColor: loginUsers[socket.username].userColor});
+		if (i == 0) dbLogInsert('SYSTEM', socket.room, 'I', -1, getDateTime(), 'START ' + socket.room);
+
+		roomInfo[(parseInt(socket.room[5]) * 10) +  parseInt(socket.room[6])] ++;
+		console.log(getDateTime() + ' user #: ' + userNumber + ', ' + socket.username + ' in ' + socket.room + 
+			'(' + roomInfo[(parseInt(socket.room[5]) * 10) +  parseInt(socket.room[6])] + ')');
+	});
+
 	// when someone is disconnect, print server information
-	socket.on('disconnect', function() { // may have some bug...
+	socket.on('disconnect', function() { // better using session...
 		if (socket.username != null){
 			socket.broadcast.to(socket.room).emit('serverOthersMsg', 'NBrain: ' + socket.username + ' has left.');
 			io.sockets.in(socket.room).emit('memberLogout', socket.username);
@@ -165,7 +175,6 @@ io.on('connection', function(socket) {
 				'(' + roomInfo[(parseInt(socket.room[5]) * 10) +  parseInt(socket.room[6])] + ')');
 		}
 	});
-	socket.emit('resRoomInfo', roomInfo);
 
 	// when the socket with tag 'chat message' is received, send socket with tag 'chat' to all the user
 	socket.on('chatMsg', function(input) {

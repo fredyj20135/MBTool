@@ -73,6 +73,8 @@ socket.on('userConfirm', function(packet) {
 
 	$("#enterCheck").click();
 
+	socket.emit('userReady');
+
 	$(window).on('beforeunload', function() {
 		return 'All messages will be droped if you leave or relaod this page. \n\nAre you sure?'; 
 	});
@@ -153,8 +155,10 @@ socket.on('chat', function(packet) {
 
 		if ($('#partnerMsgContainer').scrollTop() + $('#partnerMsgContainer').innerHeight() == $('#partnerMsgContainer').prop('scrollHeight')) {
 			$('#partnerMsgContainer').append(content).scrollTop($('#partnerMsgContainer').prop('scrollHeight'));
-			// can add a hint to announce that there is unread msg
-		} else $('#partnerMsgContainer').append(content);
+		} else {
+			$('#partnerMsgContainer').append(content);
+			$('#bottomNotifier').show();
+		}
 	}
 });
 
@@ -406,9 +410,13 @@ function windowViewHandler(pWidth, uWidth, shrink, stretch) {
 			$(this).removeClass('lie');
 			delay += 100;
 		});
+
+		var pos = parseInt(pWidth) / 2 + '%';
+		$('#topNotifier').css('left', 'calc(' + pos + ' - 63.5px)');
+		$('#bottomNotifier').css('left', 'calc(' + pos + ' - 63.5px)');
 	}});
 	$(shrink).animate({scrollTop: $(shrink).offset().top}, 100, function() { $('input[name=colMode]').prop('disabled', false); });
-	$(stretch).animate({scrollTop: $(stretch).offset().top}, 100);	
+	$(stretch).animate({scrollTop: $(stretch).offset().top}, 100);
 }
 
 function bubbleLikedCtrlHandler() {
@@ -440,7 +448,6 @@ function sendBtHandler() {
 	if ($.trim($('#textInput').val()) !== "") {
 		socket.emit('chatMsg', $('#textInput').val());
 		$('#textInput').val('').focus();
-		$('#textLimit').hide();
 	}
 }
 
@@ -536,8 +543,15 @@ $('#container').on('click', 'input.revertBt', function() {
 	socket.emit('revert', {pID: postID, uID: username});
 });
 
+$('#partnerMsgContainer').scroll(function (){
+	if ($('#partnerMsgContainer').scrollTop() + $('#partnerMsgContainer').innerHeight() == $('#partnerMsgContainer').prop('scrollHeight'))
+		$('#bottomNotifier').hide();
+});
+
 /* Initial page setting */		
 $(document).ready(function() {
 	$('#BSTBody').hide();
 	$('#settingWrap').hide();
+	$('#topNotifier').hide();
+	$('#bottomNotifier').hide();
 });
