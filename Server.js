@@ -75,7 +75,7 @@ function authenticate(name, pass, fn) {
 			hash(pass, result.rows[0].salt, function(err, cipher) {
 				if (err) return fn(err);
 
-				if (cipher.toString() == result.rows[0].pwd) return fn(null, name);
+				if (cipher.toString() == result.rows[0].pwd) return fn(null, {usr: name, room: result.rows[0].groupname});
 				else return fn(new Error('Invalid password'));
 			});
 		}
@@ -106,37 +106,26 @@ function dbLogInsert(user, room, action, pID, sysTime, content) {
 
 io.on('connection', function(socket) {
 	// at login page, show room information
-	socket.emit('resRoomInfo', roomInfo);
+	// socket.emit('resRoomInfo', roomInfo);
 
 	// from login is pressed, before page turns to chatroom;
 	socket.on('login', function(packet) {
-		if (parseInt(packet.room) >= 0 && parseInt(packet.room) < 11) {
-			authenticate(packet.usr, packet.pwd, function(err, user) {
-				if (!dbSetting || user) {
-					if (parseInt(packet.room) == 10) var roomName = 'Room ' + packet.room; 
-					else var roomName = 'Room 0' + packet.room; 
+		
+		authenticate(packet.usr, packet.pwd, function(err, user) {
+			if (!dbSetting || user) {
 
-					socket.room = roomName;
-					socket.join(roomName);
-					var temp = {userID: packet.usr, userColor: colorCode(packet.usr), blocks: false, room: roomName};
+				socket.room = user.room;
+				socket.join(user.room);
+				var temp = {userID: packet.usr, userColor: colorCode(packet.usr), blocks: false, room: user.room};
 
-					if (!dbSetting) {
-						socket.room = 'G1'; 
-						socket.join('G1'); 
-						temp.room = 'G1';
-					}
+				socket.username = temp.userID;
+				socket.emit('userConfirm', {uID: temp.userID, msg: 'Success!', room: socket.room}, socket.room);
 
-					socket.username = temp.userID;
-					socket.emit('userConfirm', {uID: temp.userID, msg: 'Success!', room: socket.room}, socket.room);
-
-					prepUsers[temp.userID] = temp;
-				} else {
-					socket.emit('loginError', err.toString());
-				}
-			});
-		}
-		else if (parseInt(packet.room) == 11) socket.emit('loginError', 'Please select a room to login!');
-		else socket.emit('loginError', 'Error Login');
+				prepUsers[temp.userID] = temp;
+			} else {
+				socket.emit('loginError', err.toString());
+			}
+		});
 	});
 
 	socket.on('userReady', function() {
@@ -157,9 +146,9 @@ io.on('connection', function(socket) {
 		io.sockets.in(socket.room).emit('memberLogin', {uID: socket.username, uColor: loginUsers[socket.username].userColor});
 		if (i == 0) dbLogInsert('SYSTEM', socket.room, 'I', -1, getDateTime(), 'START ' + socket.room);
 
-		roomInfo[(parseInt(socket.room[5]) * 10) +  parseInt(socket.room[6])] ++;
-		console.log(getDateTime() + ' user #: ' + userNumber + ', ' + socket.username + ' in ' + socket.room + 
-			'(' + roomInfo[(parseInt(socket.room[5]) * 10) +  parseInt(socket.room[6])] + ')');
+		// roomInfo[(parseInt(socket.room[5]) * 10) +  parseInt(socket.room[6])] ++;
+		// console.log(getDateTime() + ' user #: ' + userNumber + ', ' + socket.username + ' in ' + socket.room + 
+			// '(' + roomInfo[(parseInt(socket.room[5]) * 10) +  parseInt(socket.room[6])] + ')');
 	});
 
 	// when someone is disconnect, print server information
@@ -170,9 +159,9 @@ io.on('connection', function(socket) {
 			delete loginUsers[socket.username];
 
 			userNumber = userNumber - 1;
-			roomInfo[(parseInt(socket.room[5]) * 10) +  parseInt(socket.room[6])] --;
-			console.log(getDateTime() + ' user #: ' + userNumber + ', ' + socket.username + ' leave ' + socket.room + 
-				'(' + roomInfo[(parseInt(socket.room[5]) * 10) +  parseInt(socket.room[6])] + ')');
+			// roomInfo[(parseInt(socket.room[5]) * 10) +  parseInt(socket.room[6])] --;
+			// console.log(getDateTime() + ' user #: ' + userNumber + ', ' + socket.username + ' leave ' + socket.room + 
+				// '(' + roomInfo[(parseInt(socket.room[5]) * 10) +  parseInt(socket.room[6])] + ')');
 		}
 	});
 
