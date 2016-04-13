@@ -145,7 +145,8 @@ socket.on('chat', function(packet) {
 	var revertBt 	= $('<input>').addClass('revertBt').prop({type: 'button', value: 'Revert'}).hide();
 	
 	content.html(content.html().replace(/\n/g, '<br>'));
-	content = $('<span>').addClass('msgCntnt').append(content).append('<br>').append(likeNum).append(likeBt);
+	content = $('<span>').addClass('msgCntnt').append(content).append('<br>');
+	if (cond == 'CB') content = content.append(likeNum).append(likeBt);
 
 	if (uID == username) {
 		content = content.append(shareBt).append(timeStamp);
