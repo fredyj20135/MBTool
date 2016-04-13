@@ -64,6 +64,7 @@ socket.on('userConfirm', function(packet) {
 	$('input[name=bubbleMode]').on('click', bubbleLikedCtrlHandler);
 	$('#textInput').on('keyup keydown', inputCountHandler);
 	$('#textInput').on('keypress', sendBtEnterHandler);
+	$('#bottomNotifier').on('click', goBotHandler);
 	$('#sendButton').on('click', sendBtHandler);
 
 	$('#emitAll').prop('disabled', true).hide();
@@ -441,6 +442,10 @@ function bubbleLikedCtrlHandler() {
 			$(this).removeClass('vote');
 		});
 	}
+}
+
+function goBotHandler() {
+	$('#partnerMsgContainer'). animate({scrollTop: $('#partnerMsgContainer').prop('scrollHeight')}, 200);
 }
 
 /* Buttons in inputWrap */

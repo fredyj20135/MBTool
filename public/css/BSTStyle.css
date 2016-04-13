@@ -592,18 +592,22 @@ body {
 }
 
 #bottomNotifier {
+  cursor:pointer;
   float: left;
   position: fixed;
-  width: 128px;
+  text-align: center;
+  width: 130px;
   top: calc(100% - 115px);
-  left: calc(25% - 63.5px);
-  background: white; 
+  left: calc(25% - 64.5px);
+  background: white;/*#5e5c56;*/ 
   padding: 3px 20px;
   border-radius: 5px;
-  color: #37342d;
+  border: 1px solid rgba(44, 144, 118, 0.7);
+  color: #2c9076;/*#37342d;*/
   font-family: 'Open Sans', 微軟正黑體, sans-serif;
+  font-weight: bold;
   font-size: 0.5em;
-  box-shadow: 3px 3px 0px transparent, 0px 5px 3px rgba(0, 0, 0, 0.2);
+  box-shadow: 3px 3px 0px transparent, 0px 0px 7px rgba(0, 0, 0, 0.3);
 }
 
 #arrow {
