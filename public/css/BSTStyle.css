@@ -306,8 +306,35 @@ body {
 */  padding: 5px 20px 5px 10px;
 }
 
-#userMsgContainer.blockMode  {
+#userMsgContainer.blockMode {
   border-left: 2px dashed #37342d;
+}
+
+#chatLog {
+  width: 0%;
+  height:100%;
+  border-left: 3px solid #2c9076;
+  font-size: 0.8em;
+  background-color: white;
+  visibility: hidden;
+  overflow: auto;
+}
+
+#chatLog table tr td {
+  border-bottom: 1px solid #e6e6e6;
+}
+
+.logLike {
+  min-width: 40px;
+  text-align: center;
+}
+
+.logLikeSpace {
+  text-align: center;
+}
+
+.logMsg {
+  text-align: center;
 }
 
 .memberElement {
@@ -607,6 +634,7 @@ body {
   font-weight: bold;
   font-size: 0.5em;
   box-shadow: 3px 3px 0px transparent, 0px 0px 7px rgba(0, 0, 0, 0.3);
+  z-index: 6;
 }
 
 #arrow {

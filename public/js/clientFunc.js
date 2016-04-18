@@ -462,7 +462,9 @@ function goBotHandler() {
 /* Buttons in inputWrap */
 function sendBtHandler() {
 	if ($.trim($('#textInput').val()) !== "") {
-		socket.emit('chatMsg', $('#textInput').val());
+		if ($('#textInput').val() == "!SECOND") changeExpMode(); 
+		else socket.emit('chatMsg', $('#textInput').val());
+		
 		$('#textInput').val('').focus();
 	}
 }
@@ -472,6 +474,38 @@ function sendBtEnterHandler(event) {
 		event.preventDefault();
 		$('#sendButton').click();
 	}
+}
+
+function changeExpMode() {
+	$('#chatLog').css('visibility', 'visible');
+	$('#chatLog').width('40%');
+
+	var likeTd = $('<td>').addClass('logLike').text('liked');
+	var msgTd = $('<td>').addClass('logMsg').text('message');
+	var logContent = $('#partnerMsgContainer .msgCntnt');
+	var firstLine = $('<tr>');
+
+	if (cond == 'CB') firstLine = firstLine.append(likeTd);
+
+	$('#logTable').append(firstLine.append(msgTd));
+
+	$(logContent).each(function(){
+		var like = $('<td>').text($(this).find('.likeNum').text());
+		var name;
+		var line = $('<tr>');
+		var cntnt = $('<td>');
+
+		if (like.text() == '0') like.text(''); // check
+		else like.addClass('logLikeSpace');
+		
+		if ($(this).find('.nameSpace').length == 0) name = username;
+		else name = $(this).find('.nameSpace').text().substr(2, $(this).find('.nameSpace').text().length);
+		cntnt = cntnt.text(name + ': ' + $(this).find('.msgTxt').text());
+
+		if (cond == 'CB') line = line.append(like);
+		line.append(cntnt);
+		$('#logTable').append(line);
+	});
 }
 
 function inputCountHandler() {
