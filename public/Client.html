@@ -95,7 +95,7 @@
 							</div>
 						</div>
 						<div class="listRow complement" id="w2"></div>
-						<div class="listRow">
+						<div class="listRow" id="l1">
 							<div class="settingText">Liked bubbles: </div>
 							<div class="switchBt">
 								<div class="switch">
@@ -107,7 +107,7 @@
 								</div>
 							</div>
 						</div>
-						<div class="listRow complement"></div>
+						<div class="listRow complement" id="l2"></div>
 						<div class="listRow">
 							<a class="linkButton" href="/">Logout</a>
 						</div>
@@ -120,7 +120,14 @@
 				<div id="partnerMsgContainer"></div>
 				<div id="userMsgContainer"></div>
 				<div id="chatLog">
-					<table id="logTable"></table>
+					<table id="logTable">
+						<tbody>
+							<tr>
+								<td class="logLike">liked</td>
+								<td class="logMsg">message</td>
+							</tr>
+						</tbody>
+					</table>
 				</div>
 				<div id='bottomNotifier'>New Message!</div>
 			</div>

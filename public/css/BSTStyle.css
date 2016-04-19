@@ -321,11 +321,17 @@ body {
 }
 
 #chatLog table tr td {
+  padding-top: 3px;
+  padding-bottom: 3px;
   border-bottom: 1px solid #e6e6e6;
 }
 
+.logUserID {
+  font-weight: bold;
+}
+
 .logLike {
-  min-width: 40px;
+  width: 15vw;
   text-align: center;
 }
 
@@ -334,6 +340,7 @@ body {
 }
 
 .logMsg {
+  width: 85vw;
   text-align: center;
 }
 

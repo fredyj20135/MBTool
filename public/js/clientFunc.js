@@ -47,17 +47,11 @@ socket.on('userConfirm', function(packet) {
 	});
 
 	username = packet.uID;
-
-	$('#settingBt').on('click', settingBtHandler);
-
-	$('input[name=view]').on('click', blockMsgHandler);
-	$('input[name=bubbleMode]').on('click', bubbleLikedCtrlHandler);
 	$('#textInput').on('keyup keydown', inputCountHandler);
 	$('#textInput').on('keypress', sendBtEnterHandler);
-	$('#bottomNotifier').on('click', goBotHandler); // Ya
+	$('#bottomNotifier').on('click', goBotHandler);
 	$('#sendButton').on('click', sendBtHandler);
 
-	$('#emitAll').prop('disabled', true).hide();
 	$('#unblock').attr('checked', true);
 	$('#twoCol').attr('checked', true);
 	$('#bOff').attr('checked', true);
@@ -66,18 +60,20 @@ socket.on('userConfirm', function(packet) {
 
 	if (packet.room == "CA") {
 		$('#roomInfo').text("Room A");
-		$('#w1').hide();
-		$('#w2').hide();
+
 		colMode = 'oneCol';
 		windowViewHandler('100%', '0%', '#userMsgContainer', '#partnerMsgContainer');
 
-		$('#b1').hide();
-		$('#b2').hide();
 		cond = 'CA';
 	} else if (packet.room == "CB") {
 		$('#roomInfo').text("Room B");
+		
+		$('#settingBt').on('click', settingBtHandler);
 		$('input[name=view]').on('click', blockMsgHandler);
+		$('input[name=bubbleMode]').on('click', bubbleLikedCtrlHandler);
 		$('input[name=colMode]').on('click', windowCtrlBtHandler);
+		$('#emitAll').prop('disabled', true).hide();
+
 		cond = 'CB';
 	}
 
@@ -249,7 +245,7 @@ socket.on('revertMsg', function(packet) { /* Erase translation in specific bubbl
 
 			if (elmt != null && elmt.prop('title').slice(3, elmt.prop('title').length) == packet.uID) {
 				temp = elmt.clone();
-				elmt.find('.trans:last').detach();
+				elmt.find('.trans:last').remove();
 				revertHTML = revertHTML.replace(temp.prop('outerHTML'), elmt.html());
 			}
 			msgText.html(revertHTML);
@@ -462,7 +458,9 @@ function goBotHandler() {
 /* Buttons in inputWrap */
 function sendBtHandler() {
 	if ($.trim($('#textInput').val()) !== "") {
-		if ($('#textInput').val() == "!SECOND") changeExpMode(); 
+		if ($('#textInput').val() == '!SHOWLOG!') showChatLogSpace(); 		// experimental support
+		else if ($('#textInput').val() == '!CLEARLOG!') clearChatLog();		// experimental support
+		else if ($('#textInput').val() == '!CLEARMSG!') clearContainer();	// experimental support
 		else socket.emit('chatMsg', $('#textInput').val());
 		
 		$('#textInput').val('').focus();
@@ -474,38 +472,6 @@ function sendBtEnterHandler(event) {
 		event.preventDefault();
 		$('#sendButton').click();
 	}
-}
-
-function changeExpMode() {
-	$('#chatLog').css('visibility', 'visible');
-	$('#chatLog').width('40%');
-
-	var likeTd = $('<td>').addClass('logLike').text('liked');
-	var msgTd = $('<td>').addClass('logMsg').text('message');
-	var logContent = $('#partnerMsgContainer .msgCntnt');
-	var firstLine = $('<tr>');
-
-	if (cond == 'CB') firstLine = firstLine.append(likeTd);
-
-	$('#logTable').append(firstLine.append(msgTd));
-
-	$(logContent).each(function(){
-		var like = $('<td>').text($(this).find('.likeNum').text());
-		var name;
-		var line = $('<tr>');
-		var cntnt = $('<td>');
-
-		if (like.text() == '0') like.text(''); // check
-		else like.addClass('logLikeSpace');
-		
-		if ($(this).find('.nameSpace').length == 0) name = username;
-		else name = $(this).find('.nameSpace').text().substr(2, $(this).find('.nameSpace').text().length);
-		cntnt = cntnt.text(name + ': ' + $(this).find('.msgTxt').text());
-
-		if (cond == 'CB') line = line.append(like);
-		line.append(cntnt);
-		$('#logTable').append(line);
-	});
 }
 
 function inputCountHandler() {
@@ -597,6 +563,55 @@ $('#partnerMsgContainer').scroll(function (){
 	if ($('#partnerMsgContainer').scrollTop() + $('#partnerMsgContainer').innerHeight() == $('#partnerMsgContainer').prop('scrollHeight'))
 		$('#bottomNotifier').hide();
 });
+/* end of CONTROL function */
+
+/* Experimental support function, Start*/
+/* Show log table */
+function showChatLogSpace() {
+	$('#chatLog').css('visibility', 'visible');
+	$('#chatLog').width('40%');
+
+	var logContent = $('#partnerMsgContainer .msgCntnt');
+	var firstLine = $('<tr>');
+
+	if (cond == 'CA') $('#logTable .logLike').remove();
+
+	$(logContent).each(function(){
+		var line = $('<tr>');
+		var like = $('<td>').text($(this).find('.likeNum').text());
+		var cntnt = $('<td>');
+		var name = $('<span>').addClass('logUserID');
+		var msg = $('<span>').text(': ' + $(this).find('.msgTxt').text() );
+
+		if (like.text() == '0') like.text('');
+		else like.addClass('logLikeSpace');
+		
+		if ($(this).find('.nameSpace').length == 0) name = name.text(username);
+		else name = name.text($(this).find('.nameSpace').text().substr(2, $(this).find('.nameSpace').text().length));
+
+		cntnt = cntnt.append(name).append(msg);
+
+		if (cond == 'CB') line = line.append(like);
+		line.append(cntnt);
+
+		$('#logTable').append(line);
+	});
+}
+
+/* Clear record in log table */
+function clearChatLog() {
+	$('#logTable').find('tr:gt(0)').remove();
+}
+
+/* Clear recond in container */
+function clearContainer() {
+	var rmLog = confirm('These will clear all record in contatiner, are you sure?');
+	if (rmLog) {
+		$('#partnerMsgContainer').children().remove();
+		$('#userMsgContainer').children().remove();
+	}
+}
+/* Experimental support, end*/
 
 /* Initial page setting */		
 $(document).ready(function() {
