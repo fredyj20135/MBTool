@@ -229,6 +229,12 @@ io.on('connection', function(socket) {
 		dbLogInsert(socket.username, socket.room, 'B', -1, getDateTime(), input);
 	});
 
+	socket.on('blockDefault', function(input) {
+		var msg;
+		input == true? msg = ' ' : msg = ' un';
+		loginUsers[socket.username].block = input;
+	});
+
 	socket.on('shareMsg', function(pID) {
 		socket.broadcast.to(socket.room).emit('partnerMsgShare', {pID: pID, blockInfo: loginUsers[socket.username].block});
 

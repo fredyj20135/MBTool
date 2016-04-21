@@ -47,23 +47,26 @@ socket.on('userConfirm', function(packet) {
 	});
 
 	username = packet.uID;
+
 	$('#textInput').on('keyup keydown', inputCountHandler);
 	$('#textInput').on('keypress', sendBtEnterHandler);
 	$('#bottomNotifier').on('click', goBotHandler);
 	$('#sendButton').on('click', sendBtHandler);
-
-	$('#unblock').attr('checked', true);
+	
 	$('#twoCol').attr('checked', true);
 	$('#bOff').attr('checked', true);
-
-	$("#enterCheck").click();
+	$('#unblock').attr('checked', true);
 
 	if (packet.room == "CA") {
 		$('#roomInfo').text("Room A");
 
 		colMode = 'oneCol';
 		windowViewHandler('100%', '0%', '#userMsgContainer', '#partnerMsgContainer');
+		
+		blockMode = 'unblock';
 
+		$('#settingBt').hide();
+		
 		cond = 'CA';
 	} else if (packet.room == "CB") {
 		$('#roomInfo').text("Room B");
@@ -76,8 +79,11 @@ socket.on('userConfirm', function(packet) {
 
 		cond = 'CB';
 	}
+	$("#enterCheck").click();
 
 	socket.emit('userReady');
+
+	if (cond == 'CB') defaultBlock(); // until user ready can we control system function (like block)
 
 	$(window).on('beforeunload', function() {
 		return 'All messages will be droped if you leave or relaod this page. \n\nAre you sure?'; 
@@ -610,6 +616,21 @@ function clearContainer() {
 		$('#partnerMsgContainer').children().remove();
 		$('#userMsgContainer').children().remove();
 	}
+}
+
+/* Use for begin with block mode */
+function defaultBlock() {
+	$('#topMenu').addClass('blockMode');
+	$('#partnerMsgContainer').addClass('blockMode');
+	$('#userMsgContainer').addClass('blockMode');
+	$('#block').attr('checked', true);
+
+	$('#emitAll').prop('disabled', false);
+	$('.shareBt').each(function() {$(this).toggle(); });
+	$('#emitAll').toggle('blind', { direction: 'right' }, 300);
+
+	blockMode = 'block';	
+	socket.emit('blockDefault', true);
 }
 /* Experimental support, end*/
 
