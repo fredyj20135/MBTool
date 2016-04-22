@@ -575,6 +575,7 @@ $('#partnerMsgContainer').scroll(function (){
 /* Show log table */
 function showChatLogSpace() {
 	$('#chatLog').css('visibility', 'visible');
+	$('#chatLog').css('border-left', '3px solid #2c9076');
 	$('#chatLog').width('40%');
 
 	var logContent = $('#partnerMsgContainer .msgCntnt');

@@ -313,7 +313,6 @@ body {
 #chatLog {
   width: 0%;
   height:100%;
-  border-left: 3px solid #2c9076;
   font-size: 0.8em;
   background-color: white;
   visibility: hidden;
@@ -629,6 +628,7 @@ body {
   float: left;
   position: fixed;
   text-align: center;
+  cursor: pointer;
   width: 130px;
   top: calc(100% - 115px);
   left: calc(25% - 64.5px);
