@@ -66,6 +66,7 @@ socket.on('userConfirm', function(packet) {
 		blockMode = 'unblock';
 
 		$('#settingBt').hide();
+		$('#dashBoard').hide();
 		
 		cond = 'CA';
 	} else if (packet.room == "CB") {
@@ -370,11 +371,13 @@ function blockMsgHandler() {
 			$('#topMenu').addClass('blockMode');
 			$('#partnerMsgContainer').addClass('blockMode');
 			$('#userMsgContainer').addClass('blockMode');
+			$('#dashBoard').addClass('blockMode'); // add for exp
 			blockInfo = true;
 		} else if (newMode == 'unblock') {
 			$('#topMenu').removeClass('blockMode');
 			$('#partnerMsgContainer').removeClass('blockMode');
 			$('#userMsgContainer').removeClass('blockMode');
+			$('#dashBoard').removeClass('blockMode'); // add for exp
 			blockInfo = false;
 		}
 		$('#' + newMode).attr('checked', true);
@@ -507,8 +510,15 @@ $('#container').on('click', 'input.likeBt', function() {
 		clickControl($(this).find('input.likeBt'));
 	});
 
-	if ($(this).hasClass('clicked')) socket.emit('likeMsg', postID);
-	else socket.emit('dislikeMsg', postID);
+	if ($(this).hasClass('clicked')) { // modified for dashboard
+		socket.emit('likeMsg', postID);
+		dashUploadInfo('#dashLike', 1);
+	}
+	else {
+		socket.emit('dislikeMsg', postID);
+		dashUploadInfo('#dashLike', -1);
+	}
+
 });
 
 /* Share own message button */
@@ -523,8 +533,14 @@ $('#container').on('click', 'input.shareBt', function() {
 		if (shareBt.hasClass('clicked')) $(this).addClass('share');
 		else $(this).removeClass('share');
 	});
-	if ($(this).hasClass('clicked')) socket.emit('shareMsg', postID);
-	else socket.emit('unshareMsg', postID);
+	if ($(this).hasClass('clicked')) {
+		socket.emit('shareMsg', postID);
+		dashUploadInfo('#dashShare', 1);
+	}
+	else {
+		socket.emit('unshareMsg', postID);
+		dashUploadInfo('#dashShare', -1);
+	}
 });
 
 /* Send translate request */
@@ -553,6 +569,7 @@ $('#container').on('click', 'input.translateBt', function() {
 		socket.emit('translate', transElement);
 
 		$(this).prop('disabled', true).val('WAIT...').addClass('working');
+		dashUploadInfo('#dashTrans', 1);
 	}
 });
 
@@ -563,6 +580,7 @@ $('#container').on('click', 'input.revertBt', function() {
 
 	socket.emit('ctrlLock', postID);
 	socket.emit('revert', {pID: postID, uID: username});
+	dashUploadInfo('#dashTrans', -1);
 });
 
 $('#partnerMsgContainer').scroll(function (){
@@ -572,11 +590,15 @@ $('#partnerMsgContainer').scroll(function (){
 /* end of CONTROL function */
 
 /* Experimental support function, Start*/
+/* Dashboard update*/
+function dashUploadInfo(field, count) {
+	var a = parseInt($(field).text());
+	$(field).text(a + count); 
+}
+
 /* Show log table */
 function showChatLogSpace() {
-	$('#chatLog').css('visibility', 'visible');
-	$('#chatLog').css('border-left', '3px solid #2c9076');
-	$('#chatLog').width('40%');
+	$('#logTable').show();
 
 	var logContent = $('#partnerMsgContainer .msgCntnt');
 	var firstLine = $('<tr>');
@@ -624,6 +646,7 @@ function defaultBlock() {
 	$('#topMenu').addClass('blockMode');
 	$('#partnerMsgContainer').addClass('blockMode');
 	$('#userMsgContainer').addClass('blockMode');
+	$('#dashBoard').addClass('blockMode');
 	$('#block').attr('checked', true);
 
 	$('#emitAll').prop('disabled', false);
@@ -641,4 +664,5 @@ $(document).ready(function() {
 	$('#settingWrap').hide();
 	$('#topNotifier').hide();
 	$('#bottomNotifier').hide();
+	$('#logTable').hide();
 });

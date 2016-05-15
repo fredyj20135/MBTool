@@ -47,7 +47,7 @@
 							<div class="langSelectorWrap">
 								<select id="oriLang" class="langSelector">
 									<option value="en" selected="selected">English</option>
-									<option value="hi">हिन्दी</option>
+									<option value="hi">Hindi</option>
 									<option value="id">Bahasa Indonesia</option>
 									<option value="es">español</option>
 									<option value="zh-CHT">台灣正體</option>
@@ -59,7 +59,7 @@
 								<div id="arrow"></div>
 								<select id="transLang" class="langSelector">
 									<option value="en" selected="selected">English</option>
-									<option value="hi">हिन्दी</option>
+									<option value="hi">Hindi</option>
 									<option value="id">Bahasa Indonesia</option>
 									<option value="es">español</option>
 									<option value="zh-CHT">台灣正體</option>
@@ -71,7 +71,7 @@
 							</div>
 						</div>
 						<div class="listRow complement"></div>
-						<div class="listRow" id="b1">
+						<div class="listRow">
 							<div class="settingText" >Message: </div>
 							<div class="switchBt">
 								<div class="switch">
@@ -83,10 +83,10 @@
 								</div>
 							</div>
 						</div>
-						<div class="listRow complement" id="b2">
+						<div class="listRow complement">
 							<input class="linkButton" id="emitAll" type="button" value="Emit all bubbles">
 						</div>
-						<div class="listRow" id="w1">
+						<div class="listRow">
 							<div class="settingText">Window: </div>
 							<div class="switchBt">
 								<div class="switch">
@@ -98,8 +98,8 @@
 								</div>
 							</div>
 						</div>
-						<div class="listRow complement" id="w2"></div>
-						<div class="listRow" id="l1">
+						<div class="listRow complement"></div>
+						<div class="listRow">
 							<div class="settingText">Liked bubbles: </div>
 							<div class="switchBt">
 								<div class="switch">
@@ -111,7 +111,7 @@
 								</div>
 							</div>
 						</div>
-						<div class="listRow complement" id="l2"></div>
+						<div class="listRow complement"></div>
 						<div class="listRow">
 							<a class="linkButton" href="/">Logout</a>
 						</div>
@@ -123,12 +123,27 @@
 				<!-- <div id='topNotifier'>word</div> -->
 				<div id="partnerMsgContainer"></div>
 				<div id="userMsgContainer"></div>
-				<div id="chatLog">
+				<div id="dashBoard">
+					<table id="dashTable">
+						<tbody>
+							<tr>
+								<td class="dash30">Like #</td>
+								<td class="dash30">Share #</td>
+								<td class="dash40">Translate #</td>
+							</tr>
+							<tr>
+								<td id="dashLike" class="dashElmt">0</td>
+								<td id="dashShare"class="dashElmt">0</td>
+								<td id="dashTrans" class="dashElmt">0</td>
+							</tr>
+							<tr></tr>
+						</tbody>
+					</table>
 					<table id="logTable">
 						<tbody>
 							<tr>
-								<td class="logLike">liked</td>
-								<td class="logMsg">message</td>
+								<td class="logLike">Liked</td>
+								<td class="logMsg">Msg</td>
 							</tr>
 						</tbody>
 					</table>
