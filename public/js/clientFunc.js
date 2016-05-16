@@ -599,28 +599,32 @@ function dashUploadInfo(field, count) {
 /* Show log table */
 function showChatLogSpace() {
 	$('#logTable').show();
-
 	var logContent = $('#partnerMsgContainer .msgCntnt');
 	var firstLine = $('<tr>');
 
-	if (cond == 'CA') $('#logTable .logLike').remove();
+	if (cond == 'CA') {
+		$('#dashBoard').show();
+		$('#dashTable').remove();
+	}
 
 	$(logContent).each(function(){
 		var line = $('<tr>');
-		var like = $('<td>').text($(this).find('.likeNum').text());
+		// var like = $('<td>').text($(this).find('.likeNum').text());
+		// var like = $('<td>').text($(this).find('.likeNum').text());
 		var cntnt = $('<td>');
 		var name = $('<span>').addClass('logUserID');
 		var msg = $('<span>').text(': ' + $(this).find('.msgTxt').text() );
 
-		if (like.text() == '0') like.text('');
-		else like.addClass('logLikeSpace');
+		// if (like.text() == '0') like.text('');
+		// else like.addClass('logLikeSpace');
 		
 		if ($(this).find('.nameSpace').length == 0) name = name.text(username);
 		else name = name.text($(this).find('.nameSpace').text().substr(2, $(this).find('.nameSpace').text().length));
 
+		if (cond == 'CB') cntnt = cntnt.append('(' + $(this).find('.likeNum').text() + ') ')
 		cntnt = cntnt.append(name).append(msg);
-
-		if (cond == 'CB') line = line.append(like);
+		
+		// if (cond == 'CB') line = line.append(like);
 		line.append(cntnt);
 
 		$('#logTable').append(line);
