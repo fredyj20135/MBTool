@@ -20,22 +20,6 @@
 						<input id="pwd" type="password" placeholder="PASSWORD" maxlength="50" name="password">
 					</p>
 					<p>
-						<select id="roomName">
-							<option value="11" selected="selected">PLEASE SELECT</option> 
-							<option value="0">BIG ROOM</option>
-							<option value="1" >ROOM 1</option>
-							<option value="2" >ROOM 2</option>
-							<option value="3" >ROOM 3</option>
-							<option value="4" >ROOM 4</option>
-							<option value="5" >ROOM 5</option>
-							<option value="6" >ROOM 6</option>
-							<option value="7" >ROOM 7</option>
-							<option value="8" >ROOM 8</option>
-							<option value="9" >ROOM 9</option>
-							<option value="10" >ROOM 10</option>
-						</select>
-					</p>
-					<p>
 						<button id="loginInput" type="button">SUBMIT</button>
 					</p>
 				</form>
@@ -51,11 +35,37 @@
 					<div id="memberInfo">Online member: </div>
 					<div id="memberWrap"></div>
 				</div>
-				<div id="settingPanel">
+			</div>
+			<div id="container">
+				<!-- <div id='topNotifier'>word</div> -->
+				<div id="partnerMsgContainer"></div>
+				<div id="userMsgContainer"></div>
+				<div id="dashBoard">
+					<table id="dashTable">
+						<tbody>
+							<tr>
+								<td class="dash30">Like #</td>
+								<td class="dash30">Share #</td>
+								<td class="dash40">Translate #</td>
+							</tr>
+							<tr>
+								<td id="dashLike" class="dashElmt">0</td>
+								<td id="dashShare"class="dashElmt">0</td>
+								<td id="dashTrans" class="dashElmt">0</td>
+							</tr>
+							<tr></tr>
+						</tbody>
+					</table>
+					<table id="logTable">
+						<tbody>
+							<tr>
+								<td class="logMsg">Msg</td>
+							</tr>
+						</tbody>
+					</table>
+
 					<div id="settingWrap">
-						<div class="listRow">
-							<div class="settingText title"> MENU </div>
-						</div>
+						<div class="settingTitle">TOOL BOX</div>
 						<div class="listRow">
 							<div class="settingText">Translation Setting</div>
 						</div>
@@ -63,34 +73,40 @@
 							<div class="langSelectorWrap">
 								<select id="oriLang" class="langSelector">
 									<option value="en" selected="selected">English</option>
-									<option value="zh-CHT">繁中</option>
-									<option value="zh-CHS">简中</option>
-									<option value="fa">فارسی</option>
-									<option value="ar">العربية</option>
-									<option value="es">español</option>
-									<option value="th">ภาษาไทย</option>
+									<option value="hi">हिन्दी (Hindi)</option>
+									<option value="id">Bahasa Indonesia (Indonesian)</option>
+									<option value="es">español (Spanish)</option>
+									<option value="zh-CHT">台灣正體 (Taiwanese Manderin)</option>
+									<option value="zh-CHS">大陆简体 (Chinese)</option>
+									<option value="fa">فارسی (Persian)</option>
+									<option value="ar">العربية (Arabic)</option>
+									<option value="th">ภาษาไทย (Thai)</option>
+									<option value="vi">Tiếng Việt (Vietnamese)</option>
 								</select>
 								<div id="arrow"></div>
 								<select id="transLang" class="langSelector">
-									<option value="en">English</option>
-									<option value="zh-CHT" selected="selected">繁中</option>
-									<option value="zh-CHS">简中</option>
-									<option value="fa">فارسی</option>
-									<option value="ar">العربية</option>
-									<option value="es">español</option>
-									<option value="th">ภาษาไทย</option>
+									<option value="en" selected="selected">English</option>
+									<option value="hi">हिन्दी (Hindi)</option>
+									<option value="id">Bahasa Indonesia (Indonesian)</option>
+									<option value="es">español (Spanish)</option>
+									<option value="zh-CHT">台灣正體 (Taiwanese Manderin)</option>
+									<option value="zh-CHS">大陆简体 (Chinese)</option>
+									<option value="fa">فارسی (Persian)</option>
+									<option value="ar">العربية (Arabic)</option>
+									<option value="th">ภาษาไทย (Thai)</option>
+									<option value="vi">Tiếng Việt (Vietnamese)</option>
 								</select>
 							</div>
 						</div>
 						<div class="listRow complement"></div>
 						<div class="listRow">
-							<div class="settingText">Message: </div>
+							<div class="settingText" >Message: </div>
 							<div class="switchBt">
 								<div class="switch">
-									<input type="radio" class="switch-input" name="view" value="unblock" id="unblock">
-									<label for="unblock" class="switch-label switch-label-off">Unblock</label>
 									<input type="radio" class="switch-input" name="view" value="block" id="block">
-									<label for="block" class="switch-label switch-label-on">Block</label>
+									<label for="block" class="switch-label switch-label-off">Block</label>
+									<input type="radio" class="switch-input" name="view" value="unblock" id="unblock">
+									<label for="unblock" class="switch-label switch-label-on">Unblock</label>
 									<span class="switch-selection"></span>
 								</div>
 							</div>
@@ -124,17 +140,11 @@
 							</div>
 						</div>
 						<div class="listRow complement"></div>
-						<div class="listRow">
+<!-- 						<div class="listRow">
 							<a class="linkButton" href="/">Logout</a>
-						</div>
+						</div> -->
 					</div>
-					<input id="settingBt" type="button">
 				</div>
-			</div>
-			<div id="container">
-				<!-- <div id='topNotifier'>word</div> -->
-				<div id="partnerMsgContainer"></div>
-				<div id="userMsgContainer"></div>
 				<div id='bottomNotifier'>New Message!</div>
 			</div>
 			<div id="inputPanel">

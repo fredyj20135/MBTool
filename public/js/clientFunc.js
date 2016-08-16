@@ -3,6 +3,7 @@ var username;
 var blockMode = 'unblock';
 var colMode = 'twoCol';
 var highlightWord = '';
+var cond = ''
 
 /* Socket.io function, start */
 socket.on('ping', function(data) { socket.emit('pong', {beat: 1 }); });
@@ -32,13 +33,6 @@ socket.on('loginError', function(msg) {
 	$('#username').focus();
 });
 
-socket.on('resRoomInfo', function(packet) {
-	for (var i = 0; i < packet.length; i++) {
-		var count = $('#roomName option[value= "' + i + '"]').text() + ' (' + packet[i] + ')';
-		$('#roomName option[value= "' + i + '"]').text(count)
-	}
-});
-
 socket.on('userConfirm', function(packet) {
 	$('#loginMsg').text(packet.msg);
 
@@ -54,27 +48,42 @@ socket.on('userConfirm', function(packet) {
 
 	username = packet.uID;
 
-	if (parseInt(packet.room.substring(5, 7)) == 0) $('#roomInfo').text('Big Room');
-	else $('#roomInfo').text(packet.room);
-
-	$('#settingBt').on('click', settingBtHandler);
-
-	$('input[name=view]').on('click', blockMsgHandler);
-	$('input[name=colMode]').on('click', windowCtrlBtHandler);
-	$('input[name=bubbleMode]').on('click', bubbleLikedCtrlHandler);
 	$('#textInput').on('keyup keydown', inputCountHandler);
 	$('#textInput').on('keypress', sendBtEnterHandler);
 	$('#bottomNotifier').on('click', goBotHandler);
 	$('#sendButton').on('click', sendBtHandler);
-
-	$('#emitAll').prop('disabled', true).hide();
-	$('#unblock').attr('checked', true);
+	
 	$('#twoCol').attr('checked', true);
 	$('#bOff').attr('checked', true);
+	$('#unblock').attr('checked', true);
 
+	if (packet.room == "CA") {
+		$('#roomInfo').text("Room A");
+
+		colMode = 'oneCol';
+		windowViewHandler('100%', '0%', '#userMsgContainer', '#partnerMsgContainer');
+		
+		blockMode = 'unblock';
+
+		$('#settingBt').hide();
+		$('#dashBoard').hide();
+		
+		cond = 'CA';
+	} else if (packet.room == "CB") {
+		$('#roomInfo').text("Room B");
+		
+		$('input[name=view]').on('click', blockMsgHandler);
+		$('input[name=bubbleMode]').on('click', bubbleLikedCtrlHandler);
+		$('input[name=colMode]').on('click', windowCtrlBtHandler);
+		$('#emitAll').prop('disabled', true).hide();
+
+		cond = 'CB';
+	}
 	$("#enterCheck").click();
 
 	socket.emit('userReady');
+
+	if (cond == 'CB') defaultBlock(); // until user ready can we control system function (like block)
 
 	$(window).on('beforeunload', function() {
 		return 'All messages will be droped if you leave or relaod this page. \n\nAre you sure?'; 
@@ -139,7 +148,8 @@ socket.on('chat', function(packet) {
 	var revertBt 	= $('<input>').addClass('revertBt').prop({type: 'button', value: 'Revert'}).hide();
 	
 	content.html(content.html().replace(/\n/g, '<br>'));
-	content = $('<span>').addClass('msgCntnt').append(content).append('<br>').append(likeNum).append(likeBt);
+	content = $('<span>').addClass('msgCntnt').append(content).append('<br>');
+	if (cond == 'CB') content = content.append(likeNum).append(likeBt);
 
 	if (uID == username) {
 		content = content.append(shareBt).append(timeStamp);
@@ -149,7 +159,9 @@ socket.on('chat', function(packet) {
 
 		addUserMsgByColMode(content);
 	} else {
-		content = content.append(nameSpace).append(timeStamp).append(revertBt).append(translateBt);
+		content = content.append(nameSpace).append(timeStamp).append(revertBt);
+		if (cond == 'CB') content = content.append(translateBt);
+		
 		content = $('<div>').addClass('partnerMessage').append(icon).append(postID).append(content);
 
 		if (packet.block == true) content.find('.msgCntnt').addClass('block');
@@ -239,7 +251,7 @@ socket.on('revertMsg', function(packet) { /* Erase translation in specific bubbl
 
 			if (elmt != null && elmt.prop('title').slice(3, elmt.prop('title').length) == packet.uID) {
 				temp = elmt.clone();
-				elmt.find('.trans:last').detach();
+				elmt.find('.trans:last').remove();
 				revertHTML = revertHTML.replace(temp.prop('outerHTML'), elmt.html());
 			}
 			msgText.html(revertHTML);
@@ -344,10 +356,10 @@ function loginBtEnterHandler(event) {
 }
 
 /* Buttons in setting menu. Concept by Allie */
-function settingBtHandler() {
-	clickControl($('#settingBt'));
-	$('#settingWrap').toggle('blind', {direction: 'right'}, 500);
-}
+// function settingBtHandler() {
+// 	clickControl($('#settingBt'));
+// 	$('#settingWrap').toggle('blind', {direction: 'right'}, 500);
+// }
 
 function blockMsgHandler() {
 	var newMode = $('input[name=view]:checked').val();
@@ -358,11 +370,13 @@ function blockMsgHandler() {
 			$('#topMenu').addClass('blockMode');
 			$('#partnerMsgContainer').addClass('blockMode');
 			$('#userMsgContainer').addClass('blockMode');
+			$('#dashBoard').addClass('blockMode'); // add for exp
 			blockInfo = true;
 		} else if (newMode == 'unblock') {
 			$('#topMenu').removeClass('blockMode');
 			$('#partnerMsgContainer').removeClass('blockMode');
 			$('#userMsgContainer').removeClass('blockMode');
+			$('#dashBoard').removeClass('blockMode'); // add for exp
 			blockInfo = false;
 		}
 		$('#' + newMode).attr('checked', true);
@@ -395,6 +409,8 @@ function windowCtrlBtHandler() {
 
 		$('input[name=colMode]').prop('disabled', true);
 		colMode = mode;
+
+		socket.emit('colChange', mode);
 	}
 }
 
@@ -404,12 +420,13 @@ function windowViewHandler(pWidth, uWidth, shrink, stretch) {
 	$('#userMsgContainer').animate({ width: uWidth }, { duration: 300, queue: true });
 	$('#partnerMsgContainer').animate({ width: pWidth}, { duration: 300, queue: true, complete: function() {
 		$(stretch + ' .userMessage').each(function() { 
-			$(this).delay(delay).show(500, function() {
+			// $(this).delay(delay).show(500, function() {
+				$(this).show();
 				if ($(this).is(":visible")) 
 					$(stretch).animate({scrollTop: $(stretch).prop('scrollHeight') }, 150);
-			});
+			// });
 			$(this).removeClass('lie');
-			delay += 100;
+			// delay += 100;
 		});
 
 		var pos = parseInt(pWidth) / 2 + '%';
@@ -451,7 +468,11 @@ function goBotHandler() {
 /* Buttons in inputWrap */
 function sendBtHandler() {
 	if ($.trim($('#textInput').val()) !== "") {
-		socket.emit('chatMsg', $('#textInput').val());
+		if ($('#textInput').val() == '!SHOWLOG!') showChatLogSpace(); 		// experimental support
+		else if ($('#textInput').val() == '!CLEARLOG!') clearChatLog();		// experimental support
+		else if ($('#textInput').val() == '!CLEARMSG!') clearContainer();	// experimental support
+		else socket.emit('chatMsg', $('#textInput').val());
+		
 		$('#textInput').val('').focus();
 	}
 }
@@ -490,8 +511,15 @@ $('#container').on('click', 'input.likeBt', function() {
 		clickControl($(this).find('input.likeBt'));
 	});
 
-	if ($(this).hasClass('clicked')) socket.emit('likeMsg', postID);
-	else socket.emit('dislikeMsg', postID);
+	if ($(this).hasClass('clicked')) { // modified for dashboard
+		socket.emit('likeMsg', postID);
+		dashUploadInfo('#dashLike', 1);
+	}
+	else {
+		socket.emit('dislikeMsg', postID);
+		dashUploadInfo('#dashLike', -1);
+	}
+
 });
 
 /* Share own message button */
@@ -506,8 +534,14 @@ $('#container').on('click', 'input.shareBt', function() {
 		if (shareBt.hasClass('clicked')) $(this).addClass('share');
 		else $(this).removeClass('share');
 	});
-	if ($(this).hasClass('clicked')) socket.emit('shareMsg', postID);
-	else socket.emit('unshareMsg', postID);
+	if ($(this).hasClass('clicked')) {
+		socket.emit('shareMsg', postID);
+		dashUploadInfo('#dashShare', 1);
+	}
+	else {
+		socket.emit('unshareMsg', postID);
+		dashUploadInfo('#dashShare', -1);
+	}
 });
 
 /* Send translate request */
@@ -536,6 +570,7 @@ $('#container').on('click', 'input.translateBt', function() {
 		socket.emit('translate', transElement);
 
 		$(this).prop('disabled', true).val('WAIT...').addClass('working');
+		dashUploadInfo('#dashTrans', 1);
 	}
 });
 
@@ -546,17 +581,87 @@ $('#container').on('click', 'input.revertBt', function() {
 
 	socket.emit('ctrlLock', postID);
 	socket.emit('revert', {pID: postID, uID: username});
+	dashUploadInfo('#dashTrans', -1);
 });
 
 $('#partnerMsgContainer').scroll(function (){
 	if ($('#partnerMsgContainer').scrollTop() + $('#partnerMsgContainer').innerHeight() == $('#partnerMsgContainer').prop('scrollHeight'))
 		$('#bottomNotifier').hide();
 });
+/* end of CONTROL function */
+
+/* Experimental support function, Start*/
+/* Dashboard update*/
+function dashUploadInfo(field, count) {
+	var a = parseInt($(field).text());
+	$(field).text(a + count); 
+}
+
+/* Show log table */
+function showChatLogSpace() {
+	$('#logTable').show();
+	var logContent = $('#partnerMsgContainer .msgCntnt');
+	var firstLine = $('<tr>');
+
+	if (cond == 'CA') {
+		$('#dashBoard').show();
+		$('#dashTable').remove();
+	}
+
+	$(logContent).each(function(){
+		var line = $('<tr>');
+		var cntnt = $('<td>');
+		var name = $('<span>').addClass('logUserID');
+		var msg = $('<span>').text(': ' + $(this).find('.msgTxt').text() );
+		
+		if ($(this).find('.nameSpace').length == 0) name = name.text(username);
+		else name = name.text($(this).find('.nameSpace').text().substr(2, $(this).find('.nameSpace').text().length));
+
+		if (cond == 'CB') cntnt = cntnt.append('(' + $(this).find('.likeNum').text() + ') ')
+		cntnt = cntnt.append(name).append(msg);
+		
+		line.append(cntnt);
+
+		$('#logTable').append(line);
+	});
+}
+
+/* Clear record in log table */
+function clearChatLog() {
+	$('#logTable').find('tr:gt(0)').remove();
+}
+
+/* Clear recond in container */
+function clearContainer() {
+	var rmLog = confirm('These will clear all record in contatiner, are you sure?');
+	if (rmLog) {
+		$('#partnerMsgContainer').children().remove();
+		$('#userMsgContainer').children().remove();
+	}
+}
+
+/* Use for begin with block mode */
+function defaultBlock() {
+	$('#topMenu').addClass('blockMode');
+	$('#partnerMsgContainer').addClass('blockMode');
+	$('#userMsgContainer').addClass('blockMode');
+	$('#dashBoard').addClass('blockMode');
+	$('#block').attr('checked', true);
+
+	$('#emitAll').prop('disabled', false);
+	$('.shareBt').each(function() {$(this).toggle(); });
+	$('#emitAll').toggle('blind', { direction: 'right' }, 300);
+
+	blockMode = 'block';	
+	socket.emit('blockDefault', true);
+}
+/* Experimental support, end*/
 
 /* Initial page setting */		
 $(document).ready(function() {
 	$('#BSTBody').hide();
-	$('#settingWrap').hide();
+	// $('#settingWrap').hide();
 	$('#topNotifier').hide();
 	$('#bottomNotifier').hide();
+	$('#logTable').hide();
 });
