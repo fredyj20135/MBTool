@@ -229,6 +229,10 @@ io.on('connection', function(socket) {
 		dbLogInsert(socket.username, socket.room, 'B', -1, getDateTime(), input);
 	});
 
+	socket.on('colChange', function(input) {
+		dbLogInsert(socket.username, socket.room, 'W', -1, getDateTime(), input);
+	});
+
 	socket.on('blockDefault', function(input) {
 		var msg;
 		input == true? msg = ' ' : msg = ' un';
