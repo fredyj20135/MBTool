@@ -35,11 +35,37 @@
 					<div id="memberInfo">Online member: </div>
 					<div id="memberWrap"></div>
 				</div>
-				<div id="settingPanel">
+			</div>
+			<div id="container">
+				<!-- <div id='topNotifier'>word</div> -->
+				<div id="partnerMsgContainer"></div>
+				<div id="userMsgContainer"></div>
+				<div id="dashBoard">
+					<table id="dashTable">
+						<tbody>
+							<tr>
+								<td class="dash30">Like #</td>
+								<td class="dash30">Share #</td>
+								<td class="dash40">Translate #</td>
+							</tr>
+							<tr>
+								<td id="dashLike" class="dashElmt">0</td>
+								<td id="dashShare"class="dashElmt">0</td>
+								<td id="dashTrans" class="dashElmt">0</td>
+							</tr>
+							<tr></tr>
+						</tbody>
+					</table>
+					<table id="logTable">
+						<tbody>
+							<tr>
+								<td class="logMsg">Msg</td>
+							</tr>
+						</tbody>
+					</table>
+
 					<div id="settingWrap">
-						<div class="listRow">
-							<div class="settingText title"> MENU </div>
-						</div>
+						<div class="settingTitle">TOOL BOX</div>
 						<div class="listRow">
 							<div class="settingText">Translation Setting</div>
 						</div>
@@ -47,26 +73,28 @@
 							<div class="langSelectorWrap">
 								<select id="oriLang" class="langSelector">
 									<option value="en" selected="selected">English</option>
-									<option value="hi">Hindi</option>
-									<option value="id">Bahasa Indonesia</option>
-									<option value="es">español</option>
-									<option value="zh-CHT">台灣正體</option>
-									<option value="zh-CHS">大陆简体</option>
-									<option value="fa">فارسی</option>
-									<option value="ar">العربية</option>
-									<option value="th">ภาษาไทย</option>
+									<option value="hi">हिन्दी (Hindi)</option>
+									<option value="id">Bahasa Indonesia (Indonesian)</option>
+									<option value="es">español (Spanish)</option>
+									<option value="zh-CHT">台灣正體 (Taiwanese Manderin)</option>
+									<option value="zh-CHS">大陆简体 (Chinese)</option>
+									<option value="fa">فارسی (Persian)</option>
+									<option value="ar">العربية (Arabic)</option>
+									<option value="th">ภาษาไทย (Thai)</option>
+									<option value="vi">Tiếng Việt (Vietnamese)</option>
 								</select>
 								<div id="arrow"></div>
 								<select id="transLang" class="langSelector">
 									<option value="en" selected="selected">English</option>
-									<option value="hi">Hindi</option>
-									<option value="id">Bahasa Indonesia</option>
-									<option value="es">español</option>
-									<option value="zh-CHT">台灣正體</option>
-									<option value="zh-CHS">大陆简体</option>
-									<option value="fa">فارسی</option>
-									<option value="ar">العربية</option>
-									<option value="th">ภาษาไทย</option>
+									<option value="hi">हिन्दी (Hindi)</option>
+									<option value="id">Bahasa Indonesia (Indonesian)</option>
+									<option value="es">español (Spanish)</option>
+									<option value="zh-CHT">台灣正體 (Taiwanese Manderin)</option>
+									<option value="zh-CHS">大陆简体 (Chinese)</option>
+									<option value="fa">فارسی (Persian)</option>
+									<option value="ar">العربية (Arabic)</option>
+									<option value="th">ภาษาไทย (Thai)</option>
+									<option value="vi">Tiếng Việt (Vietnamese)</option>
 								</select>
 							</div>
 						</div>
@@ -112,40 +140,10 @@
 							</div>
 						</div>
 						<div class="listRow complement"></div>
-						<div class="listRow">
+<!-- 						<div class="listRow">
 							<a class="linkButton" href="/">Logout</a>
-						</div>
+						</div> -->
 					</div>
-					<input id="settingBt" type="button">
-				</div>
-			</div>
-			<div id="container">
-				<!-- <div id='topNotifier'>word</div> -->
-				<div id="partnerMsgContainer"></div>
-				<div id="userMsgContainer"></div>
-				<div id="dashBoard">
-					<table id="dashTable">
-						<tbody>
-							<tr>
-								<td class="dash30">Like #</td>
-								<td class="dash30">Share #</td>
-								<td class="dash40">Translate #</td>
-							</tr>
-							<tr>
-								<td id="dashLike" class="dashElmt">0</td>
-								<td id="dashShare"class="dashElmt">0</td>
-								<td id="dashTrans" class="dashElmt">0</td>
-							</tr>
-							<tr></tr>
-						</tbody>
-					</table>
-					<table id="logTable">
-						<tbody>
-							<tr>
-								<td class="logMsg">Msg</td>
-							</tr>
-						</tbody>
-					</table>
 				</div>
 				<div id='bottomNotifier'>New Message!</div>
 			</div>

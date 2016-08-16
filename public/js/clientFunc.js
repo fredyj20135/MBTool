@@ -72,7 +72,6 @@ socket.on('userConfirm', function(packet) {
 	} else if (packet.room == "CB") {
 		$('#roomInfo').text("Room B");
 		
-		$('#settingBt').on('click', settingBtHandler);
 		$('input[name=view]').on('click', blockMsgHandler);
 		$('input[name=bubbleMode]').on('click', bubbleLikedCtrlHandler);
 		$('input[name=colMode]').on('click', windowCtrlBtHandler);
@@ -357,10 +356,10 @@ function loginBtEnterHandler(event) {
 }
 
 /* Buttons in setting menu. Concept by Allie */
-function settingBtHandler() {
-	clickControl($('#settingBt'));
-	$('#settingWrap').toggle('blind', {direction: 'right'}, 500);
-}
+// function settingBtHandler() {
+// 	clickControl($('#settingBt'));
+// 	$('#settingWrap').toggle('blind', {direction: 'right'}, 500);
+// }
 
 function blockMsgHandler() {
 	var newMode = $('input[name=view]:checked').val();
@@ -661,7 +660,7 @@ function defaultBlock() {
 /* Initial page setting */		
 $(document).ready(function() {
 	$('#BSTBody').hide();
-	$('#settingWrap').hide();
+	// $('#settingWrap').hide();
 	$('#topNotifier').hide();
 	$('#bottomNotifier').hide();
 	$('#logTable').hide();
